@@ -1,0 +1,23 @@
+{
+    "name": "ad/buyback",
+    "description": "Add a buyback features on your shop.",
+    "license": "AFL-3.0",
+    "authors": [
+        {
+            "name": "Anthony DURET",
+            "email": "anthony.duret@outlook.fr"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "AdBuyBack\\": "src/"
+        },
+        "classmap": [
+            "ad_buyback.php"
+        ],
+        "config": {
+            "prepend-autoloader": false
+        },
+        "type": "prestashop-module"
+    }
+}

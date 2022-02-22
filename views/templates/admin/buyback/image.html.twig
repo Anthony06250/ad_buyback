@@ -1,0 +1,23 @@
+<div class="col-sm-2 mt-4">
+    <section class="form-group text-center">
+        <a class="figure" href="{{ path }}" target="_blank">
+            <img src="{{ path }}" class="figure-img img-fluid img-thumbnail" title="{{ filename }}">
+        </a>
+        <h5>
+            {{ name }}
+            <span>
+                .{{ extension }}
+            </span>
+        </h5>
+        <div class="d-block">
+            <button class="btn btn-outline-danger btn-sm"
+                    type="submit"
+                    formaction="{{ path('admin_ad_buyback_image_delete', {'id': id, 'filename': filename ~ '.' ~ extension}) }}"
+                    formmethod="POST"
+            >
+                <i class="material-icons mr-2">delete_forever</i>
+                {{ 'Delete' | trans({}, 'Modules.Adbuyback.Form') }}
+            </button>
+        </div>
+    </section>
+</div>

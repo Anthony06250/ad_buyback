@@ -1,0 +1,79 @@
+# BuyBack action
+admin_ad_buyback_index:
+    path: /buyback/
+    methods: [GET]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::indexAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_search:
+    path: /buyback/
+    methods: [POST]
+    defaults:
+        _controller: PrestaShopBundle:Admin\Common:searchGrid
+        gridDefinitionFactoryServiceId: adbuyback.grid.factory.definition.buyback
+        redirectRoute: admin_ad_buyback_index
+        _legacy_controller: 'AdminBuyBack'
+        _legacy_link: 'AdminBuyBack:submitFilterbuyback'
+
+admin_ad_buyback_create:
+    path: /buyback/new
+    methods: [GET, POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::createAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_edit:
+    path: /buyback/{id}/edit
+    methods: [GET, POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::editAction'
+        _legacy_controller: 'AdminBuyBack'
+    requirements:
+        id: \d+
+
+admin_ad_buyback_delete:
+    path: /buyback/delete
+    methods: [DELETE]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::deleteAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_toggle_active:
+    path: /buyback/{id}/toggle-active
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::toggleActiveAction'
+        _legacy_controller: 'AdminBuyBack'
+    requirements:
+        id: \d+
+
+# BuyBack bulk action
+admin_ad_buyback_delete_bulk:
+    path: /buyback/delete-bulk
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::deleteBulkAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_duplicate_bulk:
+    path: /buyback/duplicate-bulk
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::duplicateBulkAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_toggle_active_bulk:
+    path: /buyback/toggle-active-bulk
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::toggleActiveBulkAction'
+        _legacy_controller: 'AdminBuyBack'
+
+# BuyBack Image action
+admin_ad_buyback_image_delete:
+    path: /buyback/image/delete
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackImageController::deleteAction'
+        _legacy_controller: 'AdminBuyBack'
