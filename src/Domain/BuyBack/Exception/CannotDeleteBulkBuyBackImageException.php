@@ -20,32 +20,8 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\CommandHandler;
+namespace AdBuyBack\Domain\BuyBack\Exception;
 
-use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
-use AdBuyBack\Uploader\BuyBackExtraImageUploader;
-use PrestaShop\PrestaShop\Core\Image\Exception\ImageException;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-
-class ImageBuyBackHandler
+final class CannotDeleteBulkBuyBackImageException extends BuyBackException
 {
-    /**
-     * @param int $buybackId
-     * @param array $image
-     * @return void
-     */
-    protected function uploadImages(int $buybackId, array $image): void
-    {
-        try {
-            $uploader = new BuyBackExtraImageUploader();
-
-            foreach ($image as $file) {
-                if ($file instanceof UploadedFile) {
-                    $uploader->upload($buybackId, $file);
-                }
-            }
-        } catch (ImageException $exception) {
-            throw new BuyBackException($exception->getMessage());
-        }
-    }
 }

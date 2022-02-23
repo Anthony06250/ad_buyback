@@ -35,18 +35,24 @@ final class DuplicateBulkBuyBackHandler
      */
     public function handle(DuplicateBulkBuyBackCommand $command): void
     {
-        $ids = $command->getId()->getValue();
+        $buybackIds = $command->getId()->getValue();
 
         try {
-            if (false === (new BuyBack())->duplicateSelection($ids)) {
-                throw new CannotDuplicateBulkBuyBackException(
-                    sprintf('Failed to duplicate buy backs with ids "%s"', implode(', ', $ids))
-                );
-            }
+            $this->duplicateBuyBack($buybackIds);
         } catch (PrestaShopException $exception) {
-            throw new CannotDuplicateBulkBuyBackException(
-                'An unexpected error occurred when duplicate buy backs'
-            );
+            throw new CannotDuplicateBulkBuyBackException($exception->getMessage());
+        }
+    }
+
+    /**
+     * @param array $buybackIds
+     * @return void
+     * @throws PrestaShopException
+     */
+    private function duplicateBuyBack(array $buybackIds): void
+    {
+        if (!(new BuyBack())->duplicateSelection($buybackIds)) {
+            throw new CannotDuplicateBulkBuyBackException(sprintf('Failed to duplicate buy backs with ids "%s"', implode(', ', $buybackIds)));
         }
     }
 }

@@ -22,31 +22,76 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Domain\BuyBack\CommandHandler;
 
+use AdBuyBack\Domain\BuyBack\Command\DeleteBulkBuyBackImageCommand;
 use AdBuyBack\Domain\BuyBack\Command\DeleteBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\CannotDeleteBuyBackException;
+use AdBuyBack\Domain\BuyBack\Query\GetImageForBuyBack;
 use AdBuyBack\Model\BuyBack;
+use AdBuyBack\Tools\BuyBackTools;
+use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShopException;
 
 final class DeleteBuyBackHandler
 {
+    /**
+     * @var CommandBusInterface
+     */
+    private $commandBus;
+
+    /**
+     * @param CommandBusInterface $commandBus
+     */
+    public function __construct(CommandBusInterface $commandBus)
+    {
+        $this->commandBus = $commandBus;
+    }
+
     /**
      * @param DeleteBuyBackCommand $command
      * @return void
      */
     public function handle(DeleteBuyBackCommand $command): void
     {
-        $id = $command->getId()->getValue();
+        $buybackId = $command->getId()->getValue();
 
         try {
-            if (false === (new BuyBack($id))->delete()) {
-                throw new CannotDeleteBuyBackException(
-                    sprintf('Failed to delete buy back with id "%s"', $id)
-                );
-            }
+            $buyback = new BuyBack($buybackId);
+
+            $this->deleteBuyBack($buyback);
+            $this->deleteBuyBackImage($buyback);
         } catch (PrestaShopException $exception) {
-            throw new CannotDeleteBuyBackException(
-                'An unexpected error occurred when delete buy back'
-            );
+            throw new CannotDeleteBuyBackException($exception->getMessage());
+        }
+    }
+
+    /**
+     * @param BuyBack $buyback
+     * @return void
+     * @throws PrestaShopException
+     */
+    public function deleteBuyBack(BuyBack $buyback): void
+    {
+        if (!$buyback->delete()) {
+            throw new CannotDeleteBuyBackException(sprintf('Failed to delete buy back with id "%s"', $buyback->id));
+        }
+    }
+
+    /**
+     * @param BuyBack $buyback
+     * @return void
+     */
+    public function deleteBuyBackImage(BuyBack $buyback): void
+    {
+        if ($images = $this->commandBus->handle(new GetImageForBuyBack($buyback->id))->getData()) {
+            $directory = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $buyback->id . '/';
+            $imageIds = [];
+
+            foreach ($images as $image) {
+                $imageIds[] = $image['id_ad_buyback_image'];
+            }
+
+            $this->commandBus->handle(new DeleteBulkBuyBackImageCommand($imageIds));
+            BuyBackTools::deleteDirectory($directory);
         }
     }
 }

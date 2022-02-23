@@ -127,25 +127,22 @@ final class BuyBackExtraImageUploader implements ImageUploaderInterface
     }
 
     /**
-     * @param int $id
+     * @param int $buybackId
      * @param string $name
      * @return void
      */
-    private function createNewImage(int $id, string $name): void
+    private function createNewImage(int $buybackId, string $name): void
     {
         // Use custom kernel for front office
-        $handler = Ad_BuyBack::getService('prestashop.core.query_bus');
-        $response = $handler->handle(new GetImageForBuyBack($id));
+        $handler = Ad_BuyBack::getService('prestashop.core.command_bus');
+        $images = $handler->handle(new GetImageForBuyBack($buybackId))->getData();
 
-        foreach ($response->getData() as $data) {
-            if (in_array($name, $data, true)) {
+        foreach ($images as $image) {
+            if (in_array($name, $image, true)) {
                 return;
             }
         }
 
-        $handler = Ad_BuyBack::getService('adbuyback.domain.buyback_image.command_handler.create');
-        $command = (new CreateBuyBackImageCommand())->fromArray(['id_ad_buyback' => $id, 'name' => $name]);
-
-        $handler->handle($command);
+        $handler->handle((new CreateBuyBackImageCommand())->fromArray(['id_ad_buyback' => $buybackId, 'name' => $name]));
     }
 }

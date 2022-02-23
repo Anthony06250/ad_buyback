@@ -23,7 +23,7 @@ declare(strict_types=1);
 namespace AdBuyBack\Controller\Front;
 
 use Ad_BuyBack;
-use AdBuyBack\Adapter\BuyBackAdapter;
+use AdBuyBack\Adapter\RequestAdapter;
 use AdBuyBack\Adapter\SmartyAdapter;
 use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
 use ModuleFrontController;
@@ -83,7 +83,7 @@ class BuyBackFrontController extends ModuleFrontController
     public function postProcess(): void
     {
         if (Tools::getIsset('firstname')) {
-            $this->createAction(BuyBackAdapter::getFrontRequest());
+            $this->createAction(RequestAdapter::getFrontRequest());
         }
     }
 

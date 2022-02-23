@@ -24,7 +24,7 @@ admin_ad_buyback_create:
         _legacy_controller: 'AdminBuyBack'
 
 admin_ad_buyback_edit:
-    path: /buyback/{id}/edit
+    path: /buyback/{buybackId}/edit
     methods: [GET, POST]
     defaults:
         _controller: 'AdBuyBack\Controller\Admin\BuyBackController::editAction'
@@ -34,13 +34,13 @@ admin_ad_buyback_edit:
 
 admin_ad_buyback_delete:
     path: /buyback/delete
-    methods: [DELETE]
+    methods: [POST]
     defaults:
         _controller: 'AdBuyBack\Controller\Admin\BuyBackController::deleteAction'
         _legacy_controller: 'AdminBuyBack'
 
 admin_ad_buyback_toggle_active:
-    path: /buyback/{id}/toggle-active
+    path: /buyback/{buybackId}/toggle-active
     methods: [POST]
     defaults:
         _controller: 'AdBuyBack\Controller\Admin\BuyBackController::toggleActiveAction'

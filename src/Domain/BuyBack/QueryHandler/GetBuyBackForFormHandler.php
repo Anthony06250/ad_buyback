@@ -33,10 +33,12 @@ final class GetBuyBackForFormHandler extends AbstractQueryHandler
      */
     public function handle(GetBuyBackForForm $query): BuyBackForForm
     {
-        if (null === $query->getId()) {
+        if (!$query->getId()) {
             return new BuyBackForForm(false);
         }
 
-        return new BuyBackForForm($this->repository->findBy(['id_ad_buyback' => $query->getId()->getValue()]));
+        return new BuyBackForForm($this->repository->findBy([
+            'id_ad_buyback' => $query->getId()->getValue()
+        ]));
     }
 }

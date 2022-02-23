@@ -29,6 +29,7 @@ use AdBuyBack\Domain\BuyBack\Command\DuplicateBulkBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Command\ToggleActiveBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
 use AdBuyBack\Grid\Filters\BuyBackFilters;
+use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -38,6 +39,20 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class BuyBackController extends FrameworkBundleAdminController
 {
+    /**
+     * @var CommandBusInterface
+     */
+    private $commandBus;
+
+    /**
+     * @param CommandBusInterface $commandBus
+     */
+    public function __construct(CommandBusInterface $commandBus)
+    {
+        parent::__construct();
+        $this->commandBus = $commandBus;
+    }
+
     /**
      * @AdminSecurity("is_granted('read', request.get('_legacy_controller'))", message="Access denied.")
      * @param BuyBackFilters $filters
@@ -49,10 +64,9 @@ final class BuyBackController extends FrameworkBundleAdminController
         $grid = $gridFactory->getGrid($filters);
 
         return $this->render('@Modules/ad_buyback/views/templates/admin/buyback/index.html.twig', [
-                'layoutHeaderToolbarBtn' => $this->getToolbarButtons(),
-                'grid' => $this->presentGrid($grid)
-            ]
-        );
+            'layoutHeaderToolbarBtn' => $this->getToolbarButtons(),
+            'grid' => $this->presentGrid($grid)
+        ]);
     }
 
     /**
@@ -68,7 +82,7 @@ final class BuyBackController extends FrameworkBundleAdminController
         $form->handleRequest($request);
 
         try {
-            if ($formHandler->handle($form)->getIdentifiableObjectId() !== null) {
+            if ($formHandler->handle($form)->getIdentifiableObjectId()) {
                 $this->addFlash('success', $this->trans('The buy back has been successfully created.', 'Modules.Adbuyback.Alert'));
 
                 return $this->redirectToRoute('admin_ad_buyback_index');
@@ -85,19 +99,19 @@ final class BuyBackController extends FrameworkBundleAdminController
 
     /**
      * @AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message="Access denied.")
-     * @param int $id
+     * @param int $buybackId
      * @param Request $request
      * @return Response
      */
-    public function editAction(int $id, Request $request): Response
+    public function editAction(int $buybackId, Request $request): Response
     {
-        $form = $this->get('adbuyback.form.form_builder.buyback_image')->getFormFor($id);
+        $form = $this->get('adbuyback.form.form_builder.buyback_image')->getFormFor($buybackId);
         $formHandler = $this->get('adbuyback.form.form_handler.buyback');
 
         $form->handleRequest($request);
 
         try {
-            if ($formHandler->handleFor($id, $form)->getIdentifiableObjectId() !== null) {
+            if ($formHandler->handleFor($buybackId, $form)->getIdentifiableObjectId() !== null) {
                 $this->addFlash('success', $this->trans('The buy back has been successfully updated.', 'Modules.Adbuyback.Alert'));
 
                 return $this->redirectToRoute('admin_ad_buyback_index');
@@ -119,11 +133,10 @@ final class BuyBackController extends FrameworkBundleAdminController
      */
     public function deleteAction(Request $request): RedirectResponse
     {
-        $id = (int)$request->get('id');
-        $handler = $this->get('adbuyback.domain.buyback.command_handler.delete');
+        $buybackId = (int)$request->get('buybackId');
 
         try {
-            $handler->handle(new DeleteBuyBackCommand($id));
+            $this->commandBus->handle(new DeleteBuyBackCommand($buybackId));
             $this->addFlash('success', $this->trans('Buy back has been successfully deleted.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
             $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
@@ -134,15 +147,13 @@ final class BuyBackController extends FrameworkBundleAdminController
 
     /**
      * @AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message="Access denied.")
-     * @param int $id
+     * @param int $buybackId
      * @return JsonResponse
      */
-    public function toggleActiveAction(int $id): JsonResponse
+    public function toggleActiveAction(int $buybackId): JsonResponse
     {
-        $handler = $this->get('adbuyback.domain.buyback.command_handler.toggle_active');
-
         try {
-            $handler->handle(new ToggleActiveBuyBackCommand($id));
+            $this->commandBus->handle(new ToggleActiveBuyBackCommand($buybackId));
 
             $response = [
                 'status' => true,
@@ -165,11 +176,10 @@ final class BuyBackController extends FrameworkBundleAdminController
      */
     public function duplicateBulkAction(Request $request): RedirectResponse
     {
-        $ids = $request->request->get('buyback_bulk_action');
-        $handler = $this->get('adbuyback.domain.buyback.command_handler.duplicate_bulk');
+        $buybackIds = $request->request->get('buyback_bulk_action');
 
         try {
-            $handler->handle(new DuplicateBulkBuyBackCommand($ids));
+            $this->commandBus->handle(new DuplicateBulkBuyBackCommand($buybackIds));
             $this->addFlash('success', $this->trans('The selection has been successfully duplicated.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
             $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
@@ -185,12 +195,11 @@ final class BuyBackController extends FrameworkBundleAdminController
      */
     public function toggleActiveBulkAction(Request $request): RedirectResponse
     {
-        $ids = $request->request->get('buyback_bulk_action');
+        $buybackIds = $request->request->get('buyback_bulk_action');
         $status = (bool)$request->get('status');
-        $handler = $this->get('adbuyback.domain.buyback.command_handler.active_bulk');
 
         try {
-            $handler->handle(new ToggleActiveBulkBuyBackCommand($ids, $status));
+            $this->commandBus->handle(new ToggleActiveBulkBuyBackCommand($buybackIds, $status));
             $this->addFlash('success', $this->trans('The selection has been successfully ' . ($status ? 'enabled.' : 'disabled'), 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
             $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
@@ -206,11 +215,10 @@ final class BuyBackController extends FrameworkBundleAdminController
      */
     public function deleteBulkAction(Request $request): RedirectResponse
     {
-        $ids = $request->request->get('buyback_bulk_action');
-        $handler = $this->get('adbuyback.domain.buyback.command_handler.delete_bulk');
+        $buybackIds = $request->request->get('buyback_bulk_action');
 
         try {
-            $handler->handle(new DeleteBulkBuyBackCommand($ids));
+            $this->commandBus->handle(new DeleteBulkBuyBackCommand($buybackIds));
             $this->addFlash('success', $this->trans('The selection has been successfully deleted.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
             $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));

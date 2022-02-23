@@ -32,17 +32,44 @@ final class DeleteBuyBackImageHandler
     /**
      * @param DeleteBuyBackImageCommand $command
      * @return void
+     * @throws PrestaShopException
      */
     public function handle(DeleteBuyBackImageCommand $command): void
     {
-        $id = $command->getId()->getValue();
+        $imageId = $command->getId()->getValue();
 
         try {
-            if (!(new BuyBackImage($id))->delete()) {
-                throw new CannotDeleteBuyBackImageException(sprintf('Failed to delete buy back image with id "%s"', $id));
-            }
+            $image = new BuyBackImage($imageId);
+
+            $this->deleteBuyBackImage($image);
+            $this->deleteImageFile($image);
         } catch (PrestaShopException $exception) {
-            throw new CannotDeleteBuyBackImageException('An unexpected error occurred when delete buy back image');
+            throw new CannotDeleteBuyBackImageException($exception->getMessage());
+        }
+    }
+
+    /**
+     * @param BuyBackImage $image
+     * @return void
+     * @throws PrestaShopException
+     */
+    public function deleteBuyBackImage(BuyBackImage $image): void
+    {
+        if (!$image->delete()) {
+            throw new CannotDeleteBuyBackImageException(sprintf('Failed to delete buy back image with id "%s"', $image->id));
+        }
+    }
+
+    /**
+     * @param BuyBackImage $image
+     * @return void
+     */
+    public function deleteImageFile(BuyBackImage $image): void
+    {
+        $path = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $image->id_ad_buyback . '/' . $image->name;
+
+        if (!file_exists($path) || !unlink($path)) {
+            throw new CannotDeleteBuyBackImageException(sprintf('Cannot delete image with id "%s" for buyback with id "%s"', $image->id, $image->id_ad_buyback));
         }
     }
 }

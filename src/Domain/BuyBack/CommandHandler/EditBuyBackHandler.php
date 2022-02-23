@@ -25,11 +25,6 @@ namespace AdBuyBack\Domain\BuyBack\CommandHandler;
 use AdBuyBack\Domain\BuyBack\Command\EditBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\CannotEditBuyBackException;
 use AdBuyBack\Model\BuyBack;
-use PrestaShop\PrestaShop\Core\Image\Exception\ImageOptimizationException;
-use PrestaShop\PrestaShop\Core\Image\Uploader\Exception\ImageUploadException;
-use PrestaShop\PrestaShop\Core\Image\Uploader\Exception\MemoryLimitException;
-use PrestaShop\PrestaShop\Core\Image\Uploader\Exception\UploadedImageConstraintException;
-use PrestaShopDatabaseException;
 use PrestaShopException;
 
 final class EditBuyBackHandler extends ImageBuyBackHandler
@@ -37,26 +32,32 @@ final class EditBuyBackHandler extends ImageBuyBackHandler
     /**
      * @param EditBuyBackCommand $command
      * @return void
-     * @throws ImageOptimizationException
-     * @throws ImageUploadException
-     * @throws MemoryLimitException
-     * @throws PrestaShopDatabaseException
-     * @throws PrestaShopException
-     * @throws UploadedImageConstraintException
      */
     public function handle(EditBuyBackCommand $command): void
     {
-        $id = $command->getId()->getValue();
-        $buyback = new BuyBack($id);
-
-        $buyback->hydrate($command->toArray());
+        $buybackId = $command->getId()->getValue();
+        $images = $command->getImage();
 
         try {
-            if (!$buyback->update() || !$this->uploadImages($buyback->id, $command->getImage())) {
-                throw new CannotEditBuyBackException(sprintf('Failed to update buy back with id "%s"', $buyback->id));
-            }
+            $buyback = new BuyBack($buybackId);
+
+            $buyback->hydrate($command->toArray());
+            $this->editBuyBack($buyback);
+            $this->uploadImages($buyback->id, $images);
         } catch (PrestaShopException $exception) {
-            throw new CannotEditBuyBackException('An unexpected error occurred when updating buy back');
+            throw new CannotEditBuyBackException($exception->getMessage());
+        }
+    }
+
+    /**
+     * @param BuyBack $buyback
+     * @return void
+     * @throws PrestaShopException
+     */
+    private function editBuyBack(BuyBack $buyback): void
+    {
+        if (!$buyback->update()) {
+            throw new CannotEditBuyBackException(sprintf('Failed to update buy back with id "%s"', $buyback->id));
         }
     }
 }

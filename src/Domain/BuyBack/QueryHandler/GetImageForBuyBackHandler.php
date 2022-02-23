@@ -33,10 +33,12 @@ final class GetImageForBuyBackHandler extends AbstractQueryHandler
      */
     public function handle(GetImageForBuyBack $query): ImageForBuyBack
     {
-        if (null === $query->getId()) {
+        if (!$query->getId()) {
             return new ImageForBuyBack(false);
         }
 
-        return new ImageForBuyBack($this->repository->findAllBy(['id_ad_buyback' => $query->getId()->getValue()]));
+        return new ImageForBuyBack($this->repository->findAllBy([
+            'id_ad_buyback' => $query->getId()->getValue()
+        ]));
     }
 }

@@ -12,18 +12,27 @@ services:
             - '@doctrine.dbal.default_connection'
             - '%database_prefix%'
 
+    # BuyBack controller
+    AdBuyBack\Controller\Admin\BuyBackController:
+        class: 'AdBuyBack\Controller\Admin\BuyBackController'
+        arguments:
+            - '@prestashop.core.command_bus'
+
+    AdBuyBack\Controller\Admin\BuyBackImageController:
+        class: 'AdBuyBack\Controller\Admin\BuyBackImageController'
+        arguments:
+            - '@prestashop.core.command_bus'
+
     # BuyBack form factory
     adbuyback.form.type.buyback:
         class: 'AdBuyBack\Form\BuyBackType'
         parent: 'form.type.translatable.aware'
-        public: true
         tags:
             - name: form.type
 
     adbuyback.form.type.buyback_image:
         class: 'AdBuyBack\Form\BuyBackImageType'
         parent: 'form.type.translatable.aware'
-        public: true
         arguments:
             - '@prestashop.core.query_bus'
             - '@request_stack'
@@ -66,12 +75,10 @@ services:
     adbuyback.grid.factory.definition.buyback:
         class: 'AdBuyBack\Grid\Factory\BuyBackGridDefinitionFactory'
         parent: 'prestashop.core.grid.definition.factory.abstract_grid_definition'
-        public: true
 
     adbuyback.grid.query_builder.buyback:
         class: 'AdBuyBack\Grid\Query\BuyBackQueryBuilder'
         parent: 'prestashop.core.grid.abstract_query_builder'
-        public: true
         arguments:
             - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
             - "@=service('prestashop.adapter.legacy.context').getContext().shop.id"
@@ -126,6 +133,8 @@ services:
 
     adbuyback.domain.buyback.command_handler.delete:
         class: 'AdBuyBack\Domain\BuyBack\CommandHandler\DeleteBuyBackHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Command\DeleteBuyBackCommand'
@@ -157,6 +166,8 @@ services:
 
     adbuyback.domain.buyback.command_handler.delete_bulk:
         class: 'AdBuyBack\Domain\BuyBack\CommandHandler\DeleteBulkBuyBackHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Command\DeleteBulkBuyBackCommand'
@@ -167,3 +178,9 @@ services:
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Command\DeleteBuyBackImageCommand'
+
+    adbuyback.domain.buyback_image.command_handler.delete_bulk:
+        class: 'AdBuyBack\Domain\BuyBack\CommandHandler\DeleteBulkBuyBackImageHandler'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBack\Command\DeleteBulkBuyBackImageCommand'

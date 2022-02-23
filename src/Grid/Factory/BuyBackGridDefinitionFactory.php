@@ -102,7 +102,7 @@ class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitionFacto
                     'field' => 'active',
                     'primary_field' => 'id',
                     'route' => 'admin_ad_buyback_toggle_active',
-                    'route_param_name' => 'id'
+                    'route_param_name' => 'buybackId'
                 ])
             )
             ->add((new ActionColumn('actions'))
@@ -114,7 +114,7 @@ class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitionFacto
                             ->setIcon('edit')
                             ->setOptions([
                                 'route' => 'admin_ad_buyback_edit',
-                                'route_param_name' => 'id',
+                                'route_param_name' => 'buybackId',
                                 'route_param_field' => 'id',
                                 'clickable_row' => true
                             ])
@@ -123,9 +123,9 @@ class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitionFacto
                             ->setName($this->trans('Delete', [], 'Modules.Adbuyback.Admin'))
                             ->setIcon('delete')
                             ->setOptions([
-                                'method' => 'DELETE',
+                                'method' => 'POST',
                                 'route' => 'admin_ad_buyback_delete',
-                                'route_param_name' => 'id',
+                                'route_param_name' => 'buybackId',
                                 'route_param_field' => 'id',
                                 'confirm_message' => $this->trans('Are you sure you want to delete the buyback ?', [], 'Modules.Adbuyback.Admin'),
                                 'modal_options' => new ModalOptions([

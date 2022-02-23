@@ -20,32 +20,32 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\CommandHandler;
+namespace AdBuyBack\Tools;
 
 use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
-use AdBuyBack\Uploader\BuyBackExtraImageUploader;
-use PrestaShop\PrestaShop\Core\Image\Exception\ImageException;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
-class ImageBuyBackHandler
+final class BuyBackTools
 {
     /**
-     * @param int $buybackId
-     * @param array $image
+     * @param string $directory
      * @return void
      */
-    protected function uploadImages(int $buybackId, array $image): void
+    public static function deleteDirectory(string $directory): void
     {
-        try {
-            $uploader = new BuyBackExtraImageUploader();
-
-            foreach ($image as $file) {
-                if ($file instanceof UploadedFile) {
-                    $uploader->upload($buybackId, $file);
-                }
-            }
-        } catch (ImageException $exception) {
-            throw new BuyBackException($exception->getMessage());
+        if (!file_exists($directory)) {
+            throw new BuyBackException('Fail to delete directory because is not exist');
         }
+
+        $iterator = new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS);
+        $files = new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST);
+
+        foreach($files as $file) {
+            $file->isDir() ? rmdir($file->getRealPath()) : unlink($file->getRealPath());
+        }
+
+        rmdir($directory);
     }
 }

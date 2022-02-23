@@ -26,10 +26,6 @@ use AdBuyBack\Domain\BuyBack\Command\CreateBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\CannotCreateBuyBackException;
 use AdBuyBack\Domain\BuyBack\ValueObject\BuyBackId;
 use AdBuyBack\Model\BuyBack;
-use PrestaShop\PrestaShop\Core\Image\Exception\ImageOptimizationException;
-use PrestaShop\PrestaShop\Core\Image\Uploader\Exception\ImageUploadException;
-use PrestaShop\PrestaShop\Core\Image\Uploader\Exception\MemoryLimitException;
-use PrestaShop\PrestaShop\Core\Image\Uploader\Exception\UploadedImageConstraintException;
 use PrestaShopException;
 
 final class CreateBuyBackHandler extends ImageBuyBackHandler
@@ -37,25 +33,33 @@ final class CreateBuyBackHandler extends ImageBuyBackHandler
     /**
      * @param CreateBuyBackCommand $command
      * @return BuyBackId
-     * @throws ImageOptimizationException
-     * @throws ImageUploadException
-     * @throws MemoryLimitException
-     * @throws UploadedImageConstraintException
      */
     public function handle(CreateBuyBackCommand $command): BuyBackId
     {
-        $buyback = new BuyBack();
-
-        $buyback->hydrate($command->toArray());
+        $images = $command->getImage();
 
         try {
-            if (!$buyback->add() || !$this->uploadImages((int)$buyback->id, $command->getImage())) {
-                throw new CannotCreateBuyBackException('Failed to create buy back');
-            }
+            $buyback = new BuyBack();
+
+            $buyback->hydrate($command->toArray());
+            $this->createBuyBack($buyback);
+            $this->uploadImages((int)$buyback->id, $images);
         } catch (PrestaShopException $exception) {
-            throw new CannotCreateBuyBackException('An unexpected error occurred when create buy back');
+            throw new CannotCreateBuyBackException($exception->getMessage());
         }
 
         return $command->getId()->setValue((int)$buyback->id);
+    }
+
+    /**
+     * @param BuyBack $buyback
+     * @return void
+     * @throws PrestaShopException
+     */
+    private function createBuyBack(BuyBack &$buyback): void
+    {
+        if (!$buyback->add()) {
+            throw new CannotCreateBuyBackException('Failed to create buy back');
+        }
     }
 }

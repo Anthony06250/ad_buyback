@@ -26,7 +26,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Tools;
 
-final class BuyBackAdapter
+final class RequestAdapter
 {
     /**
      * @return Request
@@ -40,7 +40,7 @@ final class BuyBackAdapter
                 'email' => Tools::getValue('email'),
                 'description' => Tools::getValue('description'),
                 'active' => true,
-                'image' => BuyBackAdapter::getImageRequest(),
+                'image' => RequestAdapter::getImageRequest(),
                 '_token' => Tools::getValue('_token')
             ]]);
 

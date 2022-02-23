@@ -51,7 +51,7 @@ class BuyBackImageType extends BuyBackType
     {
         parent::__construct($translator, $locales);
         $this->queryBus = $queryBus;
-        $this->id = (int)$request->getCurrentRequest()->get('id');
+        $this->id = (int)$request->getCurrentRequest()->get('buybackId');
     }
 
     /**
