@@ -20,8 +20,8 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\ValueObject;
+namespace AdBuyBack\Domain\BuyBackImage\Exception;
 
-final class BuyBackImageId extends BuyBackId
+final class CannotCreateBuyBackImageException extends BuyBackImageException
 {
 }

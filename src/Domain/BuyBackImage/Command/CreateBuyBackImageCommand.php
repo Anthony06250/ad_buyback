@@ -20,25 +20,43 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\QueryHandler;
+namespace AdBuyBack\Domain\BuyBackImage\Command;
 
-use AdBuyBack\Domain\BuyBack\Query\GetImageForBuyBack;
-use AdBuyBack\Domain\BuyBack\QueryResult\ImageForBuyBack;
-
-final class GetImageForBuyBackHandler extends AbstractQueryHandler
+final class CreateBuyBackImageCommand extends AbstractBuyBackImageCommand
 {
     /**
-     * @param GetImageForBuyBack $query
-     * @return ImageForBuyBack
+     * @var int
      */
-    public function handle(GetImageForBuyBack $query): ImageForBuyBack
+    private $id_ad_buyback;
+
+    /**
+     * @var string
+     */
+    private $name;
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
     {
-        if (!$query->getId()) {
-            return new ImageForBuyBack(false);
+        return [
+            'id_ad_buyback' => $this->id_ad_buyback,
+            'name' => $this->name
+        ];
+    }
+
+    /**
+     * @param array $data
+     * @return CreateBuyBackImageCommand
+     */
+    public function fromArray(array $data): CreateBuyBackImageCommand
+    {
+        foreach ($data as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->{$key} = $value;
+            }
         }
 
-        return new ImageForBuyBack($this->repository->findAllBy([
-            'id_ad_buyback' => $query->getId()->getValue()
-        ]));
+        return $this;
     }
 }

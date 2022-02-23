@@ -22,10 +22,10 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Domain\BuyBack\CommandHandler;
 
-use AdBuyBack\Domain\BuyBack\Command\DeleteBulkBuyBackImageCommand;
+use AdBuyBack\Domain\BuyBackImage\Command\DeleteBulkBuyBackImageCommand;
 use AdBuyBack\Domain\BuyBack\Command\DeleteBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\CannotDeleteBuyBackException;
-use AdBuyBack\Domain\BuyBack\Query\GetImageForBuyBack;
+use AdBuyBack\Domain\BuyBackImage\Query\GetImageForBuyBack;
 use AdBuyBack\Model\BuyBack;
 use AdBuyBack\Tools\BuyBackTools;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;

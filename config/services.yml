@@ -101,7 +101,7 @@ services:
             - '@prestashop.core.grid.filter.form_factory'
             - '@prestashop.core.hook.dispatcher'
 
-    # Buy Back domain query handler
+    # BuyBack domain query handler
     adbuyback.domain.buyback.query_handler.get_for_form:
         class: 'AdBuyBack\Domain\BuyBack\QueryHandler\GetBuyBackForFormHandler'
         arguments:
@@ -109,14 +109,6 @@ services:
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Query\GetBuyBackForForm'
-
-    adbuyback.domain.buyback_image.query_handler.get_for_buyback:
-        class: 'AdBuyBack\Domain\BuyBack\QueryHandler\GetImageForBuyBackHandler'
-        arguments:
-            - '@adbuyback.repository.buyback_image'
-        tags:
-            -   name: tactician.handler
-                command: 'AdBuyBack\Domain\BuyBack\Query\GetImageForBuyBack'
 
     # BuyBack domain action handler
     adbuyback.domain.buyback.command_handler.create:
@@ -145,15 +137,11 @@ services:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Command\ToggleActiveBuyBackCommand'
 
-    adbuyback.domain.buyback_image.command_handler.create:
-        class: 'AdBuyBack\Domain\BuyBack\CommandHandler\CreateBuyBackImageHandler'
-        tags:
-            -   name: tactician.handler
-                command: 'AdBuyBack\Domain\BuyBack\Command\CreateBuyBackImageCommand'
-
-    # BuyBack bulk handler
+    # BuyBack domain bulk action handler
     adbuyback.domain.buyback.command_handler.duplicate_bulk:
         class: 'AdBuyBack\Domain\BuyBack\CommandHandler\DuplicateBulkBuyBackHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Command\DuplicateBulkBuyBackCommand'
@@ -172,15 +160,37 @@ services:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Command\DeleteBulkBuyBackCommand'
 
-    # BuyBack Image domain action handler
-    adbuyback.domain.buyback_image.command_handler.delete:
-        class: 'AdBuyBack\Domain\BuyBack\CommandHandler\DeleteBuyBackImageHandler'
+    # BuyBack Image domain query handler
+    adbuyback.domain.buyback_image.query_handler.get_for_buyback:
+        class: 'AdBuyBack\Domain\BuyBackImage\QueryHandler\GetImageForBuyBackHandler'
+        arguments:
+            - '@adbuyback.repository.buyback_image'
         tags:
             -   name: tactician.handler
-                command: 'AdBuyBack\Domain\BuyBack\Command\DeleteBuyBackImageCommand'
+                command: 'AdBuyBack\Domain\BuyBackImage\Query\GetImageForBuyBack'
+
+    # BuyBack Image domain action handler
+    adbuyback.domain.buyback_image.command_handler.create:
+        class: 'AdBuyBack\Domain\BuyBackImage\CommandHandler\CreateBuyBackImageHandler'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackImage\Command\CreateBuyBackImageCommand'
+
+    adbuyback.domain.buyback_image.command_handler.delete:
+        class: 'AdBuyBack\Domain\BuyBackImage\CommandHandler\DeleteBuyBackImageHandler'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackImage\Command\DeleteBuyBackImageCommand'
+
+    # BuyBack Image domain bulk action handler
+    adbuyback.domain.buyback_image.command_handler.duplicate_bulk:
+        class: 'AdBuyBack\Domain\BuyBackImage\CommandHandler\DuplicateBulkBuyBackImageHandler'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackImage\Command\DuplicateBulkBuyBackImageCommand'
 
     adbuyback.domain.buyback_image.command_handler.delete_bulk:
-        class: 'AdBuyBack\Domain\BuyBack\CommandHandler\DeleteBulkBuyBackImageHandler'
+        class: 'AdBuyBack\Domain\BuyBackImage\CommandHandler\DeleteBulkBuyBackImageHandler'
         tags:
             -   name: tactician.handler
-                command: 'AdBuyBack\Domain\BuyBack\Command\DeleteBulkBuyBackImageCommand'
+                command: 'AdBuyBack\Domain\BuyBackImage\Command\DeleteBulkBuyBackImageCommand'

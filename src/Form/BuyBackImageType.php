@@ -22,7 +22,7 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Form;
 
-use AdBuyBack\Domain\BuyBack\Query\GetImageForBuyBack;
+use AdBuyBack\Domain\BuyBackImage\Query\GetImageForBuyBack;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShopBundle\Form\Admin\Type\CustomContentType;
 use Symfony\Component\Form\FormBuilderInterface;

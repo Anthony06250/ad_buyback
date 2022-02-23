@@ -20,29 +20,10 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Grid\Filters;
+namespace AdBuyBack\Domain\BuyBackImage\ValueObject;
 
-use AdBuyBack\Grid\Factory\BuyBackGridDefinitionFactory;
-use PrestaShop\PrestaShop\Core\Search\Filters;
+use AdBuyBack\Domain\BuyBack\ValueObject\BuyBackId;
 
-final class BuyBackFilters extends Filters
+final class BuyBackImageId extends BuyBackId
 {
-    /**
-     * @var string
-     */
-    protected $filterId = BuyBackGridDefinitionFactory::GRID_ID;
-
-    /**
-     * @return array
-     */
-    public static function getDefaults(): array
-    {
-        return [
-            'limit' => 10,
-            'offset' => 0,
-            'orderBy' => 'id',
-            'sortOrder' => 'asc',
-            'filters' => [],
-        ];
-    }
 }

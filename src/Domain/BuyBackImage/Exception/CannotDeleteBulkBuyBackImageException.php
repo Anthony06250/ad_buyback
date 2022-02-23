@@ -20,30 +20,8 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\Query;
+namespace AdBuyBack\Domain\BuyBackImage\Exception;
 
-use AdBuyBack\Domain\BuyBack\ValueObject\BuyBackImageId;
-
-final class GetImageForBuyBack
+final class CannotDeleteBulkBuyBackImageException extends BuyBackImageException
 {
-    /**
-     * @var BuyBackImageId|null
-     */
-    private $id;
-
-    /**
-     * @param $id
-     */
-    public function __construct($id)
-    {
-        $this->id = null !== $id ? new BuyBackImageId($id) : null;
-    }
-
-    /**
-     * @return BuyBackImageId|null
-     */
-    public function getId(): ?BuyBackImageId
-    {
-        return $this->id;
-    }
 }

@@ -20,8 +20,8 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\QueryResult;
+namespace AdBuyBack\Domain\BuyBackImage\Command;
 
-final class ImageForBuyBack extends AbstractQueryResult
+final class DeleteBulkBuyBackImageCommand extends AbstractBuyBackImageCommand
 {
 }

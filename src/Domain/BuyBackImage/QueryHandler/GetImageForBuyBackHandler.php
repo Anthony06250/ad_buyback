@@ -20,8 +20,26 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\Command;
+namespace AdBuyBack\Domain\BuyBackImage\QueryHandler;
 
-final class DeleteBuyBackImageCommand extends AbstractBuyBackCommand
+use AdBuyBack\Domain\BuyBack\QueryHandler\AbstractQueryHandler;
+use AdBuyBack\Domain\BuyBackImage\Query\GetImageForBuyBack;
+use AdBuyBack\Domain\BuyBackImage\QueryResult\ImageForBuyBack;
+
+final class GetImageForBuyBackHandler extends AbstractQueryHandler
 {
+    /**
+     * @param GetImageForBuyBack $query
+     * @return ImageForBuyBack
+     */
+    public function handle(GetImageForBuyBack $query): ImageForBuyBack
+    {
+        if (!$query->getId()) {
+            return new ImageForBuyBack(false);
+        }
+
+        return new ImageForBuyBack($this->repository->findAllBy([
+            'id_ad_buyback' => $query->getId()->getValue()
+        ]));
+    }
 }

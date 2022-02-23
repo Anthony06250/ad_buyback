@@ -20,29 +20,10 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Grid\Filters;
+namespace AdBuyBack\Domain\BuyBackImage\Exception;
 
-use AdBuyBack\Grid\Factory\BuyBackGridDefinitionFactory;
-use PrestaShop\PrestaShop\Core\Search\Filters;
+use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
 
-final class BuyBackFilters extends Filters
+class BuyBackImageException extends BuyBackException
 {
-    /**
-     * @var string
-     */
-    protected $filterId = BuyBackGridDefinitionFactory::GRID_ID;
-
-    /**
-     * @return array
-     */
-    public static function getDefaults(): array
-    {
-        return [
-            'limit' => 10,
-            'offset' => 0,
-            'orderBy' => 'id',
-            'sortOrder' => 'asc',
-            'filters' => [],
-        ];
-    }
 }

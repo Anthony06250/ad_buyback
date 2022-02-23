@@ -20,10 +20,10 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\CommandHandler;
+namespace AdBuyBack\Domain\BuyBackImage\CommandHandler;
 
-use AdBuyBack\Domain\BuyBack\Command\DeleteBulkBuyBackImageCommand;
-use AdBuyBack\Domain\BuyBack\Exception\CannotDeleteBulkBuyBackImageException;
+use AdBuyBack\Domain\BuyBackImage\Command\DeleteBulkBuyBackImageCommand;
+use AdBuyBack\Domain\BuyBackImage\Exception\CannotDeleteBulkBuyBackImageException;
 use AdBuyBack\Model\BuyBackImage;
 use PrestaShopException;
 

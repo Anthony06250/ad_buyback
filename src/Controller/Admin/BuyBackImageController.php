@@ -22,7 +22,7 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Controller\Admin;
 
-use AdBuyBack\Domain\BuyBack\Command\DeleteBuyBackImageCommand;
+use AdBuyBack\Domain\BuyBackImage\Command\DeleteBuyBackImageCommand;
 use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;

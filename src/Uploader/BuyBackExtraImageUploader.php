@@ -23,8 +23,9 @@ declare(strict_types=1);
 namespace AdBuyBack\Uploader;
 
 use Ad_BuyBack;
-use AdBuyBack\Domain\BuyBack\Command\CreateBuyBackImageCommand;
-use AdBuyBack\Domain\BuyBack\Query\GetImageForBuyBack;
+use AdBuyBack\Domain\BuyBackImage\Command\CreateBuyBackImageCommand;
+use AdBuyBack\Domain\BuyBackImage\Query\GetImageForBuyBack;
+use AdBuyBack\Tools\BuyBackTools;
 use ImageManager;
 use PrestaShop\PrestaShop\Core\Image\Exception\ImageOptimizationException;
 use PrestaShop\PrestaShop\Core\Image\Uploader\Exception\ImageUploadException;
@@ -53,7 +54,7 @@ final class BuyBackExtraImageUploader implements ImageUploaderInterface
         $temporaryName = $this->createTemporaryImage($image);
         $name = $image->getClientOriginalName();
 
-        $this->createDirectory($directory);
+        BuyBackTools::createDirectory($directory);
         $this->uploadFromTemp($temporaryName, $directory . $name);
         $this->createNewImage($id, $name);
     }
@@ -92,18 +93,6 @@ final class BuyBackExtraImageUploader implements ImageUploaderInterface
         }
 
         return $temporaryName;
-    }
-
-    /**
-     * @param string $directory
-     * @return void
-     */
-    private function createDirectory(string $directory): void
-    {
-        if (!file_exists($directory)) {
-            mkdir($directory, 0777, true);
-            chmod($directory, 0777);
-        }
     }
 
     /**

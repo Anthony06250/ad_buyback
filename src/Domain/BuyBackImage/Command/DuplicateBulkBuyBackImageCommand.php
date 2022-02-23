@@ -20,29 +20,30 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Grid\Filters;
+namespace AdBuyBack\Domain\BuyBackImage\Command;
 
-use AdBuyBack\Grid\Factory\BuyBackGridDefinitionFactory;
-use PrestaShop\PrestaShop\Core\Search\Filters;
-
-final class BuyBackFilters extends Filters
+final class DuplicateBulkBuyBackImageCommand extends AbstractBuyBackImageCommand
 {
     /**
-     * @var string
+     * @var int|null
      */
-    protected $filterId = BuyBackGridDefinitionFactory::GRID_ID;
+    private $buybackId;
 
     /**
-     * @return array
+     * @param $id
+     * @param int|null $buybackId
      */
-    public static function getDefaults(): array
+    public function __construct($id = null, int $buybackId = null)
     {
-        return [
-            'limit' => 10,
-            'offset' => 0,
-            'orderBy' => 'id',
-            'sortOrder' => 'asc',
-            'filters' => [],
-        ];
+        parent::__construct($id);
+        $this->buybackId = $buybackId;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getBuybackId(): ?int
+    {
+        return $this->buybackId;
     }
 }

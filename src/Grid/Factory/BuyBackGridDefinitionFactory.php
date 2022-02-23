@@ -47,7 +47,7 @@ use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
 use PrestaShopBundle\Form\Admin\Type\YesAndNoChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitionFactory
+final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitionFactory
 {
     const GRID_ID = 'buyback';
 

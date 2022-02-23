@@ -20,8 +20,30 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\Exception;
+namespace AdBuyBack\Domain\BuyBackImage\Command;
 
-final class CannotCreateBuyBackImageException extends BuyBackException
+use AdBuyBack\Domain\BuyBackImage\ValueObject\BuyBackImageId;
+
+class AbstractBuyBackImageCommand
 {
+    /**
+     * @var BuyBackImageId
+     */
+    private $id;
+
+    /**
+     * @param mixed $id
+     */
+    public function __construct($id = null)
+    {
+        $this->id = new BuyBackImageId($id);
+    }
+
+    /**
+     * @return BuyBackImageId
+     */
+    public function getId(): BuyBackImageId
+    {
+        return $this->id;
+    }
 }

@@ -20,8 +20,10 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\Exception;
+namespace AdBuyBack\Domain\BuyBackImage\QueryResult;
 
-final class CannotDeleteBuyBackImageException extends BuyBackException
+use AdBuyBack\Domain\BuyBack\QueryResult\AbstractQueryResult;
+
+final class ImageForBuyBack extends AbstractQueryResult
 {
 }

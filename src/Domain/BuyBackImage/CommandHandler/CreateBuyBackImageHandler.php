@@ -20,30 +20,42 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\CommandHandler;
+namespace AdBuyBack\Domain\BuyBackImage\CommandHandler;
 
-use AdBuyBack\Domain\BuyBack\Command\CreateBuyBackImageCommand;
-use AdBuyBack\Domain\BuyBack\Exception\CannotCreateBuyBackImageException;
-use AdBuyBack\Domain\BuyBack\ValueObject\BuyBackId;
+use AdBuyBack\Domain\BuyBackImage\Command\CreateBuyBackImageCommand;
+use AdBuyBack\Domain\BuyBackImage\Exception\CannotCreateBuyBackImageException;
+use AdBuyBack\Domain\BuyBackImage\ValueObject\BuyBackImageId;
 use AdBuyBack\Model\BuyBackImage;
 use PrestaShopException;
 
 final class CreateBuyBackImageHandler
 {
-    public function handle(CreateBuyBackImageCommand $command): BuyBackId
+    /**
+     * @param CreateBuyBackImageCommand $command
+     * @return BuyBackImageId
+     */
+    public function handle(CreateBuyBackImageCommand $command): BuyBackImageId
     {
-        $image = new BuyBackImage();
-
-        $image->hydrate($command->toArray());
-
         try {
-            if (!$image->add()) {
-                throw new CannotCreateBuyBackImageException('Failed to create buy back image');
-            }
+            $image = new BuyBackImage();
+
+            $image->hydrate($command->toArray());
+            $this->createBuyBackImage($image);
         } catch (PrestaShopException $exception) {
             throw new CannotCreateBuyBackImageException('An unexpected error occurred when create buy back image');
         }
 
         return $command->getId()->setValue((int)$image->id);
+    }
+
+    /**
+     * @param $image
+     * @return void
+     */
+    private function createBuyBackImage($image): void
+    {
+        if (!$image->add()) {
+            throw new CannotCreateBuyBackImageException('Failed to create buy back image');
+        }
     }
 }

@@ -20,43 +20,8 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\Command;
+namespace AdBuyBack\Domain\BuyBackImage\Exception;
 
-final class CreateBuyBackImageCommand extends AbstractBuyBackImageCommand
+final class CannotDeleteBuyBackImageException extends BuyBackImageException
 {
-    /**
-     * @var int
-     */
-    private $id_ad_buyback;
-
-    /**
-     * @var string
-     */
-    private $name;
-
-    /**
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return [
-            'id_ad_buyback' => $this->id_ad_buyback,
-            'name' => $this->name
-        ];
-    }
-
-    /**
-     * @param array $data
-     * @return CreateBuyBackImageCommand
-     */
-    public function fromArray(array $data): CreateBuyBackImageCommand
-    {
-        foreach ($data as $key => $value) {
-            if (property_exists($this, $key)) {
-                $this->{$key} = $value;
-            }
-        }
-
-        return $this;
-    }
 }

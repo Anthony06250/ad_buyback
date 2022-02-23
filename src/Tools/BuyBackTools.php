@@ -33,6 +33,23 @@ final class BuyBackTools
      * @param string $directory
      * @return void
      */
+    public static function createDirectory(string $directory): void
+    {
+        if (!file_exists($directory)) {
+            if (!mkdir($directory, 0777, true)) {
+                throw new BuyBackException('Fail to create new directory');
+            }
+
+            if (!chmod($directory, 0777)) {
+                throw new BuyBackException('Unable to grant permissions to the new directory');
+            }
+        }
+    }
+
+    /**
+     * @param string $directory
+     * @return void
+     */
     public static function deleteDirectory(string $directory): void
     {
         if (!file_exists($directory)) {
@@ -43,9 +60,28 @@ final class BuyBackTools
         $files = new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST);
 
         foreach($files as $file) {
-            $file->isDir() ? rmdir($file->getRealPath()) : unlink($file->getRealPath());
+            if (!($file->isDir() ? rmdir($file->getRealPath()) : unlink($file->getRealPath()))) {
+                throw new BuyBackException('Fail to delete file in directory');
+            }
         }
 
-        rmdir($directory);
+        if (!rmdir($directory)) {
+            throw new BuyBackException('Fail to delete directory');
+        }
+    }
+
+    /**
+     * @param $file
+     * @return string
+     */
+    public static function changeFilenameForCopy($file): string
+    {
+        $infos = pathinfo($file);
+
+        // Regex test for filename of copied file
+//        dump(preg_match('/(?<=()\d+(?=\)[^.]+$)/', $infos['filename']));
+//        die();
+
+        return $infos['filename'] . '_copy.' . $infos['extension'];
     }
 }

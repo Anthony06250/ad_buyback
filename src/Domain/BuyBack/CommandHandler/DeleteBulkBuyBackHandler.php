@@ -26,7 +26,6 @@ use AdBuyBack\Domain\BuyBack\Command\DeleteBulkBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\CannotDeleteBulkBuyBackException;
 use AdBuyBack\Model\BuyBack;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
-use PrestaShopDatabaseException;
 use PrestaShopException;
 
 final class DeleteBulkBuyBackHandler
@@ -66,17 +65,14 @@ final class DeleteBulkBuyBackHandler
      * @param array $buybackIds
      * @return array
      * @throws PrestaShopException
-     * @throws PrestaShopDatabaseException
      */
     private function getBuyBack(array $buybackIds): array
     {
-        $result = [];
-
-        foreach ($buybackIds as $buybackId) {
-            $result[] = new BuyBack($buybackId);
+        foreach ($buybackIds as $key => $buybackId) {
+            $buybackIds[$key] = new BuyBack($buybackId);
         }
 
-        return $result;
+        return $buybackIds;
     }
 
     /**
@@ -98,7 +94,7 @@ final class DeleteBulkBuyBackHandler
     private function deleteBuyBackImage(array $buybacks): void
     {
         foreach ($buybacks as $buyback) {
-            (new DeleteBuyBackHandler($this->commandBus))->deleteImageFile($buyback);
+            (new DeleteBuyBackHandler($this->commandBus))->deleteBuyBackImage($buyback);
         }
     }
 }

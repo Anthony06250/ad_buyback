@@ -20,8 +20,8 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\Exception;
+namespace AdBuyBack\Domain\BuyBackImage\Exception;
 
-final class CannotDeleteBulkBuyBackImageException extends BuyBackException
+final class CannotDuplicateBulkBuyBackImageException extends BuyBackImageException
 {
 }
