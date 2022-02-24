@@ -40,10 +40,10 @@ final class DuplicateBulkBuyBackImageHandler
         $buybackId = $command->getBuybackId();
 
         try {
-            $images = $this->getBuyBackImage($imageIds);
-
-            $this->duplicateBuyBack($images, $buybackId);
-            $this->duplicateImageFile($images, $buybackId);
+            foreach ($this->getBuyBackImage($imageIds) as $image) {
+                $this->duplicateBuyBack($image, $buybackId);
+                $this->duplicateImageFile($image);
+            }
         } catch (PrestaShopException $exception) {
             throw new CannotDuplicateBulkBuyBackImageException($exception->getMessage());
         }
@@ -64,22 +64,21 @@ final class DuplicateBulkBuyBackImageHandler
     }
 
     /**
-     * @param array $images
-     * @param int $buybackId
+     * @param BuyBackImage $image
+     * @param int|null $buybackId
      * @return void
+     * @throws PrestaShopException
      */
-    private function duplicateBuyBack(array &$images, int $buybackId): void
+    private function duplicateBuyBack(BuyBackImage &$image, ?int $buybackId): void
     {
-        foreach ($images as $key => $image) {
-            $images[$key] = $image->duplicateObject();
+        $image->duplicateObject();
 
-            $buybackId
-                ? $this->changeBuyBackImageId($images[$key], $buybackId)
-                : $this->changeBuyBackImageName($images[$key]);
+        $buybackId
+            ? $this->changeBuyBackId($image, $buybackId)
+            : $this->changeBuyBackImageName($image);
 
-            if (!$images[$key]->save()) {
-                throw new CannotDuplicateBulkBuyBackImageException(sprintf('Failed to duplicate buy back image with id "%s"', $image->id));
-            }
+        if (!$image->save()) {
+            throw new CannotDuplicateBulkBuyBackImageException(sprintf('Failed to duplicate buy back image with id "%s"', $image->id));
         }
     }
 
@@ -88,9 +87,9 @@ final class DuplicateBulkBuyBackImageHandler
      * @param int $buybackId
      * @return void
      */
-    private function changeBuyBackImageId(BuyBackImage &$image, int $buybackId): void
+    private function changeBuyBackId(BuyBackImage &$image, int $buybackId): void
     {
-        $image->old_id_ad_buyback = $image->id_ad_buyback;
+        $image->oldBuybackId = $image->id_ad_buyback;
         $image->id_ad_buyback = $buybackId;
     }
 
@@ -101,28 +100,26 @@ final class DuplicateBulkBuyBackImageHandler
     private function changeBuyBackImageName(BuyBackImage &$image): void
     {
         $file = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $image->id_ad_buyback . '/' . $image->name;
-        $image->old_name = $image->name;
+        $image->oldName = $image->name;
         $image->name = BuyBackTools::changeFilenameForCopy($file);
     }
 
     /**
-     * @param array $images
+     * @param BuyBackImage $image
      * @return void
      */
-    private function duplicateImageFile(array $images): void
+    private function duplicateImageFile(BuyBackImage $image): void
     {
-        foreach ($images as $image) {
-            $directory = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/';
-            $directoryFrom = $directory . ($image->old_id_ad_buyback ?? $image->id_ad_buyback) . '/';
-            $directoryTo = $directory . $image->id_ad_buyback . '/';
+        $directory = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/';
+        $directoryFrom = $directory . ($image->oldBuybackId ?? $image->id_ad_buyback) . '/';
+        $directoryTo = $directory . $image->id_ad_buyback . '/';
 
-            if (!file_exists($directoryTo)) {
-                BuyBackTools::createDirectory($directoryTo);
-            }
+        if (!file_exists($directoryTo)) {
+            BuyBackTools::createDirectory($directoryTo);
+        }
 
-            if (!copy($directoryFrom . $image->name, $directoryTo . ($image->old_name ?? $image->name))) {
-                throw new CannotDuplicateBulkBuyBackImageException(sprintf('Failed to duplicate image file with id "%s"', $image->id));
-            }
+        if (!copy($directoryFrom . ($image->oldName ?? $image->name), $directoryTo . $image->name)) {
+            throw new CannotDuplicateBulkBuyBackImageException(sprintf('Failed to duplicate image file with id "%s"', $image->id));
         }
     }
 }

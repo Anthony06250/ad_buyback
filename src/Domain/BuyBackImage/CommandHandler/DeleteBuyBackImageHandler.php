@@ -30,6 +30,10 @@ use PrestaShopException;
 final class DeleteBuyBackImageHandler
 {
     /**
+     * -> TODO: Delete directory when deleting last image
+     */
+
+    /**
      * @param DeleteBuyBackImageCommand $command
      * @return void
      * @throws PrestaShopException

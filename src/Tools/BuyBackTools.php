@@ -71,17 +71,20 @@ final class BuyBackTools
     }
 
     /**
-     * @param $file
+     * @param $path
      * @return string
      */
-    public static function changeFilenameForCopy($file): string
+    public static function changeFilenameForCopy($path): string
     {
-        $infos = pathinfo($file);
+        $infos = pathinfo($path);
+        $infos['filename'] = preg_match('/(?<=\()\d+(?=\)+$)/', $infos['filename'], $matches)
+            ? substr($infos['filename'], 0, -(strlen($matches[0]) + 2)) . '(' . ((int)$matches[0] + 1) . ')'
+            : $infos['filename'] . '(2)';
 
-        // Regex test for filename of copied file
-//        dump(preg_match('/(?<=()\d+(?=\)[^.]+$)/', $infos['filename']));
-//        die();
+        if (file_exists($infos['dirname'] . '/' . $infos['filename'] . '.' . $infos['extension'])) {
+            return self::changeFilenameForCopy($infos['dirname'] . '/' . $infos['filename'] . '.' . $infos['extension']);
+        }
 
-        return $infos['filename'] . '_copy.' . $infos['extension'];
+        return $infos['filename'] . '.' . $infos['extension'];
     }
 }

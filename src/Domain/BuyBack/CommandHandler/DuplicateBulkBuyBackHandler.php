@@ -54,10 +54,10 @@ final class DuplicateBulkBuyBackHandler
         $buybackIds = $command->getId()->getValue();
 
         try {
-            $buybacks = $this->getBuyBack($buybackIds);
-
-            $this->duplicateBuyBack($buybacks);
-            $this->duplicateBuyBackImage($buybacks);
+            foreach ($this->getBuyBack($buybackIds) as $buyback) {
+                $this->duplicateBuyBack($buyback);
+                $this->duplicateBuyBackImage($buyback);
+            }
         } catch (PrestaShopException $exception) {
             throw new CannotDuplicateBulkBuyBackException($exception->getMessage());
         }
@@ -79,35 +79,34 @@ final class DuplicateBulkBuyBackHandler
     }
 
     /**
-     * @param array $buybacks
+     * @param BuyBack $buyback
      * @return void
+     * @throws PrestaShopException
      */
-    private function duplicateBuyBack(array &$buybacks): void
+    private function duplicateBuyBack(BuyBack &$buyback): void
     {
-        foreach ($buybacks as $key => $buyback) {
-            $buybacks[$key] = $buyback->duplicateObject();
-            $buybacks[$key]->old_id = $buyback->id;
+        $oldId = $buyback->id;
+        $buyback = $buyback->duplicateObject();
+        $buyback->oldId = $oldId;
 
-            if (!$buybacks[$key]->save()) {
-                throw new CannotDuplicateBulkBuyBackException(sprintf('Failed to duplicate buy backs with id "%s"', $buyback->id));
-            }
+        if (!$buyback->save()) {
+            throw new CannotDuplicateBulkBuyBackException(sprintf('Failed to duplicate buy backs with id "%s"', $buyback->id));
         }
+        dump($buyback);
     }
 
     /**
-     * @param array $buybacks
+     * @param BuyBack $buyback
      * @return void
      */
-    private function duplicateBuyBackImage(array $buybacks): void
+    private function duplicateBuyBackImage(BuyBack $buyback): void
     {
-        foreach ($buybacks as $buyback) {
-            if ($images = $this->commandBus->handle(new GetImageForBuyBack($buyback->old_id))->getData()) {
-                foreach ($images as $key => $image) {
-                    $images[$key] = $image['id_ad_buyback_image'];
-                }
-
-                $this->commandBus->handle(new DuplicateBulkBuyBackImageCommand($images, (int)$buyback->id));
+        if ($images = $this->commandBus->handle(new GetImageForBuyBack($buyback->oldId ?? $buyback->id))->getData()) {
+            foreach ($images as $key => $image) {
+                $images[$key] = $image['id_ad_buyback_image'];
             }
+
+            $this->commandBus->handle(new DuplicateBulkBuyBackImageCommand($images, (int)$buyback->id));
         }
     }
 }

@@ -50,7 +50,7 @@ class BuyBackFrontController extends ModuleFrontController
         parent::setMedia();
         $this->registerJavascript(
             'module-' . $this->module->name . '-form',
-            'modules/' . $this->module->name . '/views/js/buyback/front.form.bundle.js',
+            'modules/' . $this->module->name . '/views/js/buyback.front.form.bundle.js',
             ['priority' => 200, 'attribute' => 'async']
         );
     }

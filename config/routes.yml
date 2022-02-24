@@ -32,13 +32,6 @@ admin_ad_buyback_edit:
     requirements:
         id: \d+
 
-admin_ad_buyback_delete:
-    path: /buyback/delete
-    methods: [POST]
-    defaults:
-        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::deleteAction'
-        _legacy_controller: 'AdminBuyBack'
-
 admin_ad_buyback_toggle_active:
     path: /buyback/{buybackId}/toggle-active
     methods: [POST]
@@ -48,14 +41,21 @@ admin_ad_buyback_toggle_active:
     requirements:
         id: \d+
 
-# BuyBack bulk action
-admin_ad_buyback_delete_bulk:
-    path: /buyback/delete-bulk
+admin_ad_buyback_delete:
+    path: /buyback/delete
     methods: [POST]
     defaults:
-        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::deleteBulkAction'
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::deleteAction'
         _legacy_controller: 'AdminBuyBack'
 
+admin_ad_buyback_delete_image:
+    path: /buyback/delete/image
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::deleteImageAction'
+        _legacy_controller: 'AdminBuyBack'
+
+# BuyBack bulk action
 admin_ad_buyback_duplicate_bulk:
     path: /buyback/duplicate-bulk
     methods: [POST]
@@ -70,10 +70,49 @@ admin_ad_buyback_toggle_active_bulk:
         _controller: 'AdBuyBack\Controller\Admin\BuyBackController::toggleActiveBulkAction'
         _legacy_controller: 'AdminBuyBack'
 
+admin_ad_buyback_delete_bulk:
+    path: /buyback/delete-bulk
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::deleteBulkAction'
+        _legacy_controller: 'AdminBuyBack'
+
 # BuyBack Image action
+admin_ad_buyback_image_index:
+    path: /buyback/image/
+    methods: [GET]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackImageController::indexAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_image_search:
+    path: /buyback/image/
+    methods: [POST]
+    defaults:
+        _controller: PrestaShopBundle:Admin\Common:searchGrid
+        gridDefinitionFactoryServiceId: adbuyback.grid.factory.definition.buyback_image
+        redirectRoute: admin_ad_buyback_image_index
+        _legacy_controller: 'AdminBuyBack'
+        _legacy_link: 'AdminBuyBack:submitFilterbuybackImage'
+
 admin_ad_buyback_image_delete:
     path: /buyback/image/delete
     methods: [POST]
     defaults:
         _controller: 'AdBuyBack\Controller\Admin\BuyBackImageController::deleteAction'
+        _legacy_controller: 'AdminBuyBack'
+
+# BuyBack image bulk action
+admin_ad_buyback_image_duplicate_bulk:
+    path: /buyback/image/duplicate-bulk
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackImageController::duplicateBulkAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_image_delete_bulk:
+    path: /buyback/image/delete-bulk
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackImageController::deleteBulkAction'
         _legacy_controller: 'AdminBuyBack'

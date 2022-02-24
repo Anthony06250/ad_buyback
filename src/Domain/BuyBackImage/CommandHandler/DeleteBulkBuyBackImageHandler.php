@@ -38,10 +38,10 @@ final class DeleteBulkBuyBackImageHandler
         $imageIds = $command->getId()->getValue();
 
         try {
-            $images = $this->getBuyBackImage($imageIds);
-
-            $this->deleteBuyBackImage($images);
-            $this->deleteImageFile($images);
+            foreach ($this->getBuyBackImage($imageIds) as $image) {
+                $this->deleteBuyBackImage($image);
+                $this->deleteImageFile($image);
+            }
         } catch (PrestaShopException $exception) {
             throw new CannotDeleteBulkBuyBackImageException($exception->getMessage());
         }
@@ -54,35 +54,29 @@ final class DeleteBulkBuyBackImageHandler
      */
     private function getBuyBackImage(array $imageIds): array
     {
-        $result = [];
-
-        foreach ($imageIds as $imageId) {
-            $result[] = new BuyBackImage($imageId);
+        foreach ($imageIds as $key => $imageId) {
+            $imageIds[$key] = new BuyBackImage($imageId);
         }
 
-        return $result;
+        return $imageIds;
     }
 
     /**
-     * @param array $images
+     * @param BuyBackImage $image
      * @return void
      * @throws PrestaShopException
      */
-    private function deleteBuyBackImage(array $images): void
+    private function deleteBuyBackImage(BuyBackImage $image): void
     {
-        foreach ($images as $image) {
-            (new DeleteBuyBackImageHandler())->deleteBuyBackImage($image);
-        }
+        (new DeleteBuyBackImageHandler())->deleteBuyBackImage($image);
     }
 
     /**
-     * @param array $images
+     * @param BuyBackImage $image
      * @return void
      */
-    private function deleteImageFile(array $images): void
+    private function deleteImageFile(BuyBackImage $image): void
     {
-        foreach ($images as $image) {
-            (new DeleteBuyBackImageHandler())->deleteImageFile($image);
-        }
+        (new DeleteBuyBackImageHandler())->deleteImageFile($image);
     }
 }

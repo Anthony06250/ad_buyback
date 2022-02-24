@@ -12,7 +12,7 @@
         <div class="d-block">
             <button class="btn btn-outline-danger btn-sm"
                     type="submit"
-                    formaction="{{ path('admin_ad_buyback_image_delete', {'buybackId': id, 'filename': filename ~ '.' ~ extension}) }}"
+                    formaction="{{ path('admin_ad_buyback_delete_image', {'imageId': id, 'filename': filename ~ '.' ~ extension}) }}"
                     formmethod="POST"
             >
                 <i class="material-icons mr-2">delete_forever</i>

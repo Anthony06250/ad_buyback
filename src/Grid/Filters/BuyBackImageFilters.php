@@ -1,3 +1,4 @@
+<?php
 /*
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
@@ -17,17 +18,31 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 
-const path = require('path');
+declare(strict_types=1);
 
-module.exports = {
-    entry: {
-        'buyback.admin.index': './buyback/admin.index.js',
-        'buyback_image.admin.index': './buyback_image/admin.index.js',
-        'buyback.front.form': './buyback/front.form.js'
-    },
-    output: {
-        path: path.resolve(__dirname, '../../views/js'),
-        filename: '[name].bundle.js',
-        publicPath: 'public',
-    },
+namespace AdBuyBack\Grid\Filters;
+
+use AdBuyBack\Grid\Factory\BuyBackImageGridDefinitionFactory;
+use PrestaShop\PrestaShop\Core\Search\Filters;
+
+final class BuyBackImageFilters extends Filters
+{
+    /**
+     * @var string
+     */
+    protected $filterId = BuyBackImageGridDefinitionFactory::GRID_ID;
+
+    /**
+     * @return array
+     */
+    public static function getDefaults(): array
+    {
+        return [
+            'limit' => 10,
+            'offset' => 0,
+            'orderBy' => 'id',
+            'sortOrder' => 'asc',
+            'filters' => [],
+        ];
+    }
 }

@@ -1,12 +1,12 @@
 {% extends '@PrestaShop/Admin/layout.html.twig' %}
 
 {% block content %}
-        {% include '@PrestaShop/Admin/Common/Grid/grid_panel.html.twig' with {'grid': grid} %}
+    {% include '@PrestaShop/Admin/Common/Grid/grid_panel.html.twig' with {'grid': grid} %}
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
 
-    <script src="{{ asset('/modules/ad_buyback/views/js/buyback.admin.index.bundle.js') }}"></script>
+    <script src="{{ asset('/modules/ad_buyback/views/js/buyback_image.admin.index.bundle.js') }}"></script>
     <script src="{{ asset('/admin-dev/themes/default/js/bundle/pagination.js') }}"></script>
 {% endblock %}

@@ -28,6 +28,7 @@ use AdBuyBack\Domain\BuyBack\Command\DeleteBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Command\DuplicateBulkBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Command\ToggleActiveBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
+use AdBuyBack\Domain\BuyBackImage\Command\DeleteBuyBackImageCommand;
 use AdBuyBack\Grid\Filters\BuyBackFilters;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
@@ -146,6 +147,26 @@ final class BuyBackController extends FrameworkBundleAdminController
     }
 
     /**
+     * @AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message="Access denied.")
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function deleteImageAction(Request $request): RedirectResponse
+    {
+        $imageId = (int)$request->get('imageId');
+        $buybackId = (int)$request->get('buy_back_image')['id_ad_buyback'];
+
+        try {
+            $this->commandBus->handle(new DeleteBuyBackImageCommand($imageId));
+            $this->addFlash('success', $this->trans('Image has been successfully deleted.', 'Modules.Adbuyback.Alert'));
+        } catch (BuyBackException $exception) {
+            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+        }
+
+        return $this->redirectToRoute('admin_ad_buyback_edit', ['buybackId' => $buybackId]);
+    }
+
+    /**
      * @AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message="Access denied.")
      * @param int $buybackId
      * @return JsonResponse
@@ -236,8 +257,14 @@ final class BuyBackController extends FrameworkBundleAdminController
             'add' => [
                 'href' => $this->generateUrl('admin_ad_buyback_create'),
                 'desc' => $this->trans('New buy back', 'Modules.Adbuyback.Admin'),
-                'icon' => 'add_circle_outline',
+                'icon' => 'add_circle_outline'
             ],
+            'images' => [
+                'href' => $this->generateUrl('admin_ad_buyback_image_index'),
+                'desc' => $this->trans('View all images', 'Modules.Adbuyback.Admin'),
+                'class' => 'btn-warning',
+                'icon' => 'photo_library'
+            ]
         ];
     }
 }
