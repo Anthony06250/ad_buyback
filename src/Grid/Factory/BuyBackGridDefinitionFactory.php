@@ -27,6 +27,8 @@ use AdBuyBack\Grid\Action\DisableBulkAction;
 use AdBuyBack\Grid\Action\DividerBulkAction;
 use AdBuyBack\Grid\Action\DuplicateBulkAction;
 use AdBuyBack\Grid\Action\EnableBulkAction;
+use AdBuyBack\Tools\BuyBackTools;
+use Context;
 use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollection;
 use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollectionInterface;
 use PrestaShop\PrestaShop\Core\Grid\Action\ModalOptions;
@@ -37,14 +39,17 @@ use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollectionInterface;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\BulkActionColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DateTimeColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ToggleColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractFilterableGridDefinitionFactory;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollectionInterface;
+use PrestaShopBundle\Form\Admin\Type\DateRangeType;
 use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
 use PrestaShopBundle\Form\Admin\Type\YesAndNoChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitionFactory
@@ -64,7 +69,7 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
      */
     protected function getName(): string
     {
-        return $this->trans('List of buy back', [], 'Modules.Adbuyback.Admin');
+        return $this->trans('List of buybacks', [], 'Modules.Adbuyback.Admin');
     }
 
     /**
@@ -79,6 +84,10 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
             ->add((new DataColumn('id'))
                 ->setName($this->trans('ID', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions(['field' => 'id'])
+            )
+            ->add((new DataColumn('gender'))
+                ->setName($this->trans('Gender', [], 'Modules.Adbuyback.Admin'))
+                ->setOptions(['field' => 'gender'])
             )
             ->add((new DataColumn('firstname'))
                 ->setName($this->trans('Firstname', [], 'Modules.Adbuyback.Admin'))
@@ -95,6 +104,20 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
             ->add((new DataColumn('description'))
                 ->setName($this->trans('Description', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions(['field' => 'description'])
+            )
+            ->add((new DateTimeColumn('date_add'))
+                ->setName($this->trans('Created', [], 'Modules.Adbuyback.Admin'))
+                ->setOptions([
+                    'field' => 'date_add',
+                    'format' => Context::getContext()->language->date_format_full
+                ])
+            )
+            ->add((new DateTimeColumn('date_upd'))
+                ->setName($this->trans('Updated', [], 'Modules.Adbuyback.Admin'))
+                ->setOptions([
+                    'field' => 'date_upd',
+                    'format' => Context::getContext()->language->date_format_full
+                ])
             )
             ->add((new ToggleColumn('active'))
                 ->setName($this->trans('Status', [], 'Modules.Adbuyback.Admin'))
@@ -146,6 +169,13 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
     protected function getFilters()
     {
         return (new FilterCollection())
+            ->add((new Filter('id_gender', ChoiceType::class))
+                ->setAssociatedColumn('gender')
+                ->setTypeOptions([
+                    'required' => false,
+                    'choices' => BuyBackTools::getGendersForChoiceType()
+                ])
+            )
             ->add((new Filter('firstname', TextType::class))
                 ->setAssociatedColumn('firstname')
                 ->setTypeOptions([
@@ -172,6 +202,18 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
                 ->setTypeOptions([
                     'required' => false,
                     'attr' => ['placeholder' => $this->trans('Search a description', [], 'Modules.Adbuyback.Admin')]
+                ])
+            )
+            ->add((new Filter('date_add', DateRangeType::class))
+                ->setAssociatedColumn('date_add')
+                ->setTypeOptions([
+                    'date_format' => str_replace(['Y', 'm', 'd'], ['YYYY', 'MM', 'DD'], Context::getContext()->language->date_format_lite),
+                ])
+            )
+            ->add((new Filter('date_upd', DateRangeType::class))
+                ->setAssociatedColumn('date_upd')
+                ->setTypeOptions([
+                    'date_format' => str_replace(['Y', 'm', 'd'], ['YYYY', 'MM', 'DD'], Context::getContext()->language->date_format_lite),
                 ])
             )
             ->add((new Filter('active', YesAndNoChoiceType::class))

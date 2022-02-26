@@ -24,11 +24,15 @@ namespace AdBuyBack\Model;
 
 use DateTime;
 use ObjectModel;
-use PrestaShopDatabaseException;
 use PrestaShopException;
 
 final class BuyBack extends ObjectModel
 {
+    /**
+     * @var int
+     */
+    public $id_gender;
+
     /**
      * @var string
      */
@@ -68,7 +72,6 @@ final class BuyBack extends ObjectModel
      * @param $id
      * @param $id_lang
      * @param $id_shop
-     * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
     public function __construct($id = null, $id_lang = null, $id_shop = null)
@@ -85,13 +88,14 @@ final class BuyBack extends ObjectModel
         'table' => 'ad_buyback',
         'primary' => 'id_ad_buyback',
         'fields' => [
-            'firstname' => ['type' => self::TYPE_STRING, 'size' => 255],
-            'lastname' => ['type' => self::TYPE_STRING, 'size' => 255],
-            'email' => ['type' => self::TYPE_STRING, 'size' => 255],
-            'description' => ['type' => self::TYPE_STRING, 'size' => 255],
-            'active' => ['type' => self::TYPE_BOOL],
-            'date_add' => ['type' => self::TYPE_DATE],
-            'date_upd' => ['type' => self::TYPE_DATE]
+            'id_gender' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedId'],
+            'firstname' => ['type' => self::TYPE_STRING, 'validate' => 'isName', 'size' => 255],
+            'lastname' => ['type' => self::TYPE_STRING, 'validate' => 'isName', 'size' => 255],
+            'email' => ['type' => self::TYPE_STRING, 'validate' => 'isEmail', 'size' => 255],
+            'description' => ['type' => self::TYPE_HTML, 'validate' => 'isCleanHtml', 'size' => 65000, 'copy_post' => false],
+            'active' => ['type' => self::TYPE_BOOL, 'validate' => 'isBool'],
+            'date_add' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false],
+            'date_upd' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false]
         ],
     ];
 
@@ -128,7 +132,6 @@ final class BuyBack extends ObjectModel
      * @param array $ids
      * @return bool
      * @throws PrestaShopException
-     * @throws PrestaShopDatabaseException
      */
     public function duplicateSelection(array $ids): bool
     {
@@ -148,7 +151,6 @@ final class BuyBack extends ObjectModel
      * @param string $field
      * @param bool $status
      * @return bool
-     * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
     public function toggleSelection(array $ids, string $field, bool $status = null): bool

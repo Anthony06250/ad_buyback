@@ -24,6 +24,8 @@ namespace AdBuyBack\Tools;
 
 use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
 use FilesystemIterator;
+use Gender;
+use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -86,5 +88,20 @@ final class BuyBackTools
         }
 
         return $infos['filename'] . '.' . $infos['extension'];
+    }
+
+    /**
+     * Necessary due to a bug with ChoiceType and Object
+     * @return array
+     */
+    public static function getGendersForChoiceType(): array
+    {
+        $result = [];
+
+        foreach (Gender::getGenders()->getResults() as $gender) {
+            $result[$gender->name] = $gender->id_gender;
+        }
+
+        return $result;
     }
 }

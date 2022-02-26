@@ -22,6 +22,8 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Grid\Query;
 
+use Context;
+use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use PrestaShop\PrestaShop\Core\Grid\Query\AbstractDoctrineQueryBuilder;
@@ -68,7 +70,9 @@ final class BuyBackImageQueryBuilder extends AbstractDoctrineQueryBuilder
     {
         $query = $this->getQueryBuilder($searchCriteria->getFilters());
 
-        $query->select('p.`id_ad_buyback_image` AS `id`, p.`id_ad_buyback`, p.`name`');
+        $query->select('p.`id_ad_buyback_image` AS `id`, p.`id_ad_buyback`, p.`name` AS `filename`, p.`date_add`')
+            ->addSelect('ps.`firstname`, ps.`lastname`')
+            ->addSelect('pl.`name` AS `gender`');
 
         $this->searchCriteriaApplicator
             ->applyPagination($searchCriteria, $query)
@@ -97,9 +101,27 @@ final class BuyBackImageQueryBuilder extends AbstractDoctrineQueryBuilder
     {
         $query = $this->connection
             ->createQueryBuilder()
-            ->from($this->dbPrefix . 'ad_buyback_image', 'p');
+            ->from($this->dbPrefix . 'ad_buyback_image', 'p')
+            ->innerJoin('p',
+                $this->dbPrefix . 'ad_buyback',
+                'ps',
+                'ps.`id_ad_buyback` = p.`id_ad_buyback`'
+            )
+            ->innerJoin('ps',
+            $this->dbPrefix . 'gender_lang',
+            'pl',
+            'pl.`id_gender` = ps.`id_gender` AND pl.`id_lang` = :id_lang'
+        )
+        ->setParameter('id_lang', $this->contextLanguageId);
 
         foreach ($filters as $filterName => $filter) {
+            if ('filename' === $filterName) {
+                $query->andWhere('p.`name` LIKE :filename');
+                $query->setParameter('filename', '%' . $filter . '%');
+
+                continue;
+            }
+
             if ('id_ad_buyback' === $filterName) {
                 $query->andWhere('p.`id_ad_buyback` LIKE :id_ad_buyback');
                 $query->setParameter('id_ad_buyback', '%' . $filter . '%');
@@ -107,9 +129,41 @@ final class BuyBackImageQueryBuilder extends AbstractDoctrineQueryBuilder
                 continue;
             }
 
-            if ('name' === $filterName) {
-                $query->andWhere('p.`name` LIKE :name');
-                $query->setParameter('name', '%' . $filter . '%');
+            if ('id_gender' === $filterName) {
+                $query->andWhere('pl.`id_gender` LIKE :id_gender');
+                $query->setParameter('id_gender', '%' . $filter . '%');
+
+                continue;
+            }
+
+            if ('firstname' === $filterName) {
+                $query->andWhere('ps.`firstname` LIKE :firstname');
+                $query->setParameter('firstname', '%' . $filter . '%');
+
+                continue;
+            }
+
+            if ('lastname' === $filterName) {
+                $query->andWhere('ps.`lastname` LIKE :lastname');
+                $query->setParameter('lastname', '%' . $filter . '%');
+
+                continue;
+            }
+
+            if ('date_add' === $filterName) {
+                if (isset($filter['from'])) {
+                    $filter['from'] = DateTime::createFromFormat(Context::getContext()->language->date_format_lite, $filter['from']);
+
+                    $query->andWhere('p.`date_add` > :date_add_from');
+                    $query->setParameter('date_add_from', $filter['from']->format('Y-m-d') . ' 00:00:00');
+                }
+
+                if (isset($filter['to'])) {
+                    $filter['to'] = DateTime::createFromFormat(Context::getContext()->language->date_format_lite, $filter['to']);
+
+                    $query->andWhere('p.`date_add` < :date_add_to');
+                    $query->setParameter('date_add_to', $filter['to']->format('Y-m-d') . ' 23:59:59');
+                }
 
                 continue;
             }

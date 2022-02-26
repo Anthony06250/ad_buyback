@@ -22,8 +22,10 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Form;
 
+use AdBuyBack\Tools\BuyBackTools;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -42,6 +44,11 @@ class BuyBackType extends TranslatorAwareType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('id_ad_buyback', HiddenType::class)
+            ->add('id_gender', ChoiceType::class, [
+                'label' => $this->trans('Gender', 'Modules.Adbuyback.Form'),
+                'required' => true,
+                'choices' => BuyBackTools::getGendersForChoiceType()
+            ])
             ->add('firstname', TextType::class, [
                 'label' => $this->trans('Firstname', 'Modules.Adbuyback.Form'),
                 'required' => true,

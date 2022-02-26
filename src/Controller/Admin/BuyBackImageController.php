@@ -131,7 +131,7 @@ final class BuyBackImageController extends FrameworkBundleAdminController
         return [
             'return' => [
                 'href' => $this->generateUrl('admin_ad_buyback_index'),
-                'desc' => $this->trans('Return to buyback', 'Modules.Adbuyback.Admin'),
+                'desc' => $this->trans('Return to buybacks', 'Modules.Adbuyback.Admin'),
                 'class' => 'btn-secondary',
                 'icon' => 'navigate_before'
             ]

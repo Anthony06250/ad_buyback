@@ -20,10 +20,37 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBackImage\QueryResult;
+namespace AdBuyBack\Grid\Column;
 
-use AdBuyBack\Domain\BuyBack\QueryResult\AbstractQueryResult;
+use PrestaShop\PrestaShop\Core\Grid\Column\AbstractColumn;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
-final class ImageForBuyBack extends AbstractQueryResult
+final class BuyBackImageColumn extends AbstractColumn
 {
+    /**
+     * @return string
+     */
+    public function getType(): string
+    {
+        return 'buyback_image';
+    }
+
+    /**
+     * @param OptionsResolver $resolver
+     * @return void
+     */
+    protected function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver
+            ->setRequired([
+                'src_field'
+            ])
+            ->setDefaults([
+                'sortable' => true,
+                'clickable' => false,
+            ])
+            ->setAllowedTypes('src_field', 'array')
+            ->setAllowedTypes('sortable', 'bool')
+            ->setAllowedTypes('clickable', 'bool');
+    }
 }

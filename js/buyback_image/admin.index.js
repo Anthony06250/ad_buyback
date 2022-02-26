@@ -18,6 +18,11 @@
  */
 
 $(function () {
+    $('#buybackImage_grid_table .ad-bb-grid-img').on('click', function () {
+        loadImageInModal($(this).find('img').attr('src'));
+        loadTitleInModal($(this).parent().next().html());
+    });
+
     const grid = new window.prestashop.component.Grid('buybackImage');
 
     grid.addExtension(new window.prestashop.component.GridExtensions.AsyncToggleColumnExtension());
@@ -37,3 +42,15 @@ $(function () {
     grid.addExtension(new window.prestashop.component.GridExtensions.SubmitGridActionExtension());
     grid.addExtension(new window.prestashop.component.GridExtensions.SubmitRowActionExtension());
 });
+
+function loadImageInModal(source) {
+    let link = source.split('/').filter(function(element) {return element !== 'thumbnail';}).join('/');
+
+    $('#buybackImage-grid-view-modal').find('.ad-bb-modal-figure img').attr('src', source).end()
+        .find('.ad-bb-modal-view').attr('href', link);
+}
+
+function loadTitleInModal(title) {
+    $('#buybackImage-grid-view-modal').find('.ad-bb-modal-figure img').attr('title', title).end()
+        .find('.ad-bb-modal-figure figcaption').html(title);
+}

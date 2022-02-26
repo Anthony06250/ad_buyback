@@ -22,6 +22,8 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Grid\Query;
 
+use Context;
+use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use PrestaShop\PrestaShop\Core\Grid\Query\AbstractDoctrineQueryBuilder;
@@ -68,7 +70,8 @@ final class BuyBackQueryBuilder extends AbstractDoctrineQueryBuilder
     {
         $query = $this->getQueryBuilder($searchCriteria->getFilters());
 
-        $query->select('p.`id_ad_buyback` AS `id`, p.`firstname`, p.`lastname`, p.`email`, p.`description`, p.`active`, p.`date_add`, p.`date_upd`');
+        $query->select('p.`id_ad_buyback` AS `id`, p.`firstname`, p.`lastname`, p.`email`, p.`description`, p.`active`, p.`date_add`, p.`date_upd`')
+            ->addSelect('ps.`name` AS `gender`');
 
         $this->searchCriteriaApplicator
             ->applyPagination($searchCriteria, $query)
@@ -97,9 +100,22 @@ final class BuyBackQueryBuilder extends AbstractDoctrineQueryBuilder
     {
         $query = $this->connection
             ->createQueryBuilder()
-            ->from($this->dbPrefix . 'ad_buyback', 'p');
+            ->from($this->dbPrefix . 'ad_buyback', 'p')
+            ->innerJoin('p',
+                $this->dbPrefix . 'gender_lang',
+                'ps',
+                'ps.`id_gender` = p.`id_gender` AND ps.`id_lang` = :id_lang'
+            )
+            ->setParameter('id_lang', $this->contextLanguageId);
 
         foreach ($filters as $filterName => $filter) {
+            if ('id_gender' === $filterName) {
+                $query->andWhere('ps.`id_gender` LIKE :id_gender');
+                $query->setParameter('id_gender', '%' . $filter . '%');
+
+                continue;
+            }
+
             if ('firstname' === $filterName) {
                 $query->andWhere('p.`firstname` LIKE :firstname');
                 $query->setParameter('firstname', '%' . $filter . '%');
@@ -131,6 +147,42 @@ final class BuyBackQueryBuilder extends AbstractDoctrineQueryBuilder
             if ('active' === $filterName) {
                 $query->andWhere('p.`active` LIKE :active');
                 $query->setParameter('active', '%' . $filter . '%');
+
+                continue;
+            }
+
+            if ('date_add' === $filterName) {
+                if (isset($filter['from'])) {
+                    $filter['from'] = DateTime::createFromFormat(Context::getContext()->language->date_format_lite, $filter['from']);
+
+                    $query->andWhere('p.`date_add` > :date_add_from');
+                    $query->setParameter('date_add_from', $filter['from']->format('Y-m-d') . ' 00:00:00');
+                }
+
+                if (isset($filter['to'])) {
+                    $filter['to'] = DateTime::createFromFormat(Context::getContext()->language->date_format_lite, $filter['to']);
+
+                    $query->andWhere('p.`date_add` < :date_add_to');
+                    $query->setParameter('date_add_to', $filter['to']->format('Y-m-d') . ' 23:59:59');
+                }
+
+                continue;
+            }
+
+            if ('date_upd' === $filterName) {
+                if (isset($filter['from'])) {
+                    $filter['from'] = DateTime::createFromFormat(Context::getContext()->language->date_format_lite, $filter['from']);
+
+                    $query->andWhere('p.`date_upd` > :date_upd_from');
+                    $query->setParameter('date_upd_from', $filter['from']->format('Y-m-d') . ' 00:00:00');
+                }
+
+                if (isset($filter['to'])) {
+                    $filter['to'] = DateTime::createFromFormat(Context::getContext()->language->date_format_lite, $filter['to']);
+
+                    $query->andWhere('p.`date_upd` < :date_upd_to');
+                    $query->setParameter('date_upd_to', $filter['to']->format('Y-m-d') . ' 23:59:59');
+                }
 
                 continue;
             }

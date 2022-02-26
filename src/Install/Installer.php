@@ -22,11 +22,12 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Install;
 
+use AdBuyBack\Tools\BuyBackTools;
 use Context;
 use Db;
 use Language;
 use Module;
-use PrestaShopDatabaseException;
+use PrestaShopException;
 use Tools;
 
 class Installer
@@ -53,12 +54,13 @@ class Installer
 
     /**
      * @return bool
-     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function install(): bool
     {
         if (!$this->registerHooks()
-            || !$this->installDatabase()) {
+            || !$this->installDatabase()
+            || !$this->createImageDirectory()) {
             return false;
         }
 
@@ -72,7 +74,8 @@ class Installer
      */
     public function uninstall(): bool
     {
-        return $this->uninstallDatabase();
+        return $this->uninstallDatabase()
+            && $this->deleteImageDirectory();
     }
 
     /**
@@ -93,15 +96,9 @@ class Installer
      */
     private function installDatabase(): bool
     {
-        if (!file_exists(dirname(__FILE__) . '/Sql/install.sql')) {
-            return false;
-        }
+        $file = dirname(__FILE__) . '/Sql/install.sql';
 
-        $queries = Tools::file_get_contents(dirname(__FILE__) . '/Sql/install.sql');
-        $queries = str_replace(array('PREFIX_', 'ENGINE_TYPE'), array(_DB_PREFIX_, _MYSQL_ENGINE_), $queries);
-        $queries = preg_split("/;\s*[\r\n]+/", $queries);
-
-        return $this->executeQueries($queries);
+        return file_exists($file) && $this->loadSqlFile($file);
     }
 
     /**
@@ -109,11 +106,18 @@ class Installer
      */
     private function uninstallDatabase(): bool
     {
-        if (!file_exists(dirname(__FILE__) . '/Sql/uninstall.sql')) {
-            return false;
-        }
+        $file = dirname(__FILE__) . '/Sql/uninstall.sql';
 
-        $queries = Tools::file_get_contents(dirname(__FILE__) . '/Sql/uninstall.sql');
+        return file_exists($file) && $this->loadSqlFile($file);
+    }
+
+    /**
+     * @param string $file
+     * @return bool
+     */
+    private function loadSqlFile(string $file): bool
+    {
+        $queries = Tools::file_get_contents($file);
         $queries = str_replace(array('PREFIX_', 'ENGINE_TYPE'), array(_DB_PREFIX_, _MYSQL_ENGINE_), $queries);
         $queries = preg_split("/;\s*[\r\n]+/", $queries);
 
@@ -134,6 +138,30 @@ class Installer
             }
         }
 
+        return true; // -> TODO: FIX ambiguous return
+    }
+
+    /**
+     * @return bool
+     */
+    private function createImageDirectory(): bool
+    {
+        $directory = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/';
+
+        BuyBackTools::createDirectory($directory);
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    private function deleteImageDirectory(): bool
+    {
+        $directory = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/';
+
+        BuyBackTools::deleteDirectory($directory);
+
         return true;
     }
 
@@ -145,7 +173,7 @@ class Installer
         $tabNames = [];
 
         foreach (Language::getLanguages(true) as $lang) {
-            $tabNames[$lang['locale']] = Context::getContext()->getTranslator()->trans('Buy back', [], 'Modules.Adbuyback.Admin', $lang['locale']);
+            $tabNames[$lang['locale']] = Context::getContext()->getTranslator()->trans('Buybacks', [], 'Modules.Adbuyback.Admin', $lang['locale']);
         }
 
         return [
@@ -155,7 +183,7 @@ class Installer
                 'visible' => true,
                 'name' => $tabNames,
                 'parent_class_name' => 'AdminParentCustomer',
-                'wording' => 'Buy back',
+                'wording' => 'Buybacks',
                 'wording_domain' => 'Modules.Adbuyback.Admin'
             ],
         ];

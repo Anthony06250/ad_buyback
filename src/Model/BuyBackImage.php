@@ -22,7 +22,11 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Model;
 
+use Context;
+use DateTime;
 use ObjectModel;
+use PrestaShopCollection;
+use PrestaShopException;
 
 final class BuyBackImage extends ObjectModel
 {
@@ -37,14 +41,32 @@ final class BuyBackImage extends ObjectModel
     public $name;
 
     /**
+     * @var string
+     */
+    public $date_add;
+
+    /**
+     * @param $id
+     * @param $id_lang
+     * @param $id_shop
+     * @throws PrestaShopException
+     */
+    public function __construct($id = null, $id_lang = null, $id_shop = null)
+    {
+        parent::__construct($id, $id_lang, $id_shop);
+        $this->date_add = (new DateTime())->format('Y-m-d H:i:s');
+    }
+
+    /**
      * @see ObjectModel::$definition
      */
     public static $definition = [
         'table' => 'ad_buyback_image',
         'primary' => 'id_ad_buyback_image',
         'fields' => [
-            'id_ad_buyback' => ['type' => self::TYPE_INT],
-            'name' => ['type' => self::TYPE_STRING, 'size' => 64],
+            'id_ad_buyback' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedId'],
+            'name' => ['type' => self::TYPE_STRING, 'size' => 128],
+            'date_add' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false]
         ],
     ];
 
@@ -75,5 +97,25 @@ final class BuyBackImage extends ObjectModel
         }
 
         return $this;
+    }
+
+    /**
+     * @return array
+     * @throws PrestaShopException
+     */
+    public static function getBuyBackList(): array
+    {
+        $idLang = Context::getContext()->language->id;
+        $result = [];
+
+        foreach ((new PrestaShopCollection('AdBuyBack\Model\BuyBackImage', $idLang))->getResults() as $image) {
+            if (!in_array($image->id_ad_buyback, $result)) {
+                $result[$image->id_ad_buyback] = $image->id_ad_buyback;
+            }
+        }
+
+        asort($result);
+
+        return $result;
     }
 }

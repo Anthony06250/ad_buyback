@@ -55,8 +55,9 @@ final class BuyBackExtraImageUploader implements ImageUploaderInterface
         $name = $image->getClientOriginalName();
 
         BuyBackTools::createDirectory($directory);
-        $this->uploadFromTemp($temporaryName, $directory . $name);
-        $this->createNewImage($id, $name);
+        BuyBackTools::createDirectory($directory . '/thumbnail/');
+        $this->uploadFromTemp($temporaryName, $directory, $name);
+        $this->createBuyBackImage($id, $name);
     }
 
     /**
@@ -98,21 +99,46 @@ final class BuyBackExtraImageUploader implements ImageUploaderInterface
     /**
      * @param string $temporaryName
      * @param string $destination
+     * @param string $name
      * @return void
      * @throws ImageOptimizationException
      * @throws MemoryLimitException
      */
-    protected function uploadFromTemp(string $temporaryName, string $destination): void
+    protected function uploadFromTemp(string $temporaryName, string $destination, string $name): void
     {
         if (!ImageManager::checkImageMemoryLimit($temporaryName)) {
             throw new MemoryLimitException('Cannot upload image due to memory restrictions');
         }
 
-        if (!ImageManager::resize($temporaryName, $destination)) {
+        if (!ImageManager::resize($temporaryName, $destination . $name)) {
             throw new ImageOptimizationException('An error occurred while uploading the image. Check your directory permissions.');
         }
 
+        $thumbnailSize = $this->getThumbnailSize($destination . $name);
+
+        if (!ImageManager::resize($temporaryName, $destination . '/thumbnail/' . $name, $thumbnailSize['width'], $thumbnailSize['height'])) {
+            throw new ImageOptimizationException('An error occurred while creating thumbnail. Check your directory permissions.');
+        }
+
         unlink($temporaryName);
+    }
+
+    /**
+     * @param string $image
+     * @return void
+     */
+    private function getThumbnailSize(string $image): array
+    {
+        $infos = getimagesize($image);
+        $desiredHeight = 360;
+        $maxWidth = 480;
+        $width = $infos[0] * $desiredHeight / $infos[1];
+        $height = $infos[1] * $maxWidth / $infos[0];
+
+        return [
+            'width' => min($width, $maxWidth),
+            'height' => $width <= $maxWidth ? $desiredHeight : $height
+        ];
     }
 
     /**
@@ -120,11 +146,11 @@ final class BuyBackExtraImageUploader implements ImageUploaderInterface
      * @param string $name
      * @return void
      */
-    private function createNewImage(int $buybackId, string $name): void
+    private function createBuyBackImage(int $buybackId, string $name): void
     {
         // Use custom kernel for front office
-        $handler = Ad_BuyBack::getService('prestashop.core.command_bus');
-        $images = $handler->handle(new GetImageForBuyBack($buybackId))->getData();
+        $commandBus = Ad_BuyBack::getService('prestashop.core.command_bus');
+        $images = $commandBus->handle(new GetImageForBuyBack($buybackId))->getData();
 
         foreach ($images as $image) {
             if (in_array($name, $image, true)) {
@@ -132,6 +158,6 @@ final class BuyBackExtraImageUploader implements ImageUploaderInterface
             }
         }
 
-        $handler->handle((new CreateBuyBackImageCommand())->fromArray(['id_ad_buyback' => $buybackId, 'name' => $name]));
+        $commandBus->handle((new CreateBuyBackImageCommand())->fromArray(['id_ad_buyback' => $buybackId, 'name' => $name]));
     }
 }

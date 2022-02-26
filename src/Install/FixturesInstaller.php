@@ -38,6 +38,7 @@ class FixturesInstaller
     {
         $datas = [
             [
+                'id_gender' => 1,
                 'firstname' => 'Anthony',
                 'lastname' => 'DURET',
                 'email' => 'anthony.duret@outlook.fr',
@@ -45,6 +46,7 @@ class FixturesInstaller
                 'active' => 1
             ],
             [
+                'id_gender' => 1,
                 'firstname' => 'Antoine',
                 'lastname' => 'DURET',
                 'email' => 'antoine.duret@outlook.fr',
@@ -52,6 +54,7 @@ class FixturesInstaller
                 'active' => 1
             ],
             [
+                'id_gender' => 2,
                 'firstname' => 'Ludiwine',
                 'lastname' => 'DURET',
                 'email' => 'ludiwine.duret@gmail.com',

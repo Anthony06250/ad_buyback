@@ -63,7 +63,7 @@ class BuyBackImageType extends BuyBackType
     {
         parent::buildForm($builder, $options);
         $data = $this->queryBus->handle(new GetImageForBuyBack($this->id));
-        $directory = 'ad_buyback/views/img/buyback/' . $this->id . '/';
+        $directory = 'ad_buyback/views/img/buyback/' . $this->id . '/thumbnail/';
 
         foreach ($data->getData() as $image) {
             if (file_exists(_PS_MODULE_DIR_ . $directory . $image['name'])) {

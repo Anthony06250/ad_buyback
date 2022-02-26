@@ -27,6 +27,11 @@ use DateTime;
 class CreateBuyBackCommand extends AbstractBuyBackCommand
 {
     /**
+     * @var int
+     */
+    private $id_gender;
+
+    /**
      * @var string
      */
     private $firstname;
@@ -72,6 +77,7 @@ class CreateBuyBackCommand extends AbstractBuyBackCommand
     public function toArray(): array
     {
         return [
+            'id_gender' => $this->id_gender,
             'firstname' => $this->firstname,
             'lastname' => $this->lastname,
             'email' => $this->email,

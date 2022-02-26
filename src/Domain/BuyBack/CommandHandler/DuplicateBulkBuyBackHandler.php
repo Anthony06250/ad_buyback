@@ -92,7 +92,6 @@ final class DuplicateBulkBuyBackHandler
         if (!$buyback->save()) {
             throw new CannotDuplicateBulkBuyBackException(sprintf('Failed to duplicate buy backs with id "%s"', $buyback->id));
         }
-        dump($buyback);
     }
 
     /**

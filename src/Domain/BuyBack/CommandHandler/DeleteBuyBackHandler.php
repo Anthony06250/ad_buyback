@@ -83,15 +83,11 @@ final class DeleteBuyBackHandler
     public function deleteBuyBackImage(BuyBack $buyback): void
     {
         if ($images = $this->commandBus->handle(new GetImageForBuyBack($buyback->id))->getData()) {
-            $directory = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $buyback->id . '/';
-            $imageIds = [];
-
-            foreach ($images as $image) {
-                $imageIds[] = $image['id_ad_buyback_image'];
+            foreach ($images as $key => $image) {
+                $images[$key] = $image['id_ad_buyback_image'];
             }
 
-            $this->commandBus->handle(new DeleteBulkBuyBackImageCommand($imageIds));
-            BuyBackTools::deleteDirectory($directory);
+            $this->commandBus->handle(new DeleteBulkBuyBackImageCommand($images));
         }
     }
 }

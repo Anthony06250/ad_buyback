@@ -71,7 +71,7 @@ final class DuplicateBulkBuyBackImageHandler
      */
     private function duplicateBuyBack(BuyBackImage &$image, ?int $buybackId): void
     {
-        $image->duplicateObject();
+        $image = $image->duplicateObject();
 
         $buybackId
             ? $this->changeBuyBackId($image, $buybackId)
@@ -83,21 +83,21 @@ final class DuplicateBulkBuyBackImageHandler
     }
 
     /**
-     * @param BuyBackImage $image
+     * @param $image
      * @param int $buybackId
      * @return void
      */
-    private function changeBuyBackId(BuyBackImage &$image, int $buybackId): void
+    private function changeBuyBackId(&$image, int $buybackId): void
     {
         $image->oldBuybackId = $image->id_ad_buyback;
         $image->id_ad_buyback = $buybackId;
     }
 
     /**
-     * @param BuyBackImage $image
+     * @param $image
      * @return void
      */
-    private function changeBuyBackImageName(BuyBackImage &$image): void
+    private function changeBuyBackImageName(&$image): void
     {
         $file = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $image->id_ad_buyback . '/' . $image->name;
         $image->oldName = $image->name;
@@ -116,10 +116,15 @@ final class DuplicateBulkBuyBackImageHandler
 
         if (!file_exists($directoryTo)) {
             BuyBackTools::createDirectory($directoryTo);
+            BuyBackTools::createDirectory($directoryTo . '/thumbnail/');
         }
 
         if (!copy($directoryFrom . ($image->oldName ?? $image->name), $directoryTo . $image->name)) {
             throw new CannotDuplicateBulkBuyBackImageException(sprintf('Failed to duplicate image file with id "%s"', $image->id));
+        }
+
+        if (!copy($directoryFrom . '/thumbnail/' . ($image->oldName ?? $image->name), $directoryTo . '/thumbnail/' . $image->name)) {
+            throw new CannotDuplicateBulkBuyBackImageException(sprintf('Failed to duplicate image thumbnail with id "%s"', $image->id));
         }
     }
 }

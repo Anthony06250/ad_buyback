@@ -25,18 +25,15 @@ namespace AdBuyBack\Domain\BuyBackImage\CommandHandler;
 use AdBuyBack\Domain\BuyBackImage\Command\DeleteBuyBackImageCommand;
 use AdBuyBack\Domain\BuyBackImage\Exception\CannotDeleteBuyBackImageException;
 use AdBuyBack\Model\BuyBackImage;
+use AdBuyBack\Tools\BuyBackTools;
+use FilesystemIterator;
 use PrestaShopException;
 
 final class DeleteBuyBackImageHandler
 {
     /**
-     * -> TODO: Delete directory when deleting last image
-     */
-
-    /**
      * @param DeleteBuyBackImageCommand $command
      * @return void
-     * @throws PrestaShopException
      */
     public function handle(DeleteBuyBackImageCommand $command): void
     {
@@ -70,10 +67,18 @@ final class DeleteBuyBackImageHandler
      */
     public function deleteImageFile(BuyBackImage $image): void
     {
-        $path = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $image->id_ad_buyback . '/' . $image->name;
+        $directory = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $image->id_ad_buyback . '/';
 
-        if (!file_exists($path) || !unlink($path)) {
+        if (!file_exists($directory . $image->name) || !unlink($directory . $image->name)) {
             throw new CannotDeleteBuyBackImageException(sprintf('Cannot delete image with id "%s" for buyback with id "%s"', $image->id, $image->id_ad_buyback));
+        }
+
+        if (!file_exists($directory . '/thumbnail/' . $image->name) || !unlink($directory . '/thumbnail/' . $image->name)) {
+            throw new CannotDeleteBuyBackImageException(sprintf('Cannot delete thumbnail with id "%s" for buyback with id "%s"', $image->id, $image->id_ad_buyback));
+        }
+
+        if (iterator_count(new FilesystemIterator($directory, FilesystemIterator::SKIP_DOTS)) < 3) {
+            BuyBackTools::deleteDirectory($directory);
         }
     }
 }

@@ -25,21 +25,30 @@ namespace AdBuyBack\Grid\Factory;
 use AdBuyBack\Grid\Action\DeleteBulkAction;
 use AdBuyBack\Grid\Action\DividerBulkAction;
 use AdBuyBack\Grid\Action\DuplicateBulkAction;
+use AdBuyBack\Grid\Column\BuyBackImageColumn;
+use AdBuyBack\Model\BuyBackImage;
+use AdBuyBack\Tools\BuyBackTools;
+use Context;
 use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollection;
 use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollectionInterface;
 use PrestaShop\PrestaShop\Core\Grid\Action\ModalOptions;
 use PrestaShop\PrestaShop\Core\Grid\Action\Row\RowActionCollection;
+use PrestaShop\PrestaShop\Core\Grid\Action\Row\Type\LinkRowAction;
 use PrestaShop\PrestaShop\Core\Grid\Action\Row\Type\SubmitRowAction;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollectionInterface;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\BulkActionColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DateTimeColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractFilterableGridDefinitionFactory;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollectionInterface;
+use PrestaShopBundle\Form\Admin\Type\DateRangeType;
 use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
+use PrestaShopException;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefinitionFactory
@@ -59,7 +68,7 @@ final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefi
      */
     protected function getName(): string
     {
-        return $this->trans('List of buy back', [], 'Modules.Adbuyback.Admin');
+        return $this->trans('List of buyback images', [], 'Modules.Adbuyback.Admin');
     }
 
     /**
@@ -75,18 +84,55 @@ final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefi
                 ->setName($this->trans('ID', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions(['field' => 'id'])
             )
+            ->add((new BuyBackImageColumn('image'))
+                ->setName($this->trans('Image', [], 'Modules.Advideoblock.Admin'))
+                ->setOptions([
+                    'src_field' => [
+                        'id_buyback' => 'id_ad_buyback',
+                        'filename' => 'filename',
+                    ]
+                ])
+            )
+            ->add((new DataColumn('filename'))
+                ->setName($this->trans('Filename', [], 'Modules.Adbuyback.Admin'))
+                ->setOptions(['field' => 'filename'])
+            )
             ->add((new DataColumn('id_ad_buyback'))
-                ->setName($this->trans('Buyback ID', [], 'Modules.Adbuyback.Admin'))
+                ->setName($this->trans('Buyback', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions(['field' => 'id_ad_buyback'])
             )
-            ->add((new DataColumn('name'))
-                ->setName($this->trans('Name', [], 'Modules.Adbuyback.Admin'))
-                ->setOptions(['field' => 'name'])
+            ->add((new DataColumn('gender'))
+                ->setName($this->trans('Gender', [], 'Modules.Adbuyback.Admin'))
+                ->setOptions(['field' => 'gender'])
+            )
+            ->add((new DataColumn('firstname'))
+                ->setName($this->trans('Firstname', [], 'Modules.Adbuyback.Admin'))
+                ->setOptions(['field' => 'firstname'])
+            )
+            ->add((new DataColumn('lastname'))
+                ->setName($this->trans('Lastname', [], 'Modules.Adbuyback.Admin'))
+                ->setOptions(['field' => 'lastname'])
+            )
+            ->add((new DateTimeColumn('date_add'))
+                ->setName($this->trans('Created', [], 'Modules.Adbuyback.Admin'))
+                ->setOptions([
+                    'field' => 'date_add',
+                    'format' => Context::getContext()->language->date_format_full
+                ])
             )
             ->add((new ActionColumn('actions'))
                 ->setName($this->trans('Actions', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions([
                     'actions' => (new RowActionCollection())
+                        ->add((new LinkRowAction('buyback'))
+                            ->setName($this->trans('View buyback', [], 'Modules.Adbuyback.Admin'))
+                            ->setIcon('description')
+                            ->setOptions([
+                                'route' => 'admin_ad_buyback_edit',
+                                'route_param_name' => 'buybackId',
+                                'route_param_field' => 'id_ad_buyback',
+                            ])
+                        )
                         ->add((new SubmitRowAction('delete'))
                             ->setName($this->trans('Delete', [], 'Modules.Adbuyback.Admin'))
                             ->setIcon('delete')
@@ -110,22 +156,50 @@ final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefi
 
     /**
      * @return FilterCollection|FilterCollectionInterface
+     * @throws PrestaShopException
      */
     protected function getFilters()
     {
         return (new FilterCollection())
-            ->add((new Filter('id_ad_buyback', TextType::class))
+            ->add((new Filter('filename', TextType::class))
+                ->setAssociatedColumn('filename')
+                ->setTypeOptions([
+                    'required' => false,
+                    'attr' => ['placeholder' => $this->trans('Search a filename', [], 'Modules.Adbuyback.Admin')]
+                ])
+            )
+            ->add((new Filter('id_ad_buyback', ChoiceType::class))
                 ->setAssociatedColumn('id_ad_buyback')
                 ->setTypeOptions([
                     'required' => false,
-                    'attr' => ['placeholder' => $this->trans('Search a buyback', [], 'Modules.Adbuyback.Admin')]
+                    'choices' => BuyBackImage::getBuyBackList()
                 ])
             )
-            ->add((new Filter('name', TextType::class))
-                ->setAssociatedColumn('name')
+            ->add((new Filter('id_gender', ChoiceType::class))
+                ->setAssociatedColumn('gender')
                 ->setTypeOptions([
                     'required' => false,
-                    'attr' => ['placeholder' => $this->trans('Search a name', [], 'Modules.Adbuyback.Admin')]
+                    'choices' => BuyBackTools::getGendersForChoiceType()
+                ])
+            )
+            ->add((new Filter('firstname', TextType::class))
+                ->setAssociatedColumn('firstname')
+                ->setTypeOptions([
+                    'required' => false,
+                    'attr' => ['placeholder' => $this->trans('Search a firstname', [], 'Modules.Adbuyback.Admin')]
+                ])
+            )
+            ->add((new Filter('lastname', TextType::class))
+                ->setAssociatedColumn('lastname')
+                ->setTypeOptions([
+                    'required' => false,
+                    'attr' => ['placeholder' => $this->trans('Search a lastname', [], 'Modules.Adbuyback.Admin')]
+                ])
+            )
+            ->add((new Filter('date_add', DateRangeType::class))
+                ->setAssociatedColumn('date_add')
+                ->setTypeOptions([
+                    'date_format' => str_replace(['Y', 'm', 'd'], ['YYYY', 'MM', 'DD'], Context::getContext()->language->date_format_lite),
                 ])
             )
             ->add((new Filter('actions', SearchAndResetType::class))
