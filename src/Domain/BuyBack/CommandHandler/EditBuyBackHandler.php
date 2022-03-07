@@ -24,11 +24,36 @@ namespace AdBuyBack\Domain\BuyBack\CommandHandler;
 
 use AdBuyBack\Domain\BuyBack\Command\EditBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\CannotEditBuyBackException;
+use AdBuyBack\Domain\BuyBackChat\Command\ActiveBulkBuyBackChatCommand;
+use AdBuyBack\Domain\BuyBackChat\Query\GetChatForBuyBack;
+use AdBuyBack\Domain\BuyBackMessage\Command\EditBuyBackMessageCommand;
 use AdBuyBack\Model\BuyBack;
+use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
+use PrestaShopBundle\Translation\TranslatorInterface;
 use PrestaShopException;
 
 final class EditBuyBackHandler extends ImageBuyBackHandler
 {
+    /**
+     * @var CommandBusInterface
+     */
+    private $commandBus;
+
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
+     * @param CommandBusInterface $commandBus
+     * @param TranslatorInterface $translator
+     */
+    public function __construct(CommandBusInterface $commandBus, TranslatorInterface $translator)
+    {
+        $this->commandBus = $commandBus;
+        $this->translator = $translator;
+    }
+
     /**
      * @param EditBuyBackCommand $command
      * @return void
@@ -36,14 +61,13 @@ final class EditBuyBackHandler extends ImageBuyBackHandler
     public function handle(EditBuyBackCommand $command): void
     {
         $buybackId = $command->getId()->getValue();
-        $images = $command->getImage();
 
         try {
             $buyback = new BuyBack($buybackId);
 
-            $buyback->hydrate($command->toArray());
-            $this->editBuyBack($buyback);
-            $this->uploadImages($buyback->id, $images);
+            $this->editBuyBack($buyback, $command);
+            $this->editBuyBackChat($buyback);
+            $this->uploadImages((int)$buyback->id, $command);
         } catch (PrestaShopException $exception) {
             throw new CannotEditBuyBackException($exception->getMessage());
         }
@@ -51,13 +75,35 @@ final class EditBuyBackHandler extends ImageBuyBackHandler
 
     /**
      * @param BuyBack $buyback
+     * @param EditBuyBackCommand $command
      * @return void
      * @throws PrestaShopException
      */
-    private function editBuyBack(BuyBack $buyback): void
+    private function editBuyBack(BuyBack $buyback, EditBuyBackCommand $command): void
     {
+        $buyback->hydrate($command->toArray());
+
         if (!$buyback->update()) {
-            throw new CannotEditBuyBackException(sprintf('Failed to update buy back with id "%s"', $buyback->id));
+            throw new CannotEditBuyBackException($this->translator->trans(
+                'Failed to update buyback with id %buybackId%.',
+                ['%buybackId%' => $buyback->id],
+                'Modules.Adbuyback.Alert'
+            ));
+        }
+    }
+
+    /**
+     * @param BuyBack $buyback
+     * @return void
+     */
+    private function editBuyBackChat(BuyBack $buyback): void
+    {
+        if (!$buyback->active && $chats = $this->commandBus->handle(new GetChatForBuyBack($buyback->id))->getData()) {
+            foreach ($chats as $key => $chat) {
+                $chats[$key] = $chat['id_ad_buyback_chat'];
+            }
+
+            $this->commandBus->handle(new ActiveBulkBuyBackChatCommand($chats, false, false));
         }
     }
 }

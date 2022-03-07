@@ -24,10 +24,13 @@ namespace AdBuyBack\Domain\BuyBack\CommandHandler;
 
 use AdBuyBack\Domain\BuyBack\Command\DuplicateBulkBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\CannotDuplicateBulkBuyBackException;
+use AdBuyBack\Domain\BuyBackChat\Command\DuplicateBulkBuyBackChatCommand;
+use AdBuyBack\Domain\BuyBackChat\Query\GetChatForBuyBack;
 use AdBuyBack\Domain\BuyBackImage\Command\DuplicateBulkBuyBackImageCommand;
 use AdBuyBack\Domain\BuyBackImage\Query\GetImageForBuyBack;
 use AdBuyBack\Model\BuyBack;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
+use PrestaShopBundle\Translation\TranslatorInterface;
 use PrestaShopException;
 
 final class DuplicateBulkBuyBackHandler
@@ -38,11 +41,18 @@ final class DuplicateBulkBuyBackHandler
     private $commandBus;
 
     /**
-     * @param CommandBusInterface $commandBus
+     * @var TranslatorInterface
      */
-    public function __construct(CommandBusInterface $commandBus)
+    private $translator;
+
+    /**
+     * @param CommandBusInterface $commandBus
+     * @param TranslatorInterface $translator
+     */
+    public function __construct(CommandBusInterface $commandBus, TranslatorInterface $translator)
     {
         $this->commandBus = $commandBus;
+        $this->translator = $translator;
     }
 
     /**
@@ -56,6 +66,7 @@ final class DuplicateBulkBuyBackHandler
         try {
             foreach ($this->getBuyBack($buybackIds) as $buyback) {
                 $this->duplicateBuyBack($buyback);
+                $this->duplicateBuyBackChat($buyback);
                 $this->duplicateBuyBackImage($buyback);
             }
         } catch (PrestaShopException $exception) {
@@ -90,7 +101,26 @@ final class DuplicateBulkBuyBackHandler
         $buyback->oldId = $oldId;
 
         if (!$buyback->save()) {
-            throw new CannotDuplicateBulkBuyBackException(sprintf('Failed to duplicate buy backs with id "%s"', $buyback->id));
+            throw new CannotDuplicateBulkBuyBackException($this->translator->trans(
+                'Failed to duplicate buyback with id %buybackId%.',
+                ['%buybackId%' => $oldId],
+                'Modules.Adbuyback.Alert'
+            ));
+        }
+    }
+
+    /**
+     * @param BuyBack $buyback
+     * @return void
+     */
+    private function duplicateBuyBackChat(BuyBack $buyback): void
+    {
+        if ($chats = $this->commandBus->handle(new GetChatForBuyBack($buyback->oldId ?? $buyback->id))->getData()) {
+            foreach ($chats as $key => $chat) {
+                $chats[$key] = $chat['id_ad_buyback_chat'];
+            }
+
+            $this->commandBus->handle(new DuplicateBulkBuyBackChatCommand($chats, (int)$buyback->id));
         }
     }
 

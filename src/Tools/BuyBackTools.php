@@ -23,9 +23,11 @@ declare(strict_types=1);
 namespace AdBuyBack\Tools;
 
 use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
+use Context;
+use Customer;
+use Employee;
 use FilesystemIterator;
 use Gender;
-use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -91,16 +93,57 @@ final class BuyBackTools
     }
 
     /**
+     * Get list of all genders for current language
      * Necessary due to a bug with ChoiceType and Object
      * @return array
      */
-    public static function getGendersForChoiceType(): array
+    public static function getGendersList(): array
     {
         $result = [];
 
         foreach (Gender::getGenders()->getResults() as $gender) {
             $result[$gender->name] = $gender->id_gender;
         }
+
+        asort($result);
+
+        return $result;
+    }
+
+    /**
+     * Get list of all customers for current language
+     * Necessary due to a bug with ChoiceType and Object
+     * @return array
+     */
+    public static function getCustomersList(): array
+    {
+        $result = [];
+
+        foreach (Customer::getCustomers(true) as $customer) {
+            $fullname = $customer['firstname'] . ' ' . $customer['lastname'];
+            $result[$fullname] = $customer['id_customer'];
+        }
+
+        arsort($result);
+
+        return $result;
+    }
+
+    /**
+     * Get list of all employees for current language
+     * Necessary due to a bug with ChoiceType and Object
+     * @return array
+     */
+    public static function getEmployeesList(): array
+    {
+        $result = [];
+
+        foreach (Employee::getEmployees(true) as $employee) {
+            $fullname = $employee['firstname'] . ' ' . $employee['lastname'];
+            $result[$fullname] = $employee['id_employee'];
+        }
+
+        arsort($result);
 
         return $result;
     }

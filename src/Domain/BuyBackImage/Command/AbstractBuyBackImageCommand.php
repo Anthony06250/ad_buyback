@@ -40,6 +40,29 @@ class AbstractBuyBackImageCommand
     }
 
     /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return array_slice(get_object_vars($this), 0, -1);
+    }
+
+    /**
+     * @param array $data
+     * @return AbstractBuyBackImageCommand
+     */
+    public function fromArray(array $data): AbstractBuyBackImageCommand
+    {
+        foreach ($data as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->{$key} = $value;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @return BuyBackImageId
      */
     public function getId(): BuyBackImageId

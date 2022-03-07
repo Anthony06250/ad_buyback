@@ -27,7 +27,6 @@ use AdBuyBack\Domain\BuyBackImage\Command\DeleteBuyBackImageCommand;
 use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
 use AdBuyBack\Domain\BuyBackImage\Command\DuplicateBulkBuyBackImageCommand;
 use AdBuyBack\Grid\Filters\BuyBackImageFilters;
-use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -36,20 +35,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class BuyBackImageController extends FrameworkBundleAdminController
 {
-    /**
-     * @var CommandBusInterface
-     */
-    private $commandBus;
-
-    /**
-     * @param CommandBusInterface $commandBus
-     */
-    public function __construct(CommandBusInterface $commandBus)
-    {
-        parent::__construct();
-        $this->commandBus = $commandBus;
-    }
-
     /**
      * @AdminSecurity("is_granted('read', request.get('_legacy_controller'))", message="Access denied.")
      * @param BuyBackImageFilters $filters
@@ -76,7 +61,7 @@ final class BuyBackImageController extends FrameworkBundleAdminController
         $imageId = (int)$request->get('imageId');
 
         try {
-            $this->commandBus->handle(new DeleteBuyBackImageCommand($imageId));
+            $this->getCommandBus()->handle(new DeleteBuyBackImageCommand($imageId));
             $this->addFlash('success', $this->trans('Image has been successfully deleted.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
             $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
@@ -95,7 +80,7 @@ final class BuyBackImageController extends FrameworkBundleAdminController
         $imageIds = $request->request->get('buybackImage_bulk_action');
 
         try {
-            $this->commandBus->handle(new DuplicateBulkBuyBackImageCommand($imageIds));
+            $this->getCommandBus()->handle(new DuplicateBulkBuyBackImageCommand($imageIds));
             $this->addFlash('success', $this->trans('The selection has been successfully duplicated.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
             $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
@@ -114,7 +99,7 @@ final class BuyBackImageController extends FrameworkBundleAdminController
         $imageIds = $request->request->get('buybackImage_bulk_action');
 
         try {
-            $this->commandBus->handle(new DeleteBulkBuyBackImageCommand($imageIds));
+            $this->getCommandBus()->handle(new DeleteBulkBuyBackImageCommand($imageIds));
             $this->addFlash('success', $this->trans('The selection has been successfully deleted.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
             $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));

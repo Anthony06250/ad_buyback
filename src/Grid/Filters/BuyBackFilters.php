@@ -41,7 +41,7 @@ final class BuyBackFilters extends Filters
             'limit' => 10,
             'offset' => 0,
             'orderBy' => 'id',
-            'sortOrder' => 'asc',
+            'sortOrder' => 'desc',
             'filters' => [],
         ];
     }

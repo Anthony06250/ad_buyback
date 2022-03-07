@@ -22,92 +22,81 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Domain\BuyBack\Command;
 
-use DateTime;
-
 class CreateBuyBackCommand extends AbstractBuyBackCommand
 {
     /**
      * @var int
      */
-    private $id_gender;
+    protected $id_customer;
+
+    /**
+     * @var int
+     */
+    protected $id_employee;
+
+    /**
+     * @var int
+     */
+    protected $id_gender;
 
     /**
      * @var string
      */
-    private $firstname;
+    protected $firstname;
 
     /**
      * @var string
      */
-    private $lastname;
+    protected $lastname;
 
     /**
      * @var string
      */
-    private $email;
+    protected $email;
 
     /**
      * @var string
      */
-    private $description;
+    protected $message;
 
     /**
      * @var array
      */
-    private $image;
+    protected $image;
 
     /**
      * @var bool
      */
-    private $active;
+    protected $active;
 
     /**
-     * @var DateTime
+     * @return int|null
      */
-    private $date_add;
-
-    /**
-     * @var DateTime
-     */
-    private $date_upd;
-
-    /**
-     * @return array
-     */
-    public function toArray(): array
+    public function getCustomer(): ?int
     {
-        return [
-            'id_gender' => $this->id_gender,
-            'firstname' => $this->firstname,
-            'lastname' => $this->lastname,
-            'email' => $this->email,
-            'description' => $this->description,
-            'image' => $this->image,
-            'active' => $this->active,
-            'date_add' => $this->date_add,
-            'date_upd' => $this->date_upd
-        ];
+        return (int)$this->id_customer;
     }
 
     /**
-     * @param array $data
-     * @return CreateBuyBackCommand
+     * @return int|null
      */
-    public function fromArray(array $data): CreateBuyBackCommand
+    public function getEmployee(): ?int
     {
-        foreach ($data as $key => $value) {
-            if (property_exists($this, $key)) {
-                $this->{$key} = $value;
-            }
-        }
-
-        return $this;
+        return (int)$this->id_employee;
     }
 
     /**
-     * @return array
+     * @return string|null
      */
-    public function getImage(): array
+    public function getMessage(): ?string
+    {
+        return $this->message;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getImage(): ?array
     {
         return $this->image;
     }

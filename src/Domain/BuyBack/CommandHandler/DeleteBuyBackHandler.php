@@ -22,13 +22,15 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Domain\BuyBack\CommandHandler;
 
+use AdBuyBack\Domain\BuyBackChat\Command\DeleteBulkBuyBackChatCommand;
+use AdBuyBack\Domain\BuyBackChat\Query\GetChatForBuyBack;
 use AdBuyBack\Domain\BuyBackImage\Command\DeleteBulkBuyBackImageCommand;
 use AdBuyBack\Domain\BuyBack\Command\DeleteBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\CannotDeleteBuyBackException;
 use AdBuyBack\Domain\BuyBackImage\Query\GetImageForBuyBack;
 use AdBuyBack\Model\BuyBack;
-use AdBuyBack\Tools\BuyBackTools;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
+use PrestaShopBundle\Translation\TranslatorInterface;
 use PrestaShopException;
 
 final class DeleteBuyBackHandler
@@ -39,11 +41,18 @@ final class DeleteBuyBackHandler
     private $commandBus;
 
     /**
-     * @param CommandBusInterface $commandBus
+     * @var TranslatorInterface
      */
-    public function __construct(CommandBusInterface $commandBus)
+    private $translator;
+
+    /**
+     * @param CommandBusInterface $commandBus
+     * @param TranslatorInterface $translator
+     */
+    public function __construct(CommandBusInterface $commandBus, TranslatorInterface $translator)
     {
         $this->commandBus = $commandBus;
+        $this->translator = $translator;
     }
 
     /**
@@ -58,6 +67,7 @@ final class DeleteBuyBackHandler
             $buyback = new BuyBack($buybackId);
 
             $this->deleteBuyBack($buyback);
+            $this->deleteBuyBackChat($buyback);
             $this->deleteBuyBackImage($buyback);
         } catch (PrestaShopException $exception) {
             throw new CannotDeleteBuyBackException($exception->getMessage());
@@ -69,10 +79,14 @@ final class DeleteBuyBackHandler
      * @return void
      * @throws PrestaShopException
      */
-    public function deleteBuyBack(BuyBack $buyback): void
+    private function deleteBuyBack(BuyBack $buyback): void
     {
         if (!$buyback->delete()) {
-            throw new CannotDeleteBuyBackException(sprintf('Failed to delete buy back with id "%s"', $buyback->id));
+            throw new CannotDeleteBuyBackException($this->translator->trans(
+                'Failed to delete buyback with id %buybackId%.',
+                ['%buybackId%' => $buyback->id],
+                'Modules.Adbuyback.Alert'
+            ));
         }
     }
 
@@ -80,7 +94,22 @@ final class DeleteBuyBackHandler
      * @param BuyBack $buyback
      * @return void
      */
-    public function deleteBuyBackImage(BuyBack $buyback): void
+    private function deleteBuyBackChat(BuyBack $buyback): void
+    {
+        if ($chats = $this->commandBus->handle(new GetChatForBuyBack($buyback->id))->getData()) {
+            foreach ($chats as $key => $chat) {
+                $chats[$key] = $chat['id_ad_buyback_chat'];
+            }
+
+            $this->commandBus->handle(new DeleteBulkBuyBackChatCommand($chats));
+        }
+    }
+
+    /**
+     * @param BuyBack $buyback
+     * @return void
+     */
+    private function deleteBuyBackImage(BuyBack $buyback): void
     {
         if ($images = $this->commandBus->handle(new GetImageForBuyBack($buyback->id))->getData()) {
             foreach ($images as $key => $image) {

@@ -6,32 +6,9 @@ services:
             - '@doctrine.dbal.default_connection'
             - '%database_prefix%'
 
-    adbuyback.repository.buyback_image:
-        class: 'AdBuyBack\Repository\BuyBackImageRepository'
-        arguments:
-            - '@doctrine.dbal.default_connection'
-            - '%database_prefix%'
-
-    # BuyBack controller
-    AdBuyBack\Controller\Admin\BuyBackController:
-        class: 'AdBuyBack\Controller\Admin\BuyBackController'
-        arguments:
-            - '@prestashop.core.command_bus'
-
-    AdBuyBack\Controller\Admin\BuyBackImageController:
-        class: 'AdBuyBack\Controller\Admin\BuyBackImageController'
-        arguments:
-            - '@prestashop.core.command_bus'
-
     # BuyBack form factory
     adbuyback.form.type.buyback:
-        class: 'AdBuyBack\Form\BuyBackType'
-        parent: 'form.type.translatable.aware'
-        tags:
-            - name: form.type
-
-    adbuyback.form.type.buyback_image:
-        class: 'AdBuyBack\Form\BuyBackImageType'
+        class: 'AdBuyBack\Form\Type\BuyBackType'
         parent: 'form.type.translatable.aware'
         arguments:
             - '@prestashop.core.query_bus'
@@ -40,7 +17,7 @@ services:
             - name: form.type
 
     adbuyback.form.data_provider.buyback:
-        class: 'AdBuyBack\Form\BuyBackFormDataProvider'
+        class: 'AdBuyBack\Form\DataProvider\BuyBackFormDataProvider'
         arguments:
             - '@prestashop.core.query_bus'
 
@@ -49,19 +26,11 @@ services:
         factory: 'prestashop.core.form.builder.form_builder_factory:create'
         public: true
         arguments:
-            - 'AdBuyBack\Form\BuyBackType'
-            - '@adbuyback.form.data_provider.buyback'
-
-    adbuyback.form.form_builder.buyback_image:
-        class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilder'
-        factory: 'prestashop.core.form.builder.form_builder_factory:create'
-        public: true
-        arguments:
-            - 'AdBuyBack\Form\BuyBackImageType'
+            - 'AdBuyBack\Form\Type\BuyBackType'
             - '@adbuyback.form.data_provider.buyback'
 
     adbuyback.form.data_handler.buyback:
-        class: 'AdBuyBack\Form\BuyBackFormDataHandler'
+        class: 'AdBuyBack\Form\DataHandler\BuyBackFormDataHandler'
         arguments:
             - '@prestashop.core.command_bus'
 
@@ -102,6 +71,14 @@ services:
             - '@prestashop.core.hook.dispatcher'
 
     # BuyBack domain query handler
+    adbuyback.domain.buyback.query_handler.is_active:
+        class: 'AdBuyBack\Domain\BuyBack\QueryHandler\GetIsActiveBuyBackHandler'
+        arguments:
+            - '@adbuyback.repository.buyback'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBack\Query\GetIsActiveBuyBack'
+
     adbuyback.domain.buyback.query_handler.get_for_form:
         class: 'AdBuyBack\Domain\BuyBack\QueryHandler\GetBuyBackForFormHandler'
         arguments:
@@ -109,6 +86,14 @@ services:
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Query\GetBuyBackForForm'
+
+    adbuyback.domain.buyback.query_handler.get_for_front:
+        class: 'AdBuyBack\Domain\BuyBack\QueryHandler\GetBuyBackForFrontHandler'
+        arguments:
+            - '@adbuyback.repository.buyback'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBack\Query\GetBuyBackForFront'
 
     # BuyBack domain action handler
     adbuyback.domain.buyback.command_handler.create:
@@ -119,6 +104,9 @@ services:
 
     adbuyback.domain.buyback.command_handler.edit:
         class: 'AdBuyBack\Domain\BuyBack\CommandHandler\EditBuyBackHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+            - '@translator'
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Command\EditBuyBackCommand'
@@ -127,27 +115,34 @@ services:
         class: 'AdBuyBack\Domain\BuyBack\CommandHandler\DeleteBuyBackHandler'
         arguments:
             - '@prestashop.core.command_bus'
+            - '@translator'
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Command\DeleteBuyBackCommand'
 
-    adbuyback.domain.buyback.command_handler.toggle_active:
-        class: 'AdBuyBack\Domain\BuyBack\CommandHandler\ToggleActiveBuyBackHandler'
+    adbuyback.domain.buyback.command_handler.active:
+        class: 'AdBuyBack\Domain\BuyBack\CommandHandler\ActiveBuyBackHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+            - '@translator'
         tags:
             -   name: tactician.handler
-                command: 'AdBuyBack\Domain\BuyBack\Command\ToggleActiveBuyBackCommand'
+                command: 'AdBuyBack\Domain\BuyBack\Command\ActiveBuyBackCommand'
 
     # BuyBack domain bulk action handler
     adbuyback.domain.buyback.command_handler.duplicate_bulk:
         class: 'AdBuyBack\Domain\BuyBack\CommandHandler\DuplicateBulkBuyBackHandler'
         arguments:
             - '@prestashop.core.command_bus'
+            - '@translator'
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Command\DuplicateBulkBuyBackCommand'
 
     adbuyback.domain.buyback.command_handler.active_bulk:
         class: 'AdBuyBack\Domain\BuyBack\CommandHandler\ActiveBulkBuyBackHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Command\ActiveBulkBuyBackCommand'
@@ -159,6 +154,13 @@ services:
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBack\Command\DeleteBulkBuyBackCommand'
+
+    # BuyBack Image repository
+    adbuyback.repository.buyback_image:
+        class: 'AdBuyBack\Repository\BuyBackImageRepository'
+        arguments:
+            - '@doctrine.dbal.default_connection'
+            - '%database_prefix%'
 
     # BuyBack Image grid factory
     adbuyback.grid.factory.definition.buyback_image:
@@ -208,6 +210,8 @@ services:
 
     adbuyback.domain.buyback_image.command_handler.delete:
         class: 'AdBuyBack\Domain\BuyBackImage\CommandHandler\DeleteBuyBackImageHandler'
+        arguments:
+            - '@translator'
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBackImage\Command\DeleteBuyBackImageCommand'
@@ -215,12 +219,329 @@ services:
     # BuyBack Image domain bulk action handler
     adbuyback.domain.buyback_image.command_handler.duplicate_bulk:
         class: 'AdBuyBack\Domain\BuyBackImage\CommandHandler\DuplicateBulkBuyBackImageHandler'
+        arguments:
+            - '@translator'
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBackImage\Command\DuplicateBulkBuyBackImageCommand'
 
     adbuyback.domain.buyback_image.command_handler.delete_bulk:
         class: 'AdBuyBack\Domain\BuyBackImage\CommandHandler\DeleteBulkBuyBackImageHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBackImage\Command\DeleteBulkBuyBackImageCommand'
+
+    # BuyBack Chat repository
+    adbuyback.repository.buyback_chat:
+        class: 'AdBuyBack\Repository\BuyBackChatRepository'
+        arguments:
+            - '@doctrine.dbal.default_connection'
+            - '%database_prefix%'
+            - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
+
+    # BuyBack Chat form factory
+    adbuyback.form.type.buyback_chat:
+        class: 'AdBuyBack\Form\Type\BuyBackChatType'
+        parent: 'form.type.translatable.aware'
+        tags:
+            - name: form.type
+
+    adbuyback.form.data_provider.buyback_chat:
+        class: 'AdBuyBack\Form\DataProvider\BuyBackChatFormDataProvider'
+        arguments:
+            - '@prestashop.core.query_bus'
+
+    adbuyback.form.form_builder.buyback_chat:
+        class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilder'
+        factory: 'prestashop.core.form.builder.form_builder_factory:create'
+        public: true
+        arguments:
+            - 'AdBuyBack\Form\Type\BuyBackChatType'
+            - '@adbuyback.form.data_provider.buyback_chat'
+
+    adbuyback.form.data_handler.buyback_chat:
+        class: 'AdBuyBack\Form\DataHandler\BuyBackChatFormDataHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+
+    adbuyback.form.form_handler.buyback_chat:
+        class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler\FormHandler'
+        factory: 'prestashop.core.form.identifiable_object.handler.form_handler_factory:create'
+        arguments:
+            - '@adbuyback.form.data_handler.buyback_chat'
+
+    # BuyBack Chat grid factory
+    adbuyback.grid.factory.definition.buyback_chat:
+        class: 'AdBuyBack\Grid\Factory\BuyBackChatGridDefinitionFactory'
+        parent: 'prestashop.core.grid.definition.factory.abstract_grid_definition'
+
+    adbuyback.grid.query_builder.buyback_chat:
+        class: 'AdBuyBack\Grid\Query\BuyBackChatQueryBuilder'
+        parent: 'prestashop.core.grid.abstract_query_builder'
+        arguments:
+            - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
+            - "@=service('prestashop.adapter.legacy.context').getContext().shop.id"
+            - '@prestashop.core.query.doctrine_search_criteria_applicator'
+
+    adbuyback.grid.data_provider.buyback_chat:
+        class: '%prestashop.core.grid.data.factory.doctrine_grid_data_factory%'
+        arguments:
+            - '@adbuyback.grid.query_builder.buyback_chat'
+            - '@prestashop.core.hook.dispatcher'
+            - '@prestashop.core.grid.query.doctrine_query_parser'
+            - 'buybackChat'
+
+    adbuyback.grid.factory.buyback_chat:
+        class: 'PrestaShop\PrestaShop\Core\Grid\GridFactory'
+        public: true
+        arguments:
+            - '@adbuyback.grid.factory.definition.buyback_chat'
+            - '@adbuyback.grid.data_provider.buyback_chat'
+            - '@prestashop.core.grid.filter.form_factory'
+            - '@prestashop.core.hook.dispatcher'
+
+    # BuyBack Chat domain query handler
+    adbuyback.domain.buyback_chat.query_handler.is_active:
+        class: 'AdBuyBack\Domain\BuyBackChat\QueryHandler\GetIsActiveChatHandler'
+        arguments:
+            - '@adbuyback.repository.buyback_chat'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackChat\Query\GetIsActiveChat'
+
+    adbuyback.domain.buyback_chat.query_handler.get_chat_for_form:
+        class: 'AdBuyBack\Domain\BuyBackChat\QueryHandler\GetChatForFormHandler'
+        arguments:
+            - '@adbuyback.repository.buyback_chat'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackChat\Query\GetChatForForm'
+
+    adbuyback.domain.buyback_chat.query_handler.get_for_buyback:
+        class: 'AdBuyBack\Domain\BuyBackChat\QueryHandler\GetChatForBuyBackHandler'
+        arguments:
+            - '@adbuyback.repository.buyback_chat'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackChat\Query\GetChatForBuyBack'
+
+    # BuyBack Chat domain action handler
+    adbuyback.domain.buyback_chat.command_handler.create:
+        class: 'AdBuyBack\Domain\BuyBackChat\CommandHandler\CreateBuyBackChatHandler'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackChat\Command\CreateBuyBackChatCommand'
+
+    adbuyback.domain.buyback_chat.command_handler.edit:
+        class: 'AdBuyBack\Domain\BuyBackChat\CommandHandler\EditBuyBackChatHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+            - '@translator'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackChat\Command\EditBuyBackChatCommand'
+
+    adbuyback.domain.buyback_chat.command_handler.delete:
+        class: 'AdBuyBack\Domain\BuyBackChat\CommandHandler\DeleteBuyBackChatHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+            - '@translator'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackChat\Command\DeleteBuyBackChatCommand'
+
+    adbuyback.domain.buyback_chat.command_handler.active:
+        class: 'AdBuyBack\Domain\BuyBackChat\CommandHandler\ActiveBuyBackChatHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+            - '@translator'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackChat\Command\ActiveBuyBackChatCommand'
+
+    # BuyBack Chat domain bulk action handler
+    adbuyback.domain.buyback_chat.command_handler.duplicate_bulk:
+        class: 'AdBuyBack\Domain\BuyBackChat\CommandHandler\DuplicateBulkBuyBackChatHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+            - '@translator'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackChat\Command\DuplicateBulkBuyBackChatCommand'
+
+    adbuyback.domain.buyback_chat.command_handler.active_bulk:
+        class: 'AdBuyBack\Domain\BuyBackChat\CommandHandler\ActiveBulkBuyBackChatHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackChat\Command\ActiveBulkBuyBackChatCommand'
+
+    adbuyback.domain.buyback_chat.command_handler.delete_bulk:
+        class: 'AdBuyBack\Domain\BuyBackChat\CommandHandler\DeleteBulkBuyBackChatHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackChat\Command\DeleteBulkBuyBackChatCommand'
+
+    # BuyBack Message repository
+    adbuyback.repository.buyback_message:
+        class: 'AdBuyBack\Repository\BuyBackMessageRepository'
+        arguments:
+            - '@doctrine.dbal.default_connection'
+            - '%database_prefix%'
+            - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
+
+    # BuyBack Message form factory
+    adbuyback.form.type.buyback_message:
+        class: 'AdBuyBack\Form\Type\BuyBackMessageType'
+        parent: 'form.type.translatable.aware'
+        tags:
+            - name: form.type
+
+    adbuyback.form.data_provider.buyback_message:
+        class: 'AdBuyBack\Form\DataProvider\BuyBackMessageFormDataProvider'
+        arguments:
+            - '@prestashop.core.query_bus'
+
+    adbuyback.form.form_builder.buyback_message:
+        class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilder'
+        factory: 'prestashop.core.form.builder.form_builder_factory:create'
+        public: true
+        arguments:
+            - 'AdBuyBack\Form\Type\BuyBackMessageType'
+            - '@adbuyback.form.data_provider.buyback_message'
+
+    adbuyback.form.data_handler.buyback_message:
+        class: 'AdBuyBack\Form\DataHandler\BuyBackMessageFormDataHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+
+    adbuyback.form.form_handler.buyback_message:
+        class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler\FormHandler'
+        factory: 'prestashop.core.form.identifiable_object.handler.form_handler_factory:create'
+        arguments:
+            - '@adbuyback.form.data_handler.buyback_message'
+
+    # BuyBack Message grid factory
+    adbuyback.grid.factory.definition.buyback_message:
+        class: 'AdBuyBack\Grid\Factory\BuyBackMessageGridDefinitionFactory'
+        parent: 'prestashop.core.grid.definition.factory.abstract_grid_definition'
+
+    adbuyback.grid.query_builder.buyback_message:
+        class: 'AdBuyBack\Grid\Query\BuyBackMessageQueryBuilder'
+        parent: 'prestashop.core.grid.abstract_query_builder'
+        arguments:
+            - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
+            - "@=service('prestashop.adapter.legacy.context').getContext().shop.id"
+            - '@prestashop.core.query.doctrine_search_criteria_applicator'
+
+    adbuyback.grid.data_provider.buyback_message:
+        class: '%prestashop.core.grid.data.factory.doctrine_grid_data_factory%'
+        arguments:
+            - '@adbuyback.grid.query_builder.buyback_message'
+            - '@prestashop.core.hook.dispatcher'
+            - '@prestashop.core.grid.query.doctrine_query_parser'
+            - 'buybackMessage'
+
+    adbuyback.grid.factory.buyback_message:
+        class: 'PrestaShop\PrestaShop\Core\Grid\GridFactory'
+        public: true
+        arguments:
+            - '@adbuyback.grid.factory.definition.buyback_message'
+            - '@adbuyback.grid.data_provider.buyback_message'
+            - '@prestashop.core.grid.filter.form_factory'
+            - '@prestashop.core.hook.dispatcher'
+
+    # BuyBack Message domain query handler
+    adbuyback.domain.buyback_message.query_handler.get_for_form:
+        class: 'AdBuyBack\Domain\BuyBackMessage\QueryHandler\GetMessageForFormHandler'
+        arguments:
+            - '@adbuyback.repository.buyback_message'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackMessage\Query\GetMessageForForm'
+
+    adbuyback.domain.buyback_message.query_handler.get_for_chat:
+        class: 'AdBuyBack\Domain\BuyBackMessage\QueryHandler\GetMessageForChatHandler'
+        arguments:
+            - '@adbuyback.repository.buyback_message'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackMessage\Query\GetMessageForChat'
+
+    adbuyback.domain.buyback_message.query_handler.get_for_buyback:
+        class: 'AdBuyBack\Domain\BuyBackMessage\QueryHandler\GetMessageForBuyBackHandler'
+        arguments:
+            - '@adbuyback.repository.buyback_message'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackMessage\Query\GetMessageForBuyBack'
+
+    # BuyBack Message domain action handler
+    adbuyback.domain.buyback_message.command_handler.create:
+        class: 'AdBuyBack\Domain\BuyBackMessage\CommandHandler\CreateBuyBackMessageHandler'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackMessage\Command\CreateBuyBackMessageCommand'
+
+    adbuyback.domain.buyback_message.command_handler.edit:
+        class: 'AdBuyBack\Domain\BuyBackMessage\CommandHandler\EditBuyBackMessageHandler'
+        arguments:
+            - '@translator'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackMessage\Command\EditBuyBackMessageCommand'
+
+    adbuyback.domain.buyback_message.command_handler.delete:
+        class: 'AdBuyBack\Domain\BuyBackMessage\CommandHandler\DeleteBuyBackMessageHandler'
+        arguments:
+            - '@translator'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackMessage\Command\DeleteBuyBackMessageCommand'
+
+    adbuyback.domain.buyback_message.command_handler.active:
+        class: 'AdBuyBack\Domain\BuyBackMessage\CommandHandler\ActiveBuyBackMessageHandler'
+        arguments:
+            - '@translator'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackMessage\Command\ActiveBuyBackMessageCommand'
+
+    # BuyBack Message domain bulk action handler
+    adbuyback.domain.buyback_message.command_handler.duplicate_bulk:
+        class: 'AdBuyBack\Domain\BuyBackMessage\CommandHandler\DuplicateBulkBuyBackMessageHandler'
+        arguments:
+            - '@translator'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackMessage\Command\DuplicateBulkBuyBackMessageCommand'
+
+    adbuyback.domain.buyback_message.command_handler.active_bulk:
+        class: 'AdBuyBack\Domain\BuyBackMessage\CommandHandler\ActiveBulkBuyBackMessageHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackMessage\Command\ActiveBulkBuyBackMessageCommand'
+
+    adbuyback.domain.buyback_message.command_handler.delete_bulk:
+        class: 'AdBuyBack\Domain\BuyBackMessage\CommandHandler\DeleteBulkBuyBackMessageHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackMessage\Command\DeleteBulkBuyBackMessageCommand'
+
+    # AJAX BuyBack Chat domain query handler
+    adbuyback.domain.ajax_chat.query_handler.get_customer_for_message:
+        class: 'AdBuyBack\Domain\BuyBackChat\QueryHandler\GetCustomerForMessageHandler'
+        arguments:
+            - '@adbuyback.repository.buyback_chat'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackChat\Query\GetCustomerForMessage'

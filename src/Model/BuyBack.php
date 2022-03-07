@@ -22,12 +22,19 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Model;
 
-use DateTime;
+use Context;
+use Gender;
 use ObjectModel;
+use PrestaShopCollection;
 use PrestaShopException;
 
 final class BuyBack extends ObjectModel
 {
+    /**
+     * @var int
+     */
+    public $id_customer;
+
     /**
      * @var int
      */
@@ -49,11 +56,6 @@ final class BuyBack extends ObjectModel
     public $email;
 
     /**
-     * @var string
-     */
-    public $description;
-
-    /**
      * @var bool
      */
     public $active;
@@ -69,30 +71,17 @@ final class BuyBack extends ObjectModel
     public $date_upd;
 
     /**
-     * @param $id
-     * @param $id_lang
-     * @param $id_shop
-     * @throws PrestaShopException
-     */
-    public function __construct($id = null, $id_lang = null, $id_shop = null)
-    {
-        parent::__construct($id, $id_lang, $id_shop);
-        $this->date_add = (new DateTime())->format('Y-m-d H:i:s');
-        $this->date_upd = (new DateTime())->format('Y-m-d H:i:s');
-    }
-
-    /**
      * @see ObjectModel::$definition
      */
     public static $definition = [
         'table' => 'ad_buyback',
         'primary' => 'id_ad_buyback',
         'fields' => [
+            'id_customer' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedId'],
             'id_gender' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedId'],
             'firstname' => ['type' => self::TYPE_STRING, 'validate' => 'isName', 'size' => 255],
             'lastname' => ['type' => self::TYPE_STRING, 'validate' => 'isName', 'size' => 255],
             'email' => ['type' => self::TYPE_STRING, 'validate' => 'isEmail', 'size' => 255],
-            'description' => ['type' => self::TYPE_HTML, 'validate' => 'isCleanHtml', 'size' => 65000, 'copy_post' => false],
             'active' => ['type' => self::TYPE_BOOL, 'validate' => 'isBool'],
             'date_add' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false],
             'date_upd' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false]
@@ -106,7 +95,7 @@ final class BuyBack extends ObjectModel
     {
         $result = [];
 
-        foreach (BuyBack::$definition['fields'] as $key => $value) {
+        foreach (self::$definition['fields'] as $key => $value) {
             $result[$key] = $this->{$key};
         }
 
@@ -129,42 +118,83 @@ final class BuyBack extends ObjectModel
     }
 
     /**
-     * @param array $ids
-     * @return bool
+     * @return array
      * @throws PrestaShopException
      */
-    public function duplicateSelection(array $ids): bool
+    public static function getBuyBacks(): array
     {
-        $result = true;
+        $languageId = Context::getContext()->language->id;
+        $collection = new PrestaShopCollection('AdBuyBack\Model\BuyBack', $languageId);
 
-        foreach ($ids as $id) {
-            $this->id = (int)$id;
+        return $collection->getResults();
+    }
 
-            $result = $result && $this->duplicateObject()->save();
+    /**
+     * @return array
+     * @throws PrestaShopException
+     */
+    public static function getBuyBacksList(): array
+    {
+        $result = [];
+
+        foreach (self::getBuyBacks() as $buyback) {
+            $result[$buyback->id] = $buyback->id;
         }
 
         return $result;
     }
 
     /**
-     * @param array $ids
-     * @param string $field
-     * @param bool $status
-     * @return bool
+     * @return array
      * @throws PrestaShopException
      */
-    public function toggleSelection(array $ids, string $field, bool $status = null): bool
+    public static function getGendersList(): array
     {
-        $result = true;
+        $buybacks = self::getBuyBacks();
+        $genders = Gender::getGenders()->getResults();
+        $result = [];
 
-        foreach ($ids as $id) {
-            $object = new BuyBack($id);
-
-            $object->setFieldsToUpdate([$field => true]);
-            $object->{$field} = $status ?? !(int)$this->{$field};
-
-            $result = $result && $object->update(false);
+        foreach ($buybacks as $buyback) {
+            if (!in_array($buyback->id_gender, $result)) {
+                foreach ($genders as $gender) {
+                    if ($gender->id_gender === $buyback->id_gender) {
+                        $result[$gender->name] = $buyback->id_gender;
+                    }
+                }
+            }
         }
+
+        asort($result);
+
+        return $result;
+    }
+
+    /**
+     * @return array
+     * @throws PrestaShopException
+     */
+    public static function getCustomersList(): array
+    {
+        $buybacks = self::getBuyBacks();
+        $genders = self::getGendersList();
+        $customersList = $result = [];
+
+        foreach ($buybacks as $buyback) {
+            if (!in_array($buyback->id_customer, $result)) {
+                $customersList[] = $buyback->id_customer;
+            }
+            if (in_array($buyback->id_customer, $customersList)) {
+                foreach ($genders as $genderName => $genderId) {
+                    if (!array_key_exists($genderName . ' ' . $buyback->firstname . ' ' . $buyback->lastname, $result)
+                        && $genderId === $buyback->id_gender) {
+                        $fullname = $genderName . ' ' . $buyback->firstname . ' ' . $buyback->lastname;
+                        $result[$fullname] = $fullname;
+                    }
+                }
+            }
+        }
+
+        asort($result);
 
         return $result;
     }

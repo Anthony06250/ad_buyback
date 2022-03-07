@@ -27,7 +27,7 @@ final class DuplicateBulkBuyBackImageCommand extends AbstractBuyBackImageCommand
     /**
      * @var int|null
      */
-    private $buybackId;
+    protected $buybackId;
 
     /**
      * @param $id

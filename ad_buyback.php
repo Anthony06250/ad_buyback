@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 use AdBuyBack\Install\Installer;
 use AdBuyBack\Install\InstallerFactory;
+use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -29,7 +30,7 @@ if (!defined('_PS_VERSION_')) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-class Ad_BuyBack extends Module
+class Ad_BuyBack extends Module implements WidgetInterface
 {
     /**
      * Kernel for get services on front office
@@ -90,25 +91,44 @@ class Ad_BuyBack extends Module
     public function hookActionFrontControllerSetMedia(): void
     {
         $this->context->controller->registerStylesheet(
-            'module-' . $this->name . '-default',
-            'modules/' . '/' . $this->name . '/views/css/default.css',
+            'module-' . $this->name . '-widget',
+            'modules/' . '/' . $this->name . '/views/css/front.widget.css',
             ['media' => 'all', 'priority' => 150]
-        );
-        $this->context->controller->registerStylesheet(
-            'module-' . $this->name . '-custom',
-            'modules/' . '/' . $this->name . '/views/css/custom.css',
-            ['media' => 'all', 'priority' => 200]
         );
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function hookDisplayHome()
+    public function hookDisplayCustomerAccount(): string
     {
-        return $this->render('@Modules/ad_buyback/views/templates/widget/buyback.html.twig', [
-            'link' => Context::getContext()->link->getModuleLink('ad_buyback', 'form')
+        return $this->render('@Modules/ad_buyback/views/templates/widget/account.html.twig', [
+            'link' => $this->context->link->getModuleLink('ad_buyback', 'buyback')
         ]);
+    }
+
+    /**
+     * @param $hookName
+     * @param array $configuration
+     * @return string
+     */
+    public function renderWidget($hookName, array $configuration): string
+    {
+        return $this->render('@Modules/ad_buyback/views/templates/widget/buyback.html.twig',
+            $this->getWidgetVariables($hookName, $configuration)
+        );
+    }
+
+    /**
+     * @param $hookName
+     * @param array $configuration
+     * @return array
+     */
+    public function getWidgetVariables($hookName , array $configuration): array
+    {
+        return [
+            'link' => $this->context->link->getModuleLink('ad_buyback', 'form')
+        ];
     }
 
     /**
@@ -147,11 +167,20 @@ class Ad_BuyBack extends Module
     }
 
     /**
-     * @param string $template
-     * @param array $params
+     * @param mixed $query
      * @return mixed
      */
-    private function render(string $template, array $params)
+    public static function handle($query)
+    {
+        return self::getKernel()->getContainer()->get('prestashop.core.query_bus')->handle($query);
+    }
+
+    /**
+     * @param string $template
+     * @param array $params
+     * @return string
+     */
+    private function render(string $template, array $params): string
     {
         return self::getKernel()->getContainer()->get('twig')->render($template, $params);
     }

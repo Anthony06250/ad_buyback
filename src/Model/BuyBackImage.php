@@ -23,7 +23,6 @@ declare(strict_types=1);
 namespace AdBuyBack\Model;
 
 use Context;
-use DateTime;
 use ObjectModel;
 use PrestaShopCollection;
 use PrestaShopException;
@@ -46,18 +45,6 @@ final class BuyBackImage extends ObjectModel
     public $date_add;
 
     /**
-     * @param $id
-     * @param $id_lang
-     * @param $id_shop
-     * @throws PrestaShopException
-     */
-    public function __construct($id = null, $id_lang = null, $id_shop = null)
-    {
-        parent::__construct($id, $id_lang, $id_shop);
-        $this->date_add = (new DateTime())->format('Y-m-d H:i:s');
-    }
-
-    /**
      * @see ObjectModel::$definition
      */
     public static $definition = [
@@ -77,7 +64,7 @@ final class BuyBackImage extends ObjectModel
     {
         $result = [];
 
-        foreach (BuyBack::$definition['fields'] as $key => $value) {
+        foreach (self::$definition['fields'] as $key => $value) {
             $result[$key] = $this->{$key};
         }
 
@@ -103,14 +90,52 @@ final class BuyBackImage extends ObjectModel
      * @return array
      * @throws PrestaShopException
      */
-    public static function getBuyBackList(): array
+    public static function getBuyBackImages(): array
     {
-        $idLang = Context::getContext()->language->id;
+        $languageId = Context::getContext()->language->id;
+        $collection = new PrestaShopCollection('AdBuyBack\Model\BuyBackImage', $languageId);
+
+        return $collection->getResults();
+    }
+
+    /**
+     * @return array
+     * @throws PrestaShopException
+     */
+    public static function getBuyBacksList(): array
+    {
         $result = [];
 
-        foreach ((new PrestaShopCollection('AdBuyBack\Model\BuyBackImage', $idLang))->getResults() as $image) {
+        foreach (self::getBuyBackImages() as $image) {
             if (!in_array($image->id_ad_buyback, $result)) {
                 $result[$image->id_ad_buyback] = $image->id_ad_buyback;
+            }
+        }
+
+        asort($result);
+
+        return $result;
+    }
+
+    /**
+     * @return array
+     * @throws PrestaShopException
+     */
+    public static function getCustomersList(): array
+    {
+        $buybacks = self::getBuyBacksList();
+        $genders = BuyBack::getGendersList();
+        $result = [];
+
+        foreach (BuyBack::getBuyBacks() as $buyback) {
+            if (in_array($buyback->id, $buybacks)) {
+                foreach ($genders as $genderName => $genderId) {
+                    if (!array_key_exists($genderName . ' ' . $buyback->firstname . ' ' . $buyback->lastname, $result)
+                        && $genderId === $buyback->id_gender) {
+                        $fullname = $genderName . ' ' . $buyback->firstname . ' ' . $buyback->lastname;
+                        $result[$fullname] = $fullname;
+                    }
+                }
             }
         }
 

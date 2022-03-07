@@ -1,0 +1,48 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+{% trans_default_domain 'Modules.Adbuyback.Admin' %}
+
+{% block content %}
+    <section class="row justify-content-center">
+        <section class="col-xl-10">
+            <section class="card container p-0">
+                <header class="card-header">
+                    <section class="d-flex justify-content-between">
+                        <h3 class="d-inline-block card-header-title">
+                            <i class="material-icons">sms</i>
+                            {{ 'Chat ID: %chatId%' | trans({'%chatId%': chat['id_ad_buyback_chat']}) }}
+                        </h3>
+                        {% include '@Modules/ad_buyback/views/templates/admin/buyback_chat/_parts/chat_actions.html.twig' with {'chat': chat} %}
+                    </section>
+                </header>
+                {% include '@Modules/ad_buyback/views/templates/admin/buyback_chat/_parts/chat.html.twig' with {'messages': messages} %}
+                {{ form_start(form, {'action': url('admin_ad_buyback_chat_create_message')}) }}
+                    <article class="container pr-5 pb-4 pl-5">
+                        <section class="row">
+                            <input type="hidden" name="buy_back_message[id_ad_buyback_chat]" value="{{ chat['id_ad_buyback_chat'] }}">
+                            <input type="hidden" name="buy_back_message[id_employee]" value="{{ app.token.user.id }}">
+                            <input type="hidden" name="buy_back_message[active]" value="1">
+                            {{ form_widget(form.message, {'attr': {'disabled': (chat['active'] == '0')}}) }}
+                            {{ form_widget(form._token) }}
+                        </section>
+                    </article>
+                    <footer class="card-footer">
+                        <section class="d-flex justify-content-between">
+                            <a href="javascript: history.back()" class="btn btn-secondary">
+                                {{ 'Return' | trans }}
+                            </a>
+                            <button type="submit" class="btn btn-primary" {% if chat['active'] == '0' %}disabled{% endif %}>
+                                {{ 'Send message' | trans }}
+                            </button>
+                        </section>
+                    </footer>
+                {{ form_end(form, {'render_rest': false}) }}
+            </section>
+        </section>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script src="{{ asset('/modules/ad_buyback/views/js/buyback_chat.admin.view.bundle.js') }}"></script>
+{% endblock %}

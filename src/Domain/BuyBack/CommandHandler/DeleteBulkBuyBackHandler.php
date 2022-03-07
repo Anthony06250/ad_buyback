@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace AdBuyBack\Domain\BuyBack\CommandHandler;
 
 use AdBuyBack\Domain\BuyBack\Command\DeleteBulkBuyBackCommand;
+use AdBuyBack\Domain\BuyBack\Command\DeleteBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\CannotDeleteBulkBuyBackException;
 use AdBuyBack\Model\BuyBack;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
@@ -52,10 +53,9 @@ final class DeleteBulkBuyBackHandler
         $buybackIds = $command->getId()->getValue();
 
         try {
-            $buybacks = $this->getBuyBack($buybackIds);
-
-            $this->deleteBuyBack($buybacks);
-            $this->deleteBuyBackImage($buybacks);
+            foreach ($this->getBuyBack($buybackIds) as $buyback) {
+                $this->deleteBuyBack($buyback);
+            }
         } catch (PrestaShopException $exception) {
             throw new CannotDeleteBulkBuyBackException($exception->getMessage());
         }
@@ -76,25 +76,11 @@ final class DeleteBulkBuyBackHandler
     }
 
     /**
-     * @param array $buybacks
-     * @return void
-     * @throws PrestaShopException
-     */
-    private function deleteBuyBack(array $buybacks): void
-    {
-        foreach ($buybacks as $buyback) {
-            (new DeleteBuyBackHandler($this->commandBus))->deleteBuyBack($buyback);
-        }
-    }
-
-    /**
-     * @param array $buybacks
+     * @param BuyBack $buyback
      * @return void
      */
-    private function deleteBuyBackImage(array $buybacks): void
+    private function deleteBuyBack(BuyBack $buyback): void
     {
-        foreach ($buybacks as $buyback) {
-            (new DeleteBuyBackHandler($this->commandBus))->deleteBuyBackImage($buyback);
-        }
+        $this->commandBus->handle(new DeleteBuyBackCommand($buyback->id));
     }
 }

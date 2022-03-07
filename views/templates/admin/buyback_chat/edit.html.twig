@@ -1,0 +1,44 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+{% trans_default_domain 'Modules.Adbuyback.Admin' %}
+
+{% block content %}
+    <section class="row justify-content-center">
+        <section class="col-xl-10">
+            {{ form_start(form) }}
+                <section class="card">
+                    <header class="card-header">
+                        <h3 class="d-inline-block card-header-title">
+                            <i class="material-icons">
+                                {{ form.vars.value.id_ad_buyback_chat is not defined ? 'add_circle_outline' : 'edit' }}
+                            </i>
+                            {% if form.vars.value.id_ad_buyback_chat is not defined %}
+                                {{ 'New chat' | trans }}
+                            {% else %}
+                                {{ 'Edit chat' | trans }}
+                            {% endif %}
+                        </h3>
+                    </header>
+                    <article class="card-block row">
+                        <div class="card-text">
+                            {{ form_rest(form) }}
+                        </div>
+                    </article>
+                    <footer class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="javascript: history.back()" class="btn btn-secondary">
+                                {{ 'Return' | trans }}
+                            </a>
+                            <button class="btn btn-{{ form.vars.value.id_ad_buyback_chat is not defined ? 'success' : 'warning' }}">
+                                {% if form.vars.value.id_ad_buyback_chat is not defined %}
+                                    {{ 'Save' | trans }}
+                                {% else %}
+                                    {{ 'Edit' | trans }}
+                                {% endif %}
+                            </button>
+                        </div>
+                    </footer>
+                </section>
+            {{ form_end(form) }}
+        </section>
+    </section>
+{% endblock %}

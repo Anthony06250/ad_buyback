@@ -35,12 +35,12 @@ final class BuyBackQueryBuilder extends AbstractDoctrineQueryBuilder
     /**
      * @var int
      */
-    private $contextLanguageId;
+    private $languageId;
 
     /**
      * @var int
      */
-    private $contextShopId;
+    private $shopId;
 
     /**
      * @var DoctrineSearchCriteriaApplicatorInterface
@@ -49,16 +49,16 @@ final class BuyBackQueryBuilder extends AbstractDoctrineQueryBuilder
 
     /**
      * @param Connection $connection
-     * @param string $dbPrefix
-     * @param int $contextLanguageId
-     * @param int $contextShopId
+     * @param string $databasePrefix
+     * @param int $languageId
+     * @param int $shopId
      * @param DoctrineSearchCriteriaApplicatorInterface $searchCriteriaApplicator
      */
-    public function __construct(Connection $connection, string $dbPrefix, int $contextLanguageId, int $contextShopId, DoctrineSearchCriteriaApplicatorInterface $searchCriteriaApplicator)
+    public function __construct(Connection $connection, string $databasePrefix, int $languageId, int $shopId, DoctrineSearchCriteriaApplicatorInterface $searchCriteriaApplicator)
     {
-        parent::__construct($connection, $dbPrefix);
-        $this->contextLanguageId = $contextLanguageId;
-        $this->contextShopId = $contextShopId;
+        parent::__construct($connection, $databasePrefix);
+        $this->languageId = $languageId;
+        $this->shopId = $shopId;
         $this->searchCriteriaApplicator = $searchCriteriaApplicator;
     }
 
@@ -70,8 +70,8 @@ final class BuyBackQueryBuilder extends AbstractDoctrineQueryBuilder
     {
         $query = $this->getQueryBuilder($searchCriteria->getFilters());
 
-        $query->select('p.`id_ad_buyback` AS `id`, p.`firstname`, p.`lastname`, p.`email`, p.`description`, p.`active`, p.`date_add`, p.`date_upd`')
-            ->addSelect('ps.`name` AS `gender`');
+        $query->select('p.`id_ad_buyback` AS `id`, p.`email`, p.`active`, p.`date_add`, p.`date_upd`')
+            ->addSelect('CONCAT(ps.`name`, " ", p.`firstname`, " ", p.`lastname`) AS `customer`');
 
         $this->searchCriteriaApplicator
             ->applyPagination($searchCriteria, $query)
@@ -106,26 +106,12 @@ final class BuyBackQueryBuilder extends AbstractDoctrineQueryBuilder
                 'ps',
                 'ps.`id_gender` = p.`id_gender` AND ps.`id_lang` = :id_lang'
             )
-            ->setParameter('id_lang', $this->contextLanguageId);
+            ->setParameter('id_lang', $this->languageId);
 
         foreach ($filters as $filterName => $filter) {
-            if ('id_gender' === $filterName) {
-                $query->andWhere('ps.`id_gender` LIKE :id_gender');
-                $query->setParameter('id_gender', '%' . $filter . '%');
-
-                continue;
-            }
-
-            if ('firstname' === $filterName) {
-                $query->andWhere('p.`firstname` LIKE :firstname');
-                $query->setParameter('firstname', '%' . $filter . '%');
-
-                continue;
-            }
-
-            if ('lastname' === $filterName) {
-                $query->andWhere('p.`lastname` LIKE :lastname');
-                $query->setParameter('lastname', '%' . $filter . '%');
+            if ('customer' === $filterName) {
+                $query->andWhere('CONCAT(ps.`name`, " ", p.`firstname`, " ", p.`lastname`) LIKE :customer');
+                $query->setParameter('customer', '%' . $filter . '%');
 
                 continue;
             }
@@ -133,13 +119,6 @@ final class BuyBackQueryBuilder extends AbstractDoctrineQueryBuilder
             if ('email' === $filterName) {
                 $query->andWhere('p.`email` LIKE :email');
                 $query->setParameter('email', '%' . $filter . '%');
-
-                continue;
-            }
-
-            if ('description' === $filterName) {
-                $query->andWhere('p.`description` LIKE :description');
-                $query->setParameter('description', '%' . $filter . '%');
 
                 continue;
             }

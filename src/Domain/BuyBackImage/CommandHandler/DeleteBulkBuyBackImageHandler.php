@@ -23,12 +23,27 @@ declare(strict_types=1);
 namespace AdBuyBack\Domain\BuyBackImage\CommandHandler;
 
 use AdBuyBack\Domain\BuyBackImage\Command\DeleteBulkBuyBackImageCommand;
+use AdBuyBack\Domain\BuyBackImage\Command\DeleteBuyBackImageCommand;
 use AdBuyBack\Domain\BuyBackImage\Exception\CannotDeleteBulkBuyBackImageException;
 use AdBuyBack\Model\BuyBackImage;
+use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShopException;
 
 final class DeleteBulkBuyBackImageHandler
 {
+    /**
+     * @var CommandBusInterface
+     */
+    private $commandBus;
+
+    /**
+     * @param CommandBusInterface $commandBus
+     */
+    public function __construct(CommandBusInterface $commandBus)
+    {
+        $this->commandBus = $commandBus;
+    }
+
     /**
      * @param DeleteBulkBuyBackImageCommand $command
      * @return void
@@ -40,7 +55,6 @@ final class DeleteBulkBuyBackImageHandler
         try {
             foreach ($this->getBuyBackImage($imageIds) as $image) {
                 $this->deleteBuyBackImage($image);
-                $this->deleteImageFile($image);
             }
         } catch (PrestaShopException $exception) {
             throw new CannotDeleteBulkBuyBackImageException($exception->getMessage());
@@ -64,19 +78,9 @@ final class DeleteBulkBuyBackImageHandler
     /**
      * @param BuyBackImage $image
      * @return void
-     * @throws PrestaShopException
      */
     private function deleteBuyBackImage(BuyBackImage $image): void
     {
-        (new DeleteBuyBackImageHandler())->deleteBuyBackImage($image);
-    }
-
-    /**
-     * @param BuyBackImage $image
-     * @return void
-     */
-    private function deleteImageFile(BuyBackImage $image): void
-    {
-        (new DeleteBuyBackImageHandler())->deleteImageFile($image);
+        $this->commandBus->handle(new DeleteBuyBackImageCommand($image->id));
     }
 }

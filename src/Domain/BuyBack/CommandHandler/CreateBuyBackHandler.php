@@ -22,28 +22,51 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Domain\BuyBack\CommandHandler;
 
+use Ad_BuyBack;
 use AdBuyBack\Domain\BuyBack\Command\CreateBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\CannotCreateBuyBackException;
 use AdBuyBack\Domain\BuyBack\ValueObject\BuyBackId;
+use AdBuyBack\Domain\BuyBackChat\Command\CreateBuyBackChatCommand;
+use AdBuyBack\Domain\BuyBackMessage\Command\CreateBuyBackMessageCommand;
 use AdBuyBack\Model\BuyBack;
+use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
+use PrestaShopBundle\Translation\TranslatorInterface;
 use PrestaShopException;
 
 final class CreateBuyBackHandler extends ImageBuyBackHandler
 {
+    /**
+     * @var CommandBusInterface
+     */
+    private $commandBus;
+
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
+     *
+     */
+    public function __construct()
+    {
+        // Use custom kernel for front office
+        $this->commandBus = Ad_BuyBack::getService('prestashop.core.command_bus');
+        $this->translator = Ad_BuyBack::getService('translator');
+    }
+
     /**
      * @param CreateBuyBackCommand $command
      * @return BuyBackId
      */
     public function handle(CreateBuyBackCommand $command): BuyBackId
     {
-        $images = $command->getImage();
-
         try {
             $buyback = new BuyBack();
 
-            $buyback->hydrate($command->toArray());
-            $this->createBuyBack($buyback);
-            $this->uploadImages((int)$buyback->id, $images);
+            $this->createBuyBack($buyback, $command);
+            $this->createBuyBackChat($buyback, $command);
+            $this->uploadImages((int)$buyback->id, $command);
         } catch (PrestaShopException $exception) {
             throw new CannotCreateBuyBackException($exception->getMessage());
         }
@@ -53,13 +76,53 @@ final class CreateBuyBackHandler extends ImageBuyBackHandler
 
     /**
      * @param BuyBack $buyback
+     * @param CreateBuyBackCommand $command
      * @return void
      * @throws PrestaShopException
      */
-    private function createBuyBack(BuyBack &$buyback): void
+    private function createBuyBack(BuyBack &$buyback, CreateBuyBackCommand $command): void
     {
+        $buyback->hydrate($command->toArray());
+
         if (!$buyback->add()) {
-            throw new CannotCreateBuyBackException('Failed to create buy back');
+            throw new CannotCreateBuyBackException($this->translator->trans(
+                'Failed to create buyback.', [],
+                'Modules.Adbuyback.Alert'
+            ));
         }
+    }
+
+    /**
+     * @param BuyBack $buyback
+     * @param CreateBuyBackCommand $command
+     * @return void
+     */
+    private function createBuyBackChat(BuyBack $buyback, CreateBuyBackCommand $command): void
+    {
+        if ($command->getMessage()) {
+            $chatId = $this->commandBus->handle((new CreateBuyBackChatCommand())->fromArray([
+                'id_ad_buyback' => $buyback->id,
+                'active' => $buyback->active
+            ]));
+
+            $this->createBuyBackMessage($chatId->getValue(), $command);
+        }
+    }
+
+    /**
+     * @param int $chatId
+     * @param CreateBuyBackCommand $command
+     * @return void
+     */
+    private function createBuyBackMessage(int $chatId, CreateBuyBackCommand $command): void
+    {
+        $this->commandBus->handle((new CreateBuyBackMessageCommand())->fromArray([
+            'id_ad_buyback_chat' => $chatId,
+            'id_customer' => $command->getCustomer(),
+            'id_employee' => $command->getEmployee(),
+            'active' => true,
+            'message' => $command->getMessage(),
+            'isActive' => false
+        ]));
     }
 }

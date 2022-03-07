@@ -1,54 +1,127 @@
 {% extends '@PrestaShop/Admin/layout.html.twig' %}
+{% trans_default_domain 'Modules.Adbuyback.Admin' %}
 
 {% block content %}
     <section class="row justify-content-center">
         <section class="col-xl-10">
-            <section class="card">
-                <header class="card-header">
-                    <h3 class="d-inline-block card-header-title">
-                        <i class="material-icons">
-                            {{ form.vars.value.id_ad_buyback is not defined ? ' add_circle_outline' : 'edit' }}
-                        </i>
-                        {{ (form.vars.value.id_ad_buyback is not defined ? 'New buy back' : 'Edit buy back') | trans({}, 'Modules.Adbuyback.Admin') }}
-                    </h3>
-                </header>
-                {{ form_start(form) }}
-                <article class="card-block row">
-                    <div class="card-text">
-                        {% set flag_image = null %}
-                        {% for key, field in form.children %}
-                            {% if ('image-' not in key) %}
-                                {{ form_row(field) }}
+            {{ form_start(form) }}
+                <section class="card">
+                    <header class="card-header">
+                        <h3 class="d-inline-block card-header-title">
+                            <i class="material-icons">
+                                {{ form.vars.value.id_ad_buyback is not defined ? 'add_circle_outline' : 'edit' }}
+                            </i>
+                            {% if form.vars.value.id_ad_buyback is not defined %}
+                                {{ 'New buyback' | trans }}
                             {% else %}
-                                {% set flag_image = true %}
+                                {{ 'Edit buyback' | trans }}
                             {% endif %}
-                        {% endfor %}
-                        {% if flag_image is not null %}
-                            <h3 class="mt-5">
-                                {{ 'Product images' | trans({}, 'Modules.Adbuyback.Form') }}
-                            </h3>
-                            <div class="row">
+                        </h3>
+                    </header>
+                    <article class="card-block row">
+                        <div class="card-text">
+                            {% for key, field in form.children %}
+                                {% if form.vars.value.id_ad_buyback is not defined and 'active' in key %}
+                                    {{ form_row(field, {'value': '1'}) }}
+                                {% elseif 'image-' not in key and 'message-' not in key and 'message' not in key and 'image' not in key %}
+                                    {{ form_row(field) }}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </article>
+                    <footer class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="javascript: history.back()" class="btn btn-secondary">
+                                {{ 'Return' | trans }}
+                            </a>
+                            <button class="btn btn-{{ form.vars.value.id_ad_buyback is not defined ? 'success' : 'warning' }}">
+                                {% if form.vars.value.id_ad_buyback is not defined %}
+                                    {{ 'Save' | trans }}
+                                {% else %}
+                                    {{ 'Edit' | trans }}
+                                {% endif %}
+                            </button>
+                        </div>
+                    </footer>
+                </section>
+                <section id="buyback_edit_image" class="card">
+                    <header class="card-header">
+                        <h3 class="d-inline-block card-header-title">
+                            <i class="material-icons">photo</i>
+                            {% if form.vars.value.id_ad_buyback is not defined %}
+                                {{ 'Add images' | trans }}
+                            {% else %}
+                                {{ 'Edit images' | trans }}
+                            {% endif %}
+                        </h3>
+                    </header>
+                    <article class="card-block row">
+                        <div class="card-text row">
+                                {{ form_widget(form.children.image) }}
                                 {% for key, field in form.children %}
                                     {% if ('image-' in key) %}
                                         {{ form_widget(field) }}
                                     {% endif %}
                                 {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </article>
-                <footer class="card-footer">
-                    <div class="d-flex justify-content-between">
-                        <a href="javascript: history.go(-1)" class="btn btn-secondary">
-                            {{ 'Return' | trans({}, 'Modules.Adbuyback.Form') }}
-                        </a>
-                        <button class="btn btn-{{ form.vars.value.id_ad_buyback is not defined ? 'primary' : 'warning' }}">
-                            {{ (form.vars.value.id_ad_buyback is not defined ? 'Save' : 'Edit') | trans({}, 'Modules.Adbuyback.Admin') }}
-                        </button>
-                    </div>
-                </footer>
-                {{ form_end(form) }}
-            </section>
+                        </div>
+                    </article>
+                    <footer class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="javascript: history.back()" class="btn btn-secondary">
+                                {{ 'Return' | trans }}
+                            </a>
+                            <button class="btn btn-primary">
+                                {{ 'Send images' | trans }}
+                            </button>
+                        </div>
+                    </footer>
+                </section>
+                <section id="buyback_edit_message" class="card">
+                    <header class="card-header">
+                        <h3 class="d-inline-block card-header-title">
+                            <i class="material-icons">chat</i>
+                            {% if form.vars.value.id_ad_buyback is not defined %}
+                                {{ 'Add message' | trans }}
+                            {% else %}
+                                {{ 'Last messages' | trans }}
+                            {% endif %}
+                        </h3>
+                    </header>
+                    <article class="card-block row">
+                        <div class="card-text row">
+                            {% if form.vars.value.id_ad_buyback is defined %}
+                                {% for key, field in form.children %}
+                                    {% if ('message-' in key) %}
+                                        {{ form_widget(field) }}
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                {{ form_widget(form.children.message) }}
+                            {% endif %}
+                        </div>
+                    </article>
+                    <footer class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="javascript: history.back()" class="btn btn-secondary">
+                                {{ 'Return' | trans }}
+                            </a>
+                            {% if form.vars.value.id_ad_buyback is not defined %}
+                                <button class="btn btn-primary">
+                                    {{ 'Send message' | trans }}
+                                </button>
+                            {% endif %}
+                        </div>
+                    </footer>
+                </section>
+            {{ form_end(form, {'render_rest': false}) }}
         </section>
     </section>
+
+    {% include '@Modules/ad_buyback/views/templates/admin/buyback_image/_parts/modal.html.twig' with {'modalId': 'buyback-edit-view-modal'} %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script src="{{ asset('/modules/ad_buyback/views/js/buyback.admin.edit.bundle.js') }}"></script>
 {% endblock %}

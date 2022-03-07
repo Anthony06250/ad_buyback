@@ -27,10 +27,24 @@ use AdBuyBack\Domain\BuyBackImage\Exception\CannotDeleteBuyBackImageException;
 use AdBuyBack\Model\BuyBackImage;
 use AdBuyBack\Tools\BuyBackTools;
 use FilesystemIterator;
+use PrestaShopBundle\Translation\TranslatorInterface;
 use PrestaShopException;
 
 final class DeleteBuyBackImageHandler
 {
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
+     * @param TranslatorInterface $translator
+     */
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
+
     /**
      * @param DeleteBuyBackImageCommand $command
      * @return void
@@ -57,7 +71,11 @@ final class DeleteBuyBackImageHandler
     public function deleteBuyBackImage(BuyBackImage $image): void
     {
         if (!$image->delete()) {
-            throw new CannotDeleteBuyBackImageException(sprintf('Failed to delete buy back image with id "%s"', $image->id));
+            throw new CannotDeleteBuyBackImageException($this->translator->trans(
+                'Failed to delete image with id %imageId%.',
+                ['%imageId%' => $image->id],
+                'Modules.Adbuyback.Alert'
+            ));
         }
     }
 
@@ -70,11 +88,19 @@ final class DeleteBuyBackImageHandler
         $directory = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $image->id_ad_buyback . '/';
 
         if (!file_exists($directory . $image->name) || !unlink($directory . $image->name)) {
-            throw new CannotDeleteBuyBackImageException(sprintf('Cannot delete image with id "%s" for buyback with id "%s"', $image->id, $image->id_ad_buyback));
+            throw new CannotDeleteBuyBackImageException($this->translator->trans(
+                'Cannot delete image with id %imageId% for buyback with id %buybackId%.',
+                ['%imageId%' => $image->id, '%buybackId%' => $image->id_ad_buyback],
+                'Modules.Adbuyback.Alert'
+            ));
         }
 
         if (!file_exists($directory . '/thumbnail/' . $image->name) || !unlink($directory . '/thumbnail/' . $image->name)) {
-            throw new CannotDeleteBuyBackImageException(sprintf('Cannot delete thumbnail with id "%s" for buyback with id "%s"', $image->id, $image->id_ad_buyback));
+            throw new CannotDeleteBuyBackImageException($this->translator->trans(
+                'Cannot delete thumbnail for image with id %imageId% for buyback with id %buybackId%.',
+                ['%imageId%' => $image->id, '%buybackId%' => $image->id_ad_buyback],
+                'Modules.Adbuyback.Alert'
+            ));
         }
 
         if (iterator_count(new FilesystemIterator($directory, FilesystemIterator::SKIP_DOTS)) < 3) {

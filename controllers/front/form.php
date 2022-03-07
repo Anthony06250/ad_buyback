@@ -20,8 +20,8 @@
 
 declare(strict_types=1);
 
-use AdBuyBack\Controller\Front\BuyBackFrontController;
+use AdBuyBack\Controller\Front\BuyBackFormFrontController;
 
-final class Ad_BuyBackFormModuleFrontController extends BuyBackFrontController
+final class Ad_BuyBackFormModuleFrontController extends BuyBackFormFrontController
 {
 }

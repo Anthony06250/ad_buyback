@@ -30,7 +30,7 @@ use Module;
 use PrestaShopException;
 use Tools;
 
-class Installer
+final class Installer
 {
     /**
      * @var Module
@@ -85,6 +85,7 @@ class Installer
     {
         $hooks = [
             'actionFrontControllerSetMedia',
+            'displayCustomerAccount',
             'displayHome'
         ];
 

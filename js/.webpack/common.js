@@ -22,8 +22,14 @@ const path = require('path');
 module.exports = {
     entry: {
         'buyback.admin.index': './buyback/admin.index.js',
+        'buyback.admin.edit': './buyback/admin.edit.js',
         'buyback_image.admin.index': './buyback_image/admin.index.js',
-        'buyback.front.form': './buyback/front.form.js'
+        'buyback_chat.admin.index': './buyback_chat/admin.index.js',
+        'buyback_chat.admin.view': './buyback_chat/admin.view.js',
+        'buyback_message.admin.index': './buyback_message/admin.index.js',
+        'buyback_message.admin.edit': './buyback_message/admin.edit.js',
+        'buyback.front.form': './buyback/front.form.js',
+        'buyback_chat.front.chat': './buyback_chat/front.chat.js'
     },
     output: {
         path: path.resolve(__dirname, '../../views/js'),

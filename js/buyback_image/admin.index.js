@@ -20,7 +20,7 @@
 $(function () {
     $('#buybackImage_grid_table .ad-bb-grid-img').on('click', function () {
         loadImageInModal($(this).find('img').attr('src'));
-        loadTitleInModal($(this).parent().next().html());
+        loadTitleInModal($(this).find('img').attr('alt'));
     });
 
     const grid = new window.prestashop.component.Grid('buybackImage');
@@ -51,6 +51,6 @@ function loadImageInModal(source) {
 }
 
 function loadTitleInModal(title) {
-    $('#buybackImage-grid-view-modal').find('.ad-bb-modal-figure img').attr('title', title).end()
+    $('#buybackImage-grid-view-modal').find('.ad-bb-modal-figure img').attr('alt', title).end()
         .find('.ad-bb-modal-figure figcaption').html(title);
 }

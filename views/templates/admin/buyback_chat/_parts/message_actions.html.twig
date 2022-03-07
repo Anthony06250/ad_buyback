@@ -1,0 +1,39 @@
+{% trans_default_domain 'Modules.Adbuyback.Admin' %}
+
+<aside class="d-flex align-items-center">
+    <a href="{{ url('admin_ad_buyback_message_edit', {'messageId': message['id_ad_buyback_message']}) }}"
+       class="btn tooltip-link p-0 mr-2" data-toggle="pstooltip" data-placement="bottom"
+       data-original-title="{{ 'Edit message' | trans }}"
+    >
+        <i class="material-icons m-0">edit</i>
+    </a>
+    <span class="d-inline-block mr-2" data-toggle="pstooltip" data-placement="bottom"
+          data-original-title="{{ 'Active message' | trans }}"
+          style="width: 60px; overflow: hidden;"
+    >
+        <spa class="ps-switch ps-switch-sm" data-toggle-url="{{ url('admin_ad_buyback_message_active', {'messageId': message['id_ad_buyback_message']}) }}">
+            <input type="radio" name="message-{{ message['id_ad_buyback_message'] }}-active"
+                   id="message-{{ message['id_ad_buyback_message'] }}-input-false-active" value="0"
+                   {% if message['active'] == '0' %}checked{% endif %}
+            >
+            <label for="message-{{ message['id_ad_buyback_message'] }}-input-false-active">Off</label>
+            <input type="radio" name="message-{{ message['id_ad_buyback_message'] }}-active"
+                   id="message-{{ message['id_ad_buyback_message'] }}-input-true-active" value="1"
+                   {% if message['active'] %}checked{% endif %}
+            >
+            <label for="message-{{ message['id_ad_buyback_message'] }}-input-true-active">On</label>
+            <span class="slide-button"></span>
+        </spa>
+    </span>
+    <a href="#" data-method="POST" class="btn tooltip-link p-0 m-0" data-toggle="pstooltip" data-placement="bottom"
+       data-original-title="{{ 'Delete message' | trans }}"
+       data-confirm-message="{{ 'Are you sure you want to delete this message ?' | trans }}"
+       data-url="{{ url('admin_ad_buyback_message_delete', {'messageId': message['id_ad_buyback_message']}) }}"
+       data-title="{{ 'Delete message' | trans }}"
+       data-confirm-button-label="{{ 'Delete' | trans }}"
+       data-confirm-button-class="btn-danger"
+       data-close-button-label="{{ 'Close' | trans }}"
+    >
+        <i class="material-icons">delete</i>
+    </a>
+</aside>

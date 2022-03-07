@@ -30,16 +30,7 @@ admin_ad_buyback_edit:
         _controller: 'AdBuyBack\Controller\Admin\BuyBackController::editAction'
         _legacy_controller: 'AdminBuyBack'
     requirements:
-        id: \d+
-
-admin_ad_buyback_toggle_active:
-    path: /buyback/{buybackId}/toggle-active
-    methods: [POST]
-    defaults:
-        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::toggleActiveAction'
-        _legacy_controller: 'AdminBuyBack'
-    requirements:
-        id: \d+
+        buybackId: \d+
 
 admin_ad_buyback_delete:
     path: /buyback/delete
@@ -55,6 +46,15 @@ admin_ad_buyback_delete_image:
         _controller: 'AdBuyBack\Controller\Admin\BuyBackController::deleteImageAction'
         _legacy_controller: 'AdminBuyBack'
 
+admin_ad_buyback_active:
+    path: /buyback/{buybackId}/active
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::activeAction'
+        _legacy_controller: 'AdminBuyBack'
+    requirements:
+        buybackId: \d+
+
 # BuyBack bulk action
 admin_ad_buyback_duplicate_bulk:
     path: /buyback/duplicate-bulk
@@ -63,11 +63,11 @@ admin_ad_buyback_duplicate_bulk:
         _controller: 'AdBuyBack\Controller\Admin\BuyBackController::duplicateBulkAction'
         _legacy_controller: 'AdminBuyBack'
 
-admin_ad_buyback_toggle_active_bulk:
-    path: /buyback/toggle-active-bulk
+admin_ad_buyback_active_bulk:
+    path: /buyback/active-bulk
     methods: [POST]
     defaults:
-        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::toggleActiveBulkAction'
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackController::activeBulkAction'
         _legacy_controller: 'AdminBuyBack'
 
 admin_ad_buyback_delete_bulk:
@@ -102,7 +102,7 @@ admin_ad_buyback_image_delete:
         _controller: 'AdBuyBack\Controller\Admin\BuyBackImageController::deleteAction'
         _legacy_controller: 'AdminBuyBack'
 
-# BuyBack image bulk action
+# BuyBack Image bulk action
 admin_ad_buyback_image_duplicate_bulk:
     path: /buyback/image/duplicate-bulk
     methods: [POST]
@@ -115,4 +115,172 @@ admin_ad_buyback_image_delete_bulk:
     methods: [POST]
     defaults:
         _controller: 'AdBuyBack\Controller\Admin\BuyBackImageController::deleteBulkAction'
+        _legacy_controller: 'AdminBuyBack'
+
+# BuyBack Chat action
+admin_ad_buyback_chat_index:
+    path: /buyback/chat/
+    methods: [GET]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackChatController::indexAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_chat_search:
+    path: /buyback/chat/
+    methods: [POST]
+    defaults:
+        _controller: PrestaShopBundle:Admin\Common:searchGrid
+        gridDefinitionFactoryServiceId: adbuyback.grid.factory.definition.buyback_chat
+        redirectRoute: admin_ad_buyback_chat_index
+        _legacy_controller: 'AdminBuyBack'
+        _legacy_link: 'AdminBuyBack:submitFilterbuybackChat'
+
+admin_ad_buyback_chat_create:
+    path: /buyback/chat/new
+    methods: [GET, POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackChatController::createAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_chat_create_message:
+    path: /buyback/chat/new/message
+    methods: [GET, POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackChatController::createMessageAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_chat_edit:
+    path: /buyback/chat/{chatId}/edit
+    methods: [GET, POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackChatController::editAction'
+        _legacy_controller: 'AdminBuyBack'
+    requirements:
+        chatId: \d+
+
+admin_ad_buyback_chat_view:
+    path: /buyback/chat/{chatId}/view
+    methods: [GET]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackChatController::viewAction'
+        _legacy_controller: 'AdminBuyBack'
+    requirements:
+        chatId: \d+
+
+admin_ad_buyback_chat_delete:
+    path: /buyback/chat/delete
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackChatController::deleteAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_chat_active:
+    path: /buyback/chat/{chatId}/active
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackChatController::activeAction'
+        _legacy_controller: 'AdminBuyBack'
+    requirements:
+        chatId: \d+
+
+# BuyBack Chat bulk action
+admin_ad_buyback_chat_duplicate_bulk:
+    path: /buyback/chat/duplicate-bulk
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackChatController::duplicateBulkAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_chat_active_bulk:
+    path: /buyback/chat/active-bulk
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackChatController::activeBulkAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_chat_delete_bulk:
+    path: /buyback/chat/delete-bulk
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackChatController::deleteBulkAction'
+        _legacy_controller: 'AdminBuyBack'
+
+# BuyBack Message action
+admin_ad_buyback_message_index:
+    path: /buyback/message/
+    methods: [GET]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackMessageController::indexAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_message_search:
+    path: /buyback/message/
+    methods: [POST]
+    defaults:
+        _controller: PrestaShopBundle:Admin\Common:searchGrid
+        gridDefinitionFactoryServiceId: adbuyback.grid.factory.definition.buyback_message
+        redirectRoute: admin_ad_buyback_message_index
+        _legacy_controller: 'AdminBuyBack'
+        _legacy_link: 'AdminBuyBack:submitFilterbuybackMessage'
+
+admin_ad_buyback_message_create:
+    path: /buyback/message/new
+    methods: [GET, POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackMessageController::createAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_message_edit:
+    path: /buyback/message/{messageId}/edit
+    methods: [GET, POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackMessageController::editAction'
+        _legacy_controller: 'AdminBuyBack'
+    requirements:
+        buybackId: \d+
+
+admin_ad_buyback_message_delete:
+    path: /buyback/message/delete
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackMessageController::deleteAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_message_active:
+    path: /buyback/message/{messageId}/active
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackMessageController::activeAction'
+        _legacy_controller: 'AdminBuyBack'
+    requirements:
+        messageId: \d+
+
+# BuyBack Message bulk action
+admin_ad_buyback_message_duplicate_bulk:
+    path: /buyback/message/duplicate-bulk
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackMessageController::duplicateBulkAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_message_active_bulk:
+    path: /buyback/message/active-bulk
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackMessageController::activeBulkAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_message_delete_bulk:
+    path: /buyback/message/delete-bulk
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackMessageController::deleteBulkAction'
+        _legacy_controller: 'AdminBuyBack'
+
+# AJAX BuyBack Chat query
+ajax_ad_buyback_customer_for_message:
+    path: /buyback/ajax/customer-for-message
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Ajax\AjaxChatController::getCustomerForMessage'
         _legacy_controller: 'AdminBuyBack'

@@ -1,0 +1,24 @@
+{% if readOnly is not defined %}
+    {% set readOnly = false %}
+{% endif %}
+
+<article class="container pt-4 pr-5 pb-0 pl-5">
+    {% for message in messages %}
+        {% set direction = (message.id_customer == '0' and message.id_employee == app.token.user.id) %}
+        <section class="row pb-4">
+            {% if direction %}
+                <aside class="col"></aside>
+            {% endif %}
+            <article class="col-9">
+                {% include '@Modules/ad_buyback/views/templates/admin/buyback_chat/_parts/message.html.twig' with {
+                    'direction': direction,
+                    'message': message,
+                    'readOnly': readOnly
+                } %}
+            </article>
+            {% if direction == false %}
+                <aside class="col"></aside>
+            {% endif %}
+        </section>
+    {% endfor %}
+</article>

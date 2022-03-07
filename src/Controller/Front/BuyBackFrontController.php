@@ -23,20 +23,14 @@ declare(strict_types=1);
 namespace AdBuyBack\Controller\Front;
 
 use Ad_BuyBack;
-use AdBuyBack\Adapter\RequestAdapter;
-use AdBuyBack\Adapter\SmartyAdapter;
-use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
+use AdBuyBack\Domain\BuyBack\Query\GetBuyBackForFront;
+use AdBuyBack\Domain\BuyBackChat\Query\GetChatForBuyBack;
+use AdBuyBack\Domain\BuyBackMessage\Query\GetMessageForBuyBack;
 use ModuleFrontController;
 use PrestaShopException;
-use Symfony\Component\HttpFoundation\Request;
-use Tools;
 
 class BuyBackFrontController extends ModuleFrontController
 {
-    /**
-     * Use front kernel to get service - Ad_BuyBack::getService('service')
-     */
-
     /**
      * @var bool
      */
@@ -48,10 +42,15 @@ class BuyBackFrontController extends ModuleFrontController
     public function setMedia()
     {
         parent::setMedia();
-        $this->registerJavascript(
-            'module-' . $this->module->name . '-form',
-            'modules/' . $this->module->name . '/views/js/buyback.front.form.bundle.js',
-            ['priority' => 200, 'attribute' => 'async']
+        $this->registerStylesheet(
+            'module-' . $this->module->name . '-front-buyback',
+            'modules/' . '/' . $this->module->name . '/views/css/front.buyback.css',
+            ['media' => 'all', 'priority' => 150]
+        );
+        $this->registerStylesheet(
+            'module-' . $this->module->name . '-front-chat',
+            'modules/' . '/' . $this->module->name . '/views/css/front.chat.css',
+            ['media' => 'all', 'priority' => 150]
         );
     }
 
@@ -71,45 +70,19 @@ class BuyBackFrontController extends ModuleFrontController
      */
     private function indexAction(): void
     {
-        $form = Ad_BuyBack::getService('adbuyback.form.form_builder.buyback')->getForm();
+        // Use custom kernel for front office
+        $buybacks = Ad_BuyBack::handle(new GetBuyBackForFront($this->context->customer->id))->getData();
 
-        $this->context->smarty->assign(['form' => SmartyAdapter::convertTwigFormToSmarty($form)]);
-        $this->setTemplate('module:' . $this->module->name . '/views/templates/front/form.tpl');
-    }
+        foreach ($buybacks as $key => $buyback) {
+            $chats = Ad_BuyBack::handle(new GetChatForBuyBack($buyback['id_ad_buyback']))->getData();
 
-    /**
-     * @return void
-     */
-    public function postProcess(): void
-    {
-        if (Tools::getIsset('firstname')) {
-            $this->createAction(RequestAdapter::getFrontRequest());
-        }
-    }
-
-    /**
-     * @param Request $request
-     * @return void
-     */
-    private function createAction(Request $request): void
-    {
-        $form = Ad_BuyBack::getService('adbuyback.form.form_builder.buyback')->getForm();
-        $formHandler = Ad_BuyBack::getService('adbuyback.form.form_handler.buyback');
-
-        $form->handleRequest($request);
-
-        try {
-            if ($formHandler->handle($form)->getIdentifiableObjectId() !== null) {
-                $this->success[] = $this->trans('The buy back has been successfully created.', [], 'Modules.Adbuyback.Alert');
-
-                $this->redirectWithNotifications('/');
+            foreach ($chats as $chat) {
+                $chat['messages'][] = Ad_BuyBack::handle(new GetMessageForBuyBack($chat['id_ad_buyback_chat']))->getData();
+                $buybacks[$key]['chats'][] = $chat;
             }
-
-            $this->errors[] = $this->trans('Ho shit ! ERROR !!!', [], 'Modules.Adbuyback.Alert');
-        } catch (BuyBackException $exception) {
-            $this->errors[] = $this->trans($exception->getMessage(), [], 'Modules.Adbuyback.Alert');
         }
 
-        $this->redirectWithNotifications($this->getCurrentURL());
+        $this->context->smarty->assign(['buybacks' => $buybacks]);
+        $this->setTemplate('module:' . $this->module->name . '/views/templates/front/buyback.tpl');
     }
 }

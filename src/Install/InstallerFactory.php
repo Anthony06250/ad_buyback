@@ -24,7 +24,7 @@ namespace AdBuyBack\Install;
 
 use Module;
 
-class InstallerFactory
+final class InstallerFactory
 {
     /**
      * @param Module $module

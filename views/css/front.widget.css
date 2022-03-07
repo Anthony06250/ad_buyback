@@ -1,0 +1,18 @@
+/* Enhance front Bootstrap */
+.d-flex {
+    display: flex;
+}
+.justify-content-evenly {
+    justify-content: space-evenly;
+}
+
+/* Custom front widget */
+.ad-bb-front-widget {
+    margin-bottom: 1.5rem;
+    color: #232323;
+    background: #FFFFFF;
+    border-radius: 4px;
+}
+.ad-bb-front-widget .ad-bb-front-widget-header {
+    font-weight: 600;
+}

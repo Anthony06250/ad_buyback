@@ -1,0 +1,19 @@
+<section class="card container p-0">
+    <header class="card-header">
+        <h3 class="d-inline-block card-header-title">
+            <i class="material-icons">sms</i>
+            {{ 'Chat ID: %chatId%' | trans({'%chatId%': chatId}, 'Admin.Adbuyback.Admin') }}
+        </h3>
+    </header>
+    {% include '@Modules/ad_buyback/views/templates/admin/buyback_chat/_parts/chat.html.twig' with {
+        'messages': data['message'],
+        'readOnly': true
+    } %}
+    <footer class="card-footer">
+        <div class="d-flex justify-content-end">
+            <a href="{{ url('admin_ad_buyback_chat_view', {'chatId': chatId}) }}" class="btn btn-primary">
+                {{ 'View chat' | trans({}, 'Modules.Adbuyback.Admin') }}
+            </a>
+        </div>
+    </footer>
+</section>

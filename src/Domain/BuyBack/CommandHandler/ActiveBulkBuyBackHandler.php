@@ -22,32 +22,69 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Domain\BuyBack\CommandHandler;
 
-use AdBuyBack\Domain\BuyBack\Command\ToggleActiveBulkBuyBackCommand;
+use AdBuyBack\Domain\BuyBack\Command\ActiveBulkBuyBackCommand;
+use AdBuyBack\Domain\BuyBack\Command\ActiveBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\CannotActiveBulkBuyBackException;
 use AdBuyBack\Model\BuyBack;
+use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShopException;
 
 final class ActiveBulkBuyBackHandler
 {
     /**
-     * @param ToggleActiveBulkBuyBackCommand $command
+     * @var CommandBusInterface
+     */
+    private $commandBus;
+
+    /**
+     * @param CommandBusInterface $commandBus
+     */
+    public function __construct(CommandBusInterface $commandBus)
+    {
+        $this->commandBus = $commandBus;
+    }
+
+    /**
+     * @param ActiveBulkBuyBackCommand $command
      * @return void
      */
-    public function handle(ToggleActiveBulkBuyBackCommand $command): void
+    public function handle(ActiveBulkBuyBackCommand $command): void
     {
-        $ids = $command->getId()->getValue();
-        $status = $command->getStatus();
+        $buybackIds = $command->getId()->getValue();
+        $status = (int)$command->getStatus();
 
         try {
-            if (false === (new BuyBack())->toggleSelection($ids, 'active', $status)) {
-                throw new CannotActiveBulkBuyBackException(
-                    sprintf('Failed to enable buy backs with ids "%s"', implode(', ', $ids))
-                );
+            foreach ($this->getBuyBack($buybackIds) as $buyback) {
+                $this->activeBuyBack($buyback, $status);
             }
         } catch (PrestaShopException $exception) {
-            throw new CannotActiveBulkBuyBackException(
-                'An unexpected error occurred when enable buy back'
-            );
+            throw new CannotActiveBulkBuyBackException($exception->getMessage());
+        }
+    }
+
+    /**
+     * @param array $buybackIds
+     * @return array
+     * @throws PrestaShopException
+     */
+    private function getBuyBack(array $buybackIds): array
+    {
+        foreach ($buybackIds as $key => $buybackId) {
+            $buybackIds[$key] = new BuyBack($buybackId);
+        }
+
+        return $buybackIds;
+    }
+
+    /**
+     * @param BuyBack $buyBack
+     * @param int $status
+     * @return void
+     */
+    private function activeBuyBack(BuyBack $buyBack, int $status): void
+    {
+        if ($buyBack->active != $status) {
+            $this->commandBus->handle(new ActiveBuyBackCommand($buyBack->id));
         }
     }
 }

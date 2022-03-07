@@ -1,0 +1,30 @@
+{% trans_default_domain 'Modules.Adbuyback.Admin' %}
+
+<div class="modal fade" id="{{ modalId }}" aria-modal="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    {{ 'Image preview' | trans }}
+                </h4>
+                <button class="close" type="button" data-dismiss="modal">×</button>
+            </div>
+            <div class="modal-body text-left font-weight-normal row mt-3">
+                <article style="float:none; margin: 0 auto;">
+                    <figure class="ad-bb-modal-figure">
+                        <img src="" alt="">
+                        <figcaption class="text-center mt-3"></figcaption>
+                    </figure>
+                </article>
+            </div>
+            <div class="modal-footer mt-3">
+                <button type="button" class="btn btn-outline-secondary btn-lg" data-dismiss="modal">
+                    {{ 'Close' | trans }}
+                </button>
+                <a href="" class="ad-bb-modal-view btn btn-info btn-lg" target="_blank">
+                    {{ 'Open in new tab' | trans }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

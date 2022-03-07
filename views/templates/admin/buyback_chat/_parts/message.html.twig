@@ -1,0 +1,36 @@
+{% trans_default_domain 'Modules.Adbuyback.Admin' %}
+
+<section class="ad-bb-message p-0 border {{ direction ? 'border-success' : 'border-info' }} rounded" style="background-color: {{ direction == '0' ? '#beeaf3' : '#cbf2d4' }};">
+    <header>
+        <h4 class="d-flex justify-content-between align-items-center m-2">
+            <article>
+                <span class="align-middle">
+                    {% if message.id_customer %}
+                        {{ message.customer_name }}
+                    {% elseif message.id_employee %}
+                        {{ message.employee_name }}
+                    {% else %}
+                        {{ message.default_name }}
+                    {% endif %}
+                </span>
+            </article>
+            {% if readOnly == false %}
+                {% include '@Modules/ad_buyback/views/templates/admin/buyback_chat/_parts/message_actions.html.twig' with {'message': message} %}
+            {% endif %}
+        </h4>
+    </header>
+    <article class="p-3 border-top {{ direction ? 'border-success' : 'border-info' }}">
+        {{ message.message | nl2br }}
+    </article>
+    <footer class="d-flex justify-content-between border-top {{ direction ? 'border-success' : 'border-info' }}">
+        <small class="align-middle p-1 pl-2">
+            <i class="material-icons mr-1" style="font-size: 10px;">timer</i>
+            {{ message.date_add | date_format_full }}
+        </small>
+        <small class="p-1 pr-2">
+            {% if message.date_add != message.date_upd %}
+                ({{ 'Edited on : %date_upd%' | trans({'%date_upd%': message.date_upd | date_format_full}) }})
+            {% endif %}
+        </small>
+    </footer>
+</section>

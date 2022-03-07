@@ -26,10 +26,24 @@ use AdBuyBack\Domain\BuyBackImage\Command\DuplicateBulkBuyBackImageCommand;
 use AdBuyBack\Domain\BuyBackImage\Exception\CannotDuplicateBulkBuyBackImageException;
 use AdBuyBack\Model\BuyBackImage;
 use AdBuyBack\Tools\BuyBackTools;
+use PrestaShopBundle\Translation\TranslatorInterface;
 use PrestaShopException;
 
 final class DuplicateBulkBuyBackImageHandler
 {
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
+     * @param TranslatorInterface $translator
+     */
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
+
     /**
      * @param DuplicateBulkBuyBackImageCommand $command
      * @return void
@@ -41,7 +55,7 @@ final class DuplicateBulkBuyBackImageHandler
 
         try {
             foreach ($this->getBuyBackImage($imageIds) as $image) {
-                $this->duplicateBuyBack($image, $buybackId);
+                $this->duplicateBuyBackImage($image, $buybackId);
                 $this->duplicateImageFile($image);
             }
         } catch (PrestaShopException $exception) {
@@ -69,16 +83,20 @@ final class DuplicateBulkBuyBackImageHandler
      * @return void
      * @throws PrestaShopException
      */
-    private function duplicateBuyBack(BuyBackImage &$image, ?int $buybackId): void
+    private function duplicateBuyBackImage(BuyBackImage &$image, ?int $buybackId): void
     {
         $image = $image->duplicateObject();
 
         $buybackId
-            ? $this->changeBuyBackId($image, $buybackId)
+            ? $this->changeBuyBackImageId($image, $buybackId)
             : $this->changeBuyBackImageName($image);
 
         if (!$image->save()) {
-            throw new CannotDuplicateBulkBuyBackImageException(sprintf('Failed to duplicate buy back image with id "%s"', $image->id));
+            throw new CannotDuplicateBulkBuyBackImageException($this->translator->trans(
+                'Failed to duplicate image with id %imageId%.',
+                ['%imageId%' => $image->id],
+                'Modules.Adbuyback.Alert'
+            ));
         }
     }
 
@@ -87,7 +105,7 @@ final class DuplicateBulkBuyBackImageHandler
      * @param int $buybackId
      * @return void
      */
-    private function changeBuyBackId(&$image, int $buybackId): void
+    private function changeBuyBackImageId(&$image, int $buybackId): void
     {
         $image->oldBuybackId = $image->id_ad_buyback;
         $image->id_ad_buyback = $buybackId;
@@ -120,11 +138,19 @@ final class DuplicateBulkBuyBackImageHandler
         }
 
         if (!copy($directoryFrom . ($image->oldName ?? $image->name), $directoryTo . $image->name)) {
-            throw new CannotDuplicateBulkBuyBackImageException(sprintf('Failed to duplicate image file with id "%s"', $image->id));
+            throw new CannotDuplicateBulkBuyBackImageException($this->translator->trans(
+                'Failed to duplicate file for image with id %imageId%.',
+                ['%imageId%' => $image->id],
+                'Modules.Adbuyback.Alert'
+            ));
         }
 
         if (!copy($directoryFrom . '/thumbnail/' . ($image->oldName ?? $image->name), $directoryTo . '/thumbnail/' . $image->name)) {
-            throw new CannotDuplicateBulkBuyBackImageException(sprintf('Failed to duplicate image thumbnail with id "%s"', $image->id));
+            throw new CannotDuplicateBulkBuyBackImageException($this->translator->trans(
+                'Failed to duplicate thumbnail for image with id %imageId%.',
+                ['%imageId%' => $image->id],
+                'Modules.Adbuyback.Alert'
+            ));
         }
     }
 }

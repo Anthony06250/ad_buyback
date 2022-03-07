@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace AdBuyBack\Repository;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
 
 final class BuyBackRepository
 {
@@ -48,39 +49,51 @@ final class BuyBackRepository
 
     /**
      * @param array $params
-     * @return array
+     * @param array $orders
+     * @param array $fields
+     * @return mixed
      */
-    public function findBy(array $params): array
+    public function findBy(array $params, array $orders = [], array $fields = ['*'])
     {
-        $query = $this->connection->createQueryBuilder();
-
-        $query->select('*')
-            ->from($this->databaseName);
-
-        foreach ($params as $key => $param) {
-            $query->andWhere("`$key` = :$key")
-                ->setParameter($key, $param);
-        }
-
-        return $query->execute()->fetch();
+        return $this->getQuery($params, $orders, $fields)->execute()->fetch();
     }
 
     /**
      * @param array $params
-     * @return array
+     * @param array $orders
+     * @param array $fields
+     * @return mixed[]
      */
-    public function findAllBy(array $params): array
+    public function findAllBy(array $params, array $orders = [], array $fields = ['*'])
+    {
+        return $this->getQuery($params, $orders, $fields)->execute()->fetchAll();
+    }
+
+    /**
+     * @param array $params
+     * @param array $orders
+     * @param array $fields
+     * @return QueryBuilder
+     */
+    private function getQuery(array $params, array $orders, array $fields): QueryBuilder
     {
         $query = $this->connection->createQueryBuilder();
 
-        $query->select('*')
-            ->from($this->databaseName);
+        $query->from($this->databaseName);
+
+        foreach ($fields as $field) {
+            $query->addSelect($field);
+        }
 
         foreach ($params as $key => $param) {
             $query->andWhere("`$key` = :$key")
                 ->setParameter($key, $param);
         }
 
-        return $query->execute()->fetchAll();
+        foreach ($orders as $key => $order) {
+            $query->addOrderBy("`$key`", $order);
+        }
+
+        return $query;
     }
 }

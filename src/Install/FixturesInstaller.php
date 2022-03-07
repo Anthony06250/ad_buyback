@@ -22,27 +22,27 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Install;
 
-use AdBuyBack\Model\BuyBack;
-use DateTime;
-use PrestaShopDatabaseException;
-use PrestaShopException;
+use Ad_BuyBack;
+use AdBuyBack\Domain\BuyBack\Command\CreateBuyBackCommand;
+use AdBuyBack\Domain\BuyBackMessage\Command\CreateBuyBackMessageCommand;
 
-class FixturesInstaller
+final class FixturesInstaller
 {
     /**
      * @return void
-     * @throws PrestaShopDatabaseException
-     * @throws PrestaShopException
      */
     public function install(): void
     {
-        $datas = [
+        // Use custom kernel for front office
+        $commandBus = Ad_BuyBack::getService('prestashop.core.command_bus');
+        $buybacks = [
             [
+                'id_customer' => 3,
                 'id_gender' => 1,
                 'firstname' => 'Anthony',
                 'lastname' => 'DURET',
                 'email' => 'anthony.duret@outlook.fr',
-                'description' => 'Je vous aime mes Amours de ma vie !',
+                'message' => 'Je vous aime mes Amours de ma vie !',
                 'active' => 1
             ],
             [
@@ -50,7 +50,7 @@ class FixturesInstaller
                 'firstname' => 'Antoine',
                 'lastname' => 'DURET',
                 'email' => 'antoine.duret@outlook.fr',
-                'description' => 'Je t\'aime Papa !',
+                'message' => 'Je t\'aime Papa !',
                 'active' => 1
             ],
             [
@@ -58,13 +58,37 @@ class FixturesInstaller
                 'firstname' => 'Ludiwine',
                 'lastname' => 'DURET',
                 'email' => 'ludiwine.duret@gmail.com',
-                'description' => 'Je t\'aime mon Amour !',
+                'message' => 'Je t\'aime mon Amour !',
+                'active' => 1
+            ]
+        ];
+        $messages = [
+            [
+                'id_ad_buyback_chat' => 1,
+                'id_employee' => 1,
+                'message' => 'En encore plus chaque jour !',
+                'active' => 1
+            ],
+            [
+                'id_ad_buyback_chat' => 2,
+                'id_employee' => 1,
+                'message' => 'Mon aussi mon fils !',
+                'active' => 1
+            ],
+            [
+                'id_ad_buyback_chat' => 3,
+                'id_employee' => 1,
+                'message' => 'Moi aussi mon amour !',
                 'active' => 1
             ]
         ];
 
-        foreach ($datas as $data) {
-            (new BuyBack())->fromArray($data)->save();
+        foreach ($buybacks as $buyback) {
+            $commandBus->handle((new CreateBuyBackCommand())->fromArray($buyback));
+        }
+
+        foreach ($messages as $message) {
+            $commandBus->handle((new CreateBuyBackMessageCommand())->fromArray($message));
         }
     }
 }

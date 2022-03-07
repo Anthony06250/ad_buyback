@@ -27,7 +27,7 @@ use AdBuyBack\Grid\Action\DisableBulkAction;
 use AdBuyBack\Grid\Action\DividerBulkAction;
 use AdBuyBack\Grid\Action\DuplicateBulkAction;
 use AdBuyBack\Grid\Action\EnableBulkAction;
-use AdBuyBack\Tools\BuyBackTools;
+use AdBuyBack\Model\BuyBack;
 use Context;
 use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollection;
 use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollectionInterface;
@@ -49,6 +49,7 @@ use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollectionInterface;
 use PrestaShopBundle\Form\Admin\Type\DateRangeType;
 use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
 use PrestaShopBundle\Form\Admin\Type\YesAndNoChoiceType;
+use PrestaShopException;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -85,25 +86,13 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
                 ->setName($this->trans('ID', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions(['field' => 'id'])
             )
-            ->add((new DataColumn('gender'))
-                ->setName($this->trans('Gender', [], 'Modules.Adbuyback.Admin'))
-                ->setOptions(['field' => 'gender'])
-            )
-            ->add((new DataColumn('firstname'))
-                ->setName($this->trans('Firstname', [], 'Modules.Adbuyback.Admin'))
-                ->setOptions(['field' => 'firstname'])
-            )
-            ->add((new DataColumn('lastname'))
-                ->setName($this->trans('Lastname', [], 'Modules.Adbuyback.Admin'))
-                ->setOptions(['field' => 'lastname'])
+            ->add((new DataColumn('customer'))
+                ->setName($this->trans('Customer', [], 'Modules.Adbuyback.Admin'))
+                ->setOptions(['field' => 'customer'])
             )
             ->add((new DataColumn('email'))
                 ->setName($this->trans('Email', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions(['field' => 'email'])
-            )
-            ->add((new DataColumn('description'))
-                ->setName($this->trans('Description', [], 'Modules.Adbuyback.Admin'))
-                ->setOptions(['field' => 'description'])
             )
             ->add((new DateTimeColumn('date_add'))
                 ->setName($this->trans('Created', [], 'Modules.Adbuyback.Admin'))
@@ -124,7 +113,7 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
                 ->setOptions([
                     'field' => 'active',
                     'primary_field' => 'id',
-                    'route' => 'admin_ad_buyback_toggle_active',
+                    'route' => 'admin_ad_buyback_active',
                     'route_param_name' => 'buybackId'
                 ])
             )
@@ -142,6 +131,15 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
                                 'clickable_row' => true
                             ])
                         )
+                        ->add((new LinkRowAction('chats'))
+                            ->setName($this->trans('Chats', [], 'Modules.Adbuyback.Admin'))
+                            ->setIcon('list')
+                            ->setOptions([
+                                'route' => 'admin_ad_buyback_chat_index',
+                                'route_param_name' => 'buybackId',
+                                'route_param_field' => 'id'
+                            ])
+                        )
                         ->add((new SubmitRowAction('delete'))
                             ->setName($this->trans('Delete', [], 'Modules.Adbuyback.Admin'))
                             ->setIcon('delete')
@@ -150,7 +148,7 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
                                 'route' => 'admin_ad_buyback_delete',
                                 'route_param_name' => 'buybackId',
                                 'route_param_field' => 'id',
-                                'confirm_message' => $this->trans('Are you sure you want to delete the buyback ?', [], 'Modules.Adbuyback.Admin'),
+                                'confirm_message' => $this->trans('Are you sure you want to delete the buyback ?', [], 'Modules.Adbuyback.Alert'),
                                 'modal_options' => new ModalOptions([
                                     'title' => $this->trans('Delete buyback', [], 'Modules.Adbuyback.Admin'),
                                     'confirm_button_label' => $this->trans('Delete', [], 'Modules.Adbuyback.Admin'),
@@ -165,43 +163,23 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
 
     /**
      * @return FilterCollection|FilterCollectionInterface
+     * @throws PrestaShopException
      */
     protected function getFilters()
     {
         return (new FilterCollection())
-            ->add((new Filter('id_gender', ChoiceType::class))
-                ->setAssociatedColumn('gender')
+            ->add((new Filter('customer', ChoiceType::class))
+                ->setAssociatedColumn('customer')
                 ->setTypeOptions([
                     'required' => false,
-                    'choices' => BuyBackTools::getGendersForChoiceType()
-                ])
-            )
-            ->add((new Filter('firstname', TextType::class))
-                ->setAssociatedColumn('firstname')
-                ->setTypeOptions([
-                    'required' => false,
-                    'attr' => ['placeholder' => $this->trans('Search a firstname', [], 'Modules.Adbuyback.Admin')]
-                ])
-            )
-            ->add((new Filter('lastname', TextType::class))
-                ->setAssociatedColumn('lastname')
-                ->setTypeOptions([
-                    'required' => false,
-                    'attr' => ['placeholder' => $this->trans('Search a lastname', [], 'Modules.Adbuyback.Admin')]
+                    'choices' => BuyBack::getCustomersList()
                 ])
             )
             ->add((new Filter('email', TextType::class))
                 ->setAssociatedColumn('email')
                 ->setTypeOptions([
                     'required' => false,
-                    'attr' => ['placeholder' => $this->trans('Search an email', [], 'Modules.Adbuyback.Admin')]
-                ])
-            )
-            ->add((new Filter('description', TextType::class))
-                ->setAssociatedColumn('description')
-                ->setTypeOptions([
-                    'required' => false,
-                    'attr' => ['placeholder' => $this->trans('Search a description', [], 'Modules.Adbuyback.Admin')]
+                    'attr' => ['placeholder' => $this->trans('Search', [], 'Modules.Adbuyback.Admin')]
                 ])
             )
             ->add((new Filter('date_add', DateRangeType::class))
@@ -238,11 +216,11 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
             ->add((new EnableBulkAction('enable_selection'))
                 ->setName($this->trans('Enable selection', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions([
-                    'submit_route' => 'admin_ad_buyback_toggle_active_bulk',
+                    'submit_route' => 'admin_ad_buyback_active_bulk',
                     'route_params' => ['status' => true],
-                    'confirm_message' => $this->trans('Are you sure you want to enable the selected buy back(s) ?', [], 'Modules.Adbuyback.Admin'),
+                    'confirm_message' => $this->trans('Are you sure you want to enable the selected buyback(s) ?', [], 'Modules.Adbuyback.Alert'),
                     'modal_options' => new ModalOptions([
-                        'title' => $this->trans('Enable buy back(s) selection', [], 'Modules.Adbuyback.Admin'),
+                        'title' => $this->trans('Enable buyback(s) selection', [], 'Modules.Adbuyback.Admin'),
                         'confirm_button_label' => $this->trans('Enable selection', [], 'Modules.Adbuyback.Admin'),
                         'confirm_button_class' => 'btn-success'
                     ])
@@ -251,11 +229,11 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
             ->add((new DisableBulkAction('disable_selection'))
                 ->setName($this->trans('Disable selection', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions([
-                    'submit_route' => 'admin_ad_buyback_toggle_active_bulk',
+                    'submit_route' => 'admin_ad_buyback_active_bulk',
                     'route_params' => ['status' => false],
-                    'confirm_message' => $this->trans('Are you sure you want to disable the selected buy back(s) ?', [], 'Modules.Adbuyback.Admin'),
+                    'confirm_message' => $this->trans('Are you sure you want to disable the selected buyback(s) ?', [], 'Modules.Adbuyback.Alert'),
                     'modal_options' => new ModalOptions([
-                        'title' => $this->trans('Disable buy back(s) selection', [], 'Modules.Adbuyback.Admin'),
+                        'title' => $this->trans('Disable buyback(s) selection', [], 'Modules.Adbuyback.Admin'),
                         'confirm_button_label' => $this->trans('Disable selection', [], 'Modules.Adbuyback.Admin'),
                         'confirm_button_class' => 'btn-warning'
                     ])
@@ -266,9 +244,9 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
                 ->setName($this->trans('Duplicate selection', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions([
                     'submit_route' => 'admin_ad_buyback_duplicate_bulk',
-                    'confirm_message' => $this->trans('Are you sure you want to duplicate the selected buy back(s) ?', [], 'Modules.Adbuyback.Admin'),
+                    'confirm_message' => $this->trans('Are you sure you want to duplicate the selected buyback(s) ?', [], 'Modules.Adbuyback.Alert'),
                     'modal_options' => new ModalOptions([
-                        'title' => $this->trans('Duplicate buy back(s) selection', [], 'Modules.Adbuyback.Admin'),
+                        'title' => $this->trans('Duplicate buyback(s) selection', [], 'Modules.Adbuyback.Admin'),
                         'confirm_button_label' => $this->trans('Duplicate selection', [], 'Modules.Adbuyback.Admin'),
                         'confirm_button_class' => 'btn-success'
                     ])
@@ -279,9 +257,9 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
                 ->setName($this->trans('Delete selection', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions([
                     'submit_route' => 'admin_ad_buyback_delete_bulk',
-                    'confirm_message' => $this->trans('Are you sure you want to delete the selected buy back(s) ?', [], 'Modules.Adbuyback.Admin'),
+                    'confirm_message' => $this->trans('Are you sure you want to delete the selected buyback(s) ?', [], 'Modules.Adbuyback.Alert'),
                     'modal_options' => new ModalOptions([
-                        'title' => $this->trans('Delete buy back(s) selection', [], 'Modules.Adbuyback.Admin'),
+                        'title' => $this->trans('Delete buyback(s) selection', [], 'Modules.Adbuyback.Admin'),
                         'confirm_button_label' => $this->trans('Delete selection', [], 'Modules.Adbuyback.Admin'),
                         'confirm_button_class' => 'btn-danger'
                     ])

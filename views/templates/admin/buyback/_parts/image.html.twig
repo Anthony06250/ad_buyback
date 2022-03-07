@@ -1,0 +1,29 @@
+<div class="col-sm-2 mt-4">
+    <section class="form-group text-center">
+        <article>
+            <button class="ad-bb-edit-img p-0" type="button" style="width: 100%; border: none; border-radius: 4px;"
+                    data-toggle="modal" data-target="#buyback-edit-view-modal"
+            >
+                <figure class="m-0">
+                    <img class="img-thumbnail p-1" data-toggle="pstooltip" data-placement="top"
+                         title="{{ 'Click for preview' | trans({}, 'Modules.Adbuyback.Admin') }}"
+                         src="{{ path }}" alt="{{ filename }}.{{ extension }}"
+                    >
+                    <figcaption>
+                        <h5 class="m-1">
+                            {{ (filename | length < 23) ? filename : filename|slice(0, 20) ~ '...' }}
+                        </h5>
+                    </figcaption>
+                </figure>
+            </button>
+        </article>
+        <footer class="mt-3">
+            <button class="btn btn-outline-danger btn-sm" type="submit" formmethod="POST"
+                    formaction="{{ path('admin_ad_buyback_delete_image', {'imageId': id, 'filename': filename ~ '.' ~ extension}) }}"
+            >
+                <i class="material-icons mr-2">delete_forever</i>
+                {{ 'Delete' | trans({}, 'Modules.Adbuyback.Form') }}
+            </button>
+        </footer>
+    </section>
+</div>

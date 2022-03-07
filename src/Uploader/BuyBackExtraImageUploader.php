@@ -22,9 +22,6 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Uploader;
 
-use Ad_BuyBack;
-use AdBuyBack\Domain\BuyBackImage\Command\CreateBuyBackImageCommand;
-use AdBuyBack\Domain\BuyBackImage\Query\GetImageForBuyBack;
 use AdBuyBack\Tools\BuyBackTools;
 use ImageManager;
 use PrestaShop\PrestaShop\Core\Image\Exception\ImageOptimizationException;
@@ -52,12 +49,11 @@ final class BuyBackExtraImageUploader implements ImageUploaderInterface
 
         $directory = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $id . '/';
         $temporaryName = $this->createTemporaryImage($image);
-        $name = $image->getClientOriginalName();
+        $imageName = $image->getClientOriginalName();
 
         BuyBackTools::createDirectory($directory);
         BuyBackTools::createDirectory($directory . '/thumbnail/');
-        $this->uploadFromTemp($temporaryName, $directory, $name);
-        $this->createBuyBackImage($id, $name);
+        $this->uploadFromTemp($temporaryName, $directory, $imageName);
     }
 
     /**
@@ -110,13 +106,18 @@ final class BuyBackExtraImageUploader implements ImageUploaderInterface
             throw new MemoryLimitException('Cannot upload image due to memory restrictions');
         }
 
-        if (!ImageManager::resize($temporaryName, $destination . $name)) {
+        $imageInfos = getimagesize($temporaryName);
+        $error = 0;
+
+        if (!ImageManager::resize($temporaryName, $destination . $name, $imageInfos[0], $imageInfos[1],
+            $imageInfos['mime'], false, $error, $imageInfos[0], $imageInfos[0], 10)) {
             throw new ImageOptimizationException('An error occurred while uploading the image. Check your directory permissions.');
         }
 
         $thumbnailSize = $this->getThumbnailSize($destination . $name);
 
-        if (!ImageManager::resize($temporaryName, $destination . '/thumbnail/' . $name, $thumbnailSize['width'], $thumbnailSize['height'])) {
+        if (!ImageManager::resize($temporaryName, $destination . '/thumbnail/' . $name, $thumbnailSize['width'], $thumbnailSize['height'],
+            $imageInfos['mime'], false, $error, $imageInfos[0], $imageInfos[1], 10)) {
             throw new ImageOptimizationException('An error occurred while creating thumbnail. Check your directory permissions.');
         }
 
@@ -129,35 +130,15 @@ final class BuyBackExtraImageUploader implements ImageUploaderInterface
      */
     private function getThumbnailSize(string $image): array
     {
-        $infos = getimagesize($image);
+        $thumbnailSize = getimagesize($image);
         $desiredHeight = 360;
         $maxWidth = 480;
-        $width = $infos[0] * $desiredHeight / $infos[1];
-        $height = $infos[1] * $maxWidth / $infos[0];
+        $width = $thumbnailSize[0] * $desiredHeight / $thumbnailSize[1];
+        $height = $thumbnailSize[1] * $maxWidth / $thumbnailSize[0];
 
         return [
             'width' => min($width, $maxWidth),
             'height' => $width <= $maxWidth ? $desiredHeight : $height
         ];
-    }
-
-    /**
-     * @param int $buybackId
-     * @param string $name
-     * @return void
-     */
-    private function createBuyBackImage(int $buybackId, string $name): void
-    {
-        // Use custom kernel for front office
-        $commandBus = Ad_BuyBack::getService('prestashop.core.command_bus');
-        $images = $commandBus->handle(new GetImageForBuyBack($buybackId))->getData();
-
-        foreach ($images as $image) {
-            if (in_array($name, $image, true)) {
-                return;
-            }
-        }
-
-        $commandBus->handle((new CreateBuyBackImageCommand())->fromArray(['id_ad_buyback' => $buybackId, 'name' => $name]));
     }
 }

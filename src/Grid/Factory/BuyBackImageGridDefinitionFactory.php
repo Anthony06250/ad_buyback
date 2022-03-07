@@ -26,8 +26,8 @@ use AdBuyBack\Grid\Action\DeleteBulkAction;
 use AdBuyBack\Grid\Action\DividerBulkAction;
 use AdBuyBack\Grid\Action\DuplicateBulkAction;
 use AdBuyBack\Grid\Column\BuyBackImageColumn;
+use AdBuyBack\Model\BuyBack;
 use AdBuyBack\Model\BuyBackImage;
-use AdBuyBack\Tools\BuyBackTools;
 use Context;
 use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollection;
 use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollectionInterface;
@@ -68,7 +68,7 @@ final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefi
      */
     protected function getName(): string
     {
-        return $this->trans('List of buyback images', [], 'Modules.Adbuyback.Admin');
+        return $this->trans('List of images', [], 'Modules.Adbuyback.Admin');
     }
 
     /**
@@ -101,17 +101,9 @@ final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefi
                 ->setName($this->trans('Buyback', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions(['field' => 'id_ad_buyback'])
             )
-            ->add((new DataColumn('gender'))
-                ->setName($this->trans('Gender', [], 'Modules.Adbuyback.Admin'))
-                ->setOptions(['field' => 'gender'])
-            )
-            ->add((new DataColumn('firstname'))
-                ->setName($this->trans('Firstname', [], 'Modules.Adbuyback.Admin'))
-                ->setOptions(['field' => 'firstname'])
-            )
-            ->add((new DataColumn('lastname'))
-                ->setName($this->trans('Lastname', [], 'Modules.Adbuyback.Admin'))
-                ->setOptions(['field' => 'lastname'])
+            ->add((new DataColumn('customer'))
+                ->setName($this->trans('Civility', [], 'Modules.Adbuyback.Admin'))
+                ->setOptions(['field' => 'customer'])
             )
             ->add((new DateTimeColumn('date_add'))
                 ->setName($this->trans('Created', [], 'Modules.Adbuyback.Admin'))
@@ -141,9 +133,9 @@ final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefi
                                 'route' => 'admin_ad_buyback_image_delete',
                                 'route_param_name' => 'imageId',
                                 'route_param_field' => 'id',
-                                'confirm_message' => $this->trans('Are you sure you want to delete the buyback image ?', [], 'Modules.Adbuyback.Admin'),
+                                'confirm_message' => $this->trans('Are you sure you want to delete image of buyback ?', [], 'Modules.Adbuyback.Alert'),
                                 'modal_options' => new ModalOptions([
-                                    'title' => $this->trans('Delete buyback image', [], 'Modules.Adbuyback.Admin'),
+                                    'title' => $this->trans('Delete image of buyback', [], 'Modules.Adbuyback.Admin'),
                                     'confirm_button_label' => $this->trans('Delete', [], 'Modules.Adbuyback.Admin'),
                                     'confirm_button_class' => 'btn-danger',
                                     'close_button_label' => $this->trans('Close', [], 'Modules.Adbuyback.Admin')
@@ -165,35 +157,21 @@ final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefi
                 ->setAssociatedColumn('filename')
                 ->setTypeOptions([
                     'required' => false,
-                    'attr' => ['placeholder' => $this->trans('Search a filename', [], 'Modules.Adbuyback.Admin')]
+                    'attr' => ['placeholder' => $this->trans('Search', [], 'Modules.Adbuyback.Admin')]
                 ])
             )
             ->add((new Filter('id_ad_buyback', ChoiceType::class))
                 ->setAssociatedColumn('id_ad_buyback')
                 ->setTypeOptions([
                     'required' => false,
-                    'choices' => BuyBackImage::getBuyBackList()
+                    'choices' => BuyBackImage::getBuyBacksList()
                 ])
             )
-            ->add((new Filter('id_gender', ChoiceType::class))
-                ->setAssociatedColumn('gender')
+            ->add((new Filter('customer', ChoiceType::class))
+                ->setAssociatedColumn('customer')
                 ->setTypeOptions([
                     'required' => false,
-                    'choices' => BuyBackTools::getGendersForChoiceType()
-                ])
-            )
-            ->add((new Filter('firstname', TextType::class))
-                ->setAssociatedColumn('firstname')
-                ->setTypeOptions([
-                    'required' => false,
-                    'attr' => ['placeholder' => $this->trans('Search a firstname', [], 'Modules.Adbuyback.Admin')]
-                ])
-            )
-            ->add((new Filter('lastname', TextType::class))
-                ->setAssociatedColumn('lastname')
-                ->setTypeOptions([
-                    'required' => false,
-                    'attr' => ['placeholder' => $this->trans('Search a lastname', [], 'Modules.Adbuyback.Admin')]
+                    'choices' => BuyBackImage::getCustomersList()
                 ])
             )
             ->add((new Filter('date_add', DateRangeType::class))
@@ -222,7 +200,7 @@ final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefi
                 ->setName($this->trans('Duplicate selection', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions([
                     'submit_route' => 'admin_ad_buyback_image_duplicate_bulk',
-                    'confirm_message' => $this->trans('Are you sure you want to duplicate the selected image(s) ?', [], 'Modules.Adbuyback.Admin'),
+                    'confirm_message' => $this->trans('Are you sure you want to duplicate the selected image(s) ?', [], 'Modules.Adbuyback.Alert'),
                     'modal_options' => new ModalOptions([
                         'title' => $this->trans('Duplicate image(s) selection', [], 'Modules.Adbuyback.Admin'),
                         'confirm_button_label' => $this->trans('Duplicate selection', [], 'Modules.Adbuyback.Admin'),
@@ -235,7 +213,7 @@ final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefi
                 ->setName($this->trans('Delete selection', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions([
                     'submit_route' => 'admin_ad_buyback_image_delete_bulk',
-                    'confirm_message' => $this->trans('Are you sure you want to delete the selected image(s) ?', [], 'Modules.Adbuyback.Admin'),
+                    'confirm_message' => $this->trans('Are you sure you want to delete the selected image(s) ?', [], 'Modules.Adbuyback.Alert'),
                     'modal_options' => new ModalOptions([
                         'title' => $this->trans('Delete image(s) selection', [], 'Modules.Adbuyback.Admin'),
                         'confirm_button_label' => $this->trans('Delete selection', [], 'Modules.Adbuyback.Admin'),

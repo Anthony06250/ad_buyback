@@ -35,12 +35,12 @@ final class BuyBackImageQueryBuilder extends AbstractDoctrineQueryBuilder
     /**
      * @var int
      */
-    private $contextLanguageId;
+    private $languageId;
 
     /**
      * @var int
      */
-    private $contextShopId;
+    private $shopId;
 
     /**
      * @var DoctrineSearchCriteriaApplicatorInterface
@@ -49,16 +49,16 @@ final class BuyBackImageQueryBuilder extends AbstractDoctrineQueryBuilder
 
     /**
      * @param Connection $connection
-     * @param string $dbPrefix
-     * @param int $contextLanguageId
-     * @param int $contextShopId
+     * @param string $databasePrefix
+     * @param int $languageId
+     * @param int $shopId
      * @param DoctrineSearchCriteriaApplicatorInterface $searchCriteriaApplicator
      */
-    public function __construct(Connection $connection, string $dbPrefix, int $contextLanguageId, int $contextShopId, DoctrineSearchCriteriaApplicatorInterface $searchCriteriaApplicator)
+    public function __construct(Connection $connection, string $databasePrefix, int $languageId, int $shopId, DoctrineSearchCriteriaApplicatorInterface $searchCriteriaApplicator)
     {
-        parent::__construct($connection, $dbPrefix);
-        $this->contextLanguageId = $contextLanguageId;
-        $this->contextShopId = $contextShopId;
+        parent::__construct($connection, $databasePrefix);
+        $this->languageId = $languageId;
+        $this->shopId = $shopId;
         $this->searchCriteriaApplicator = $searchCriteriaApplicator;
     }
 
@@ -71,8 +71,7 @@ final class BuyBackImageQueryBuilder extends AbstractDoctrineQueryBuilder
         $query = $this->getQueryBuilder($searchCriteria->getFilters());
 
         $query->select('p.`id_ad_buyback_image` AS `id`, p.`id_ad_buyback`, p.`name` AS `filename`, p.`date_add`')
-            ->addSelect('ps.`firstname`, ps.`lastname`')
-            ->addSelect('pl.`name` AS `gender`');
+            ->addSelect('CONCAT(pl.`name`, " ", ps.`firstname`, " ", ps.`lastname`) AS `customer`');
 
         $this->searchCriteriaApplicator
             ->applyPagination($searchCriteria, $query)
@@ -112,7 +111,7 @@ final class BuyBackImageQueryBuilder extends AbstractDoctrineQueryBuilder
             'pl',
             'pl.`id_gender` = ps.`id_gender` AND pl.`id_lang` = :id_lang'
         )
-        ->setParameter('id_lang', $this->contextLanguageId);
+        ->setParameter('id_lang', $this->languageId);
 
         foreach ($filters as $filterName => $filter) {
             if ('filename' === $filterName) {
@@ -129,23 +128,9 @@ final class BuyBackImageQueryBuilder extends AbstractDoctrineQueryBuilder
                 continue;
             }
 
-            if ('id_gender' === $filterName) {
-                $query->andWhere('pl.`id_gender` LIKE :id_gender');
-                $query->setParameter('id_gender', '%' . $filter . '%');
-
-                continue;
-            }
-
-            if ('firstname' === $filterName) {
-                $query->andWhere('ps.`firstname` LIKE :firstname');
-                $query->setParameter('firstname', '%' . $filter . '%');
-
-                continue;
-            }
-
-            if ('lastname' === $filterName) {
-                $query->andWhere('ps.`lastname` LIKE :lastname');
-                $query->setParameter('lastname', '%' . $filter . '%');
+            if ('customer' === $filterName) {
+                $query->andWhere('CONCAT(pl.`name`, " ", ps.`firstname`, " ", ps.`lastname`) LIKE :customer');
+                $query->setParameter('customer', '%' . $filter . '%');
 
                 continue;
             }

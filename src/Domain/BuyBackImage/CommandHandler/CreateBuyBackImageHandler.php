@@ -22,14 +22,30 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Domain\BuyBackImage\CommandHandler;
 
+use Ad_BuyBack;
 use AdBuyBack\Domain\BuyBackImage\Command\CreateBuyBackImageCommand;
 use AdBuyBack\Domain\BuyBackImage\Exception\CannotCreateBuyBackImageException;
 use AdBuyBack\Domain\BuyBackImage\ValueObject\BuyBackImageId;
 use AdBuyBack\Model\BuyBackImage;
+use PrestaShopBundle\Translation\TranslatorInterface;
 use PrestaShopException;
 
 final class CreateBuyBackImageHandler
 {
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
+     *
+     */
+    public function __construct()
+    {
+        // Use custom kernel for front office
+        $this->translator = Ad_BuyBack::getService('translator');
+    }
+
     /**
      * @param CreateBuyBackImageCommand $command
      * @return BuyBackImageId
@@ -39,23 +55,30 @@ final class CreateBuyBackImageHandler
         try {
             $image = new BuyBackImage();
 
-            $image->hydrate($command->toArray());
-            $this->createBuyBackImage($image);
+            $this->createBuyBackImage($image, $command);
         } catch (PrestaShopException $exception) {
-            throw new CannotCreateBuyBackImageException('An unexpected error occurred when create buy back image');
+            throw new CannotCreateBuyBackImageException($exception->getMessage());
         }
 
         return $command->getId()->setValue((int)$image->id);
     }
 
     /**
-     * @param $image
+     * @param BuyBackImage $image
+     * @param CreateBuyBackImageCommand $command
      * @return void
+     * @throws PrestaShopException
      */
-    private function createBuyBackImage($image): void
+    private function createBuyBackImage(BuyBackImage $image, CreateBuyBackImageCommand $command): void
     {
+        $image->hydrate($command->toArray());
+
         if (!$image->add()) {
-            throw new CannotCreateBuyBackImageException('Failed to create buy back image');
+            throw new CannotCreateBuyBackImageException($this->translator->trans(
+                'Failed to create buyback image.',
+                [],
+                'Modules.Adbuyback.Alert'
+            ));
         }
     }
 }
