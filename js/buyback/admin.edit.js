@@ -17,21 +17,63 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 
+import ImageModal from '../buyback_image/admin.modal';
+
 $(function () {
-    $('#buyback_edit_image .ad-bb-edit-img').on('click', function () {
-        loadImageInModal($(this).find('img').attr('src'));
-        loadTitleInModal($(this).find('img').attr('alt'));
+    let modal = new ImageModal('buyback-edit-view-modal');
+    let customerInfos = new CustomerInfos();
+
+    $('#buy_back_id_customer').on('change', function() {
+        customerInfos.getCustomerInfos(this);
+    });
+
+    $('.ad-bb-admin-img-btn').on('click', function () {
+        modal.loadImageModal(this);
     });
 });
 
-function loadImageInModal(source) {
-    let link = source.split('/').filter(function(element) {return element !== 'thumbnail';}).join('/');
+class CustomerInfos {
+    constructor() {
+        this.defaultCustomer = {
+            'id_gender': $('#buy_back_id_gender').val(),
+            'firstname': $('#buy_back_firstname').val(),
+            'lastname': $('#buy_back_lastname').val(),
+            'email': $('#buy_back_email').val()
+        };
+        this.init();
+    }
 
-    $('#buyback-edit-view-modal').find('.ad-bb-modal-figure img').attr('src', source).end()
-        .find('.ad-bb-modal-view').attr('href', link);
-}
+    init() {
+        if ($('#buy_back_id_customer option:selected').val()) {
+            this.readOnlyInputs(true);
+        }
+    }
 
-function loadTitleInModal(title) {
-    $('#buyback-edit-view-modal').find('.ad-bb-modal-figure img').attr('alt', title).end()
-        .find('.ad-bb-modal-figure figcaption').html(title);
+    getCustomerInfos(trigger) {
+        let url = $('#buy_back_id_customer').attr('data-customer-url');
+        let self = this;
+
+        $.post(url, {'buybackId': $(trigger).val()}, function(data) {
+            (data.status === true)
+                ? self.fillCustomerInputs(data.message)
+                : $.growl.error({message: data.message});
+        }, 'json');
+    }
+
+    fillCustomerInputs(data) {
+        $('#buy_back_id_gender').prop('selectedIndex', data ? data['id_gender'] : this.defaultCustomer.id_gender);
+        $('#buy_back_firstname').val(data ? data['firstname'] : this.defaultCustomer.firstname);
+        $('#buy_back_lastname').val(data ? data['lastname'] : this.defaultCustomer.lastname);
+        $('#buy_back_email').val(data ? data['email'] : this.defaultCustomer.email);
+        this.readOnlyInputs((data));
+    }
+
+    readOnlyInputs(readonly) {
+        let inputIdGender = $('#buy_back_id_gender');
+
+        readonly ? inputIdGender.addClass('readonly') : inputIdGender.removeClass('readonly')
+        $('#buy_back_firstname').attr('readonly', readonly);
+        $('#buy_back_lastname').attr('readonly', readonly);
+        $('#buy_back_email').attr('readonly', readonly);
+    }
 }

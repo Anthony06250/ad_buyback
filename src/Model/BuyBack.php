@@ -180,6 +180,36 @@ final class BuyBack extends ObjectModel
         $customersList = $result = [];
 
         foreach ($buybacks as $buyback) {
+            if ($buyback->id_customer && !in_array($buyback->id_customer, $result)) {
+                $customersList[] = $buyback->id_customer;
+            }
+            if (in_array($buyback->id_customer, $customersList)) {
+                foreach ($genders as $genderName => $genderId) {
+                    if (!array_key_exists($genderName . ' ' . $buyback->firstname . ' ' . $buyback->lastname, $result)
+                        && $genderId === $buyback->id_gender) {
+                        $fullname = $genderName . ' ' . $buyback->firstname . ' ' . $buyback->lastname;
+                        $result[$fullname] = $buyback->id_customer;
+                    }
+                }
+            }
+        }
+
+        asort($result);
+
+        return $result;
+    }
+
+    /**
+     * @return array
+     * @throws PrestaShopException
+     */
+    public static function getCustomersListWithVisitors(): array
+    {
+        $buybacks = self::getBuyBacks();
+        $genders = self::getGendersList();
+        $customersList = $result = [];
+
+        foreach ($buybacks as $buyback) {
             if (!in_array($buyback->id_customer, $result)) {
                 $customersList[] = $buyback->id_customer;
             }

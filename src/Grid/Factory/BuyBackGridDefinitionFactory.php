@@ -172,7 +172,7 @@ final class BuyBackGridDefinitionFactory extends AbstractFilterableGridDefinitio
                 ->setAssociatedColumn('customer')
                 ->setTypeOptions([
                     'required' => false,
-                    'choices' => BuyBack::getCustomersList()
+                    'choices' => BuyBack::getCustomersListWithVisitors()
                 ])
             )
             ->add((new Filter('email', TextType::class))

@@ -39,6 +39,14 @@
             </section>
         </section>
     </section>
+
+    {% include '@Modules/ad_buyback/views/templates/admin/buyback/_parts/modal.html.twig' with {'modalId': 'buyback-chat-modal'} %}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="{{ asset('/modules/ad_buyback/views/css/admin.message.css') }}">
 {% endblock %}
 
 {% block javascripts %}

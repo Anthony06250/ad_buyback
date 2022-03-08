@@ -17,10 +17,13 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 
+import ImageModal from './admin.modal';
+
 $(function () {
-    $('#buybackImage_grid_table .ad-bb-grid-img').on('click', function () {
-        loadImageInModal($(this).find('img').attr('src'));
-        loadTitleInModal($(this).find('img').attr('alt'));
+    let modal = new ImageModal('buybackImage-view-modal');
+
+    $('.ad-bb-admin-img-btn').on('click', function () {
+        modal.loadImageModal(this);
     });
 
     const grid = new window.prestashop.component.Grid('buybackImage');
@@ -42,15 +45,3 @@ $(function () {
     grid.addExtension(new window.prestashop.component.GridExtensions.SubmitGridActionExtension());
     grid.addExtension(new window.prestashop.component.GridExtensions.SubmitRowActionExtension());
 });
-
-function loadImageInModal(source) {
-    let link = source.split('/').filter(function(element) {return element !== 'thumbnail';}).join('/');
-
-    $('#buybackImage-grid-view-modal').find('.ad-bb-modal-figure img').attr('src', source).end()
-        .find('.ad-bb-modal-view').attr('href', link);
-}
-
-function loadTitleInModal(title) {
-    $('#buybackImage-grid-view-modal').find('.ad-bb-modal-figure img').attr('alt', title).end()
-        .find('.ad-bb-modal-figure figcaption').html(title);
-}

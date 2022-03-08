@@ -9,7 +9,7 @@
                        {if isset($field.attr.placeholder)}placeholder="{$field.attr.placeholder}"{/if}
                 >
                 <div class="input-group-btn">
-                    <label class="btn btn-primary m-0" for="field-{$field.name}" style="height: 100%">
+                    <label class="btn btn-primary" for="field-{$field.name}" style="border: 2px solid #24b9d7;">
                         {l s='Browse' d='Shop.Forms.Labels'}
                     </label>
                     <input id="field-{$field.name}" name="{$field.name}[]" type="{$field.type}" hidden

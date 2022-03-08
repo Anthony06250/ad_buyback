@@ -121,4 +121,23 @@ class BuyBackChatFrontController extends ModuleFrontController
 
         $this->redirectWithNotifications($this->getCurrentURL());
     }
+
+    /**
+     * @return array
+     */
+    public function getBreadcrumbLinks(): array
+    {
+        $breadcrumb = parent::getBreadcrumbLinks();
+        $breadcrumb['links'][] = $this->addMyAccountToBreadcrumb();
+        $breadcrumb['links'][] = [
+            'title' => $this->trans('Buyback', [], 'Modules.Adbuyback.Front'),
+            'url' => $this->context->link->getModuleLink('ad_buyback', 'buyback')
+        ];
+        $breadcrumb['links'][] = [
+            'title' => $this->trans('Chat', [], 'Modules.Adbuyback.Front'),
+            'url' => $this->context->link->getModuleLink('ad_buyback', 'chat')
+        ];
+
+        return $breadcrumb;
+    }
 }

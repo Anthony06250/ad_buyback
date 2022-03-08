@@ -52,7 +52,7 @@ final class BuyBackChatRepository
      * @param string $databasePrefix
      * @param int $languageId
      */
-    public function __construct(Connection $connection, string $databasePrefix = 'ps_', int $languageId)
+    public function __construct(Connection $connection, string $databasePrefix, int $languageId)
     {
         $this->connection = $connection;
         $this->databasePrefix = $databasePrefix;

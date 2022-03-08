@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Form\Type;
 
+use AdBuyBack\Model\BuyBack;
 use AdBuyBack\Model\BuyBackChat;
 use AdBuyBack\Tools\BuyBackTools;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
@@ -53,6 +54,7 @@ final class BuyBackMessageType extends TranslatorAwareType
             ->add('id_customer', ChoiceType::class, [
                 'label' => $this->trans('Customer', 'Modules.Adbuyback.Form'),
                 'required' => false,
+                'choices' => BuyBack::getCustomersList(),
                 'placeholder' => $this->trans('Choose customer', 'Modules.Adbuyback.Form')
             ])
             ->add('id_employee', ChoiceType::class, [

@@ -1,6 +1,6 @@
 {% trans_default_domain 'Modules.Adbuyback.Admin' %}
 
-<section class="ad-bb-message p-0 border {{ direction ? 'border-success' : 'border-info' }} rounded" style="background-color: {{ direction == '0' ? '#beeaf3' : '#cbf2d4' }};">
+<section class="ad-bb-admin-message p-0 border {{ direction ? 'border-success' : 'border-info' }} rounded" style="background-color: {{ direction == '0' ? '#beeaf3' : '#cbf2d4' }};">
     <header>
         <h4 class="d-flex justify-content-between align-items-center m-2">
             <article>
@@ -24,7 +24,7 @@
     </article>
     <footer class="d-flex justify-content-between border-top {{ direction ? 'border-success' : 'border-info' }}">
         <small class="align-middle p-1 pl-2">
-            <i class="material-icons mr-1" style="font-size: 10px;">timer</i>
+            <i class="material-icons md-10 mr-1">timer</i>
             {{ message.date_add | date_format_full }}
         </small>
         <small class="p-1 pr-2">

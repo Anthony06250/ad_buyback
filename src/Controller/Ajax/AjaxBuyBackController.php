@@ -23,25 +23,25 @@ declare(strict_types=1);
 namespace AdBuyBack\Controller\Ajax;
 
 use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
-use AdBuyBack\Domain\BuyBackChat\Query\GetCustomerForMessage;
+use AdBuyBack\Domain\BuyBack\Query\GetCustomerForBuyBack;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopBundle\Security\Annotation\AdminSecurity;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-final class AjaxChatController extends FrameworkBundleAdminController
+final class AjaxBuyBackController extends FrameworkBundleAdminController
 {
     /**
      * @AdminSecurity("is_granted('read', request.get('_legacy_controller'))", message="Access denied.")
      * @param Request $request
      * @return JsonResponse
      */
-    public function getCustomerForMessage(Request $request): JsonResponse
+    public function getCustomerForBuyBack(Request $request): JsonResponse
     {
-        $chatId = $request->get('chatId');
+        $buybackId = $request->get('buybackId');
 
         try {
-            $customer = $this->getQueryBus()->handle(new GetCustomerForMessage($chatId))->getData();
+            $customer = $this->getQueryBus()->handle(new GetCustomerForBuyBack($buybackId))->getData();
 
             $response = [
                 'status' => true,

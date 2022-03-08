@@ -5,6 +5,7 @@ services:
         arguments:
             - '@doctrine.dbal.default_connection'
             - '%database_prefix%'
+            - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
 
     # BuyBack form factory
     adbuyback.form.type.buyback:
@@ -536,6 +537,15 @@ services:
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBackMessage\Command\DeleteBulkBuyBackMessageCommand'
+
+    # AJAX BuyBack domain query handler
+    adbuyback.domain.ajax_buyback.query_handler.get_customer_for_buyback:
+        class: 'AdBuyBack\Domain\BuyBack\QueryHandler\GetCustomerForBuyBackHandler'
+        arguments:
+            - '@adbuyback.repository.buyback'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBack\Query\GetCustomerForBuyBack'
 
     # AJAX BuyBack Chat domain query handler
     adbuyback.domain.ajax_chat.query_handler.get_customer_for_message:

@@ -13,9 +13,14 @@
           {if $form.options.multipart}enctype="multipart/form-data"{/if}
     >
         {foreach from=$form.fields item=field}
+            {if $field['id']|strpos: 'id_customer'}
+                {$field.type = 'hidden'}
+            {/if}
             {if $field.type === 'choice'}
-                {$field['value'] = $customer.gender.id}
-                {$field['readonly'] = ($customer.gender.id)}
+                {if $field['id']|strpos: 'id_gender'}
+                    {$field['value'] = $customer.gender.id}
+                    {$field['readonly'] = ($customer.gender.id)}
+                {/if}
                 {include file='modules/ad_buyback/views/templates/front/_parts/form/choices.tpl'}
             {elseif $field.type === 'textarea'}
                 {include file='modules/ad_buyback/views/templates/front/_parts/form/textarea.tpl'}
@@ -46,4 +51,11 @@
             </button>
         </footer>
     </form>
+{/block}
+
+{block name='page_footer'}
+    <a href="{$urls.pages.index}" class="account-link">
+        <i class="material-icons">&#xE88A;</i>
+        <span>{l s='Home' d='Shop.Theme.Global'}</span>
+    </a>
 {/block}

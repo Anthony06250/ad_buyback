@@ -277,6 +277,14 @@ admin_ad_buyback_message_delete_bulk:
         _controller: 'AdBuyBack\Controller\Admin\BuyBackMessageController::deleteBulkAction'
         _legacy_controller: 'AdminBuyBack'
 
+# AJAX BuyBack query
+ajax_ad_buyback_customer_for_buyback:
+    path: /buyback/ajax/customer-for-buyback
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Ajax\AjaxBuyBackController::getCustomerForBuyBack'
+        _legacy_controller: 'AdminBuyBack'
+
 # AJAX BuyBack Chat query
 ajax_ad_buyback_customer_for_message:
     path: /buyback/ajax/customer-for-message

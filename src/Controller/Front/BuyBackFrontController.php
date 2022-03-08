@@ -85,4 +85,19 @@ class BuyBackFrontController extends ModuleFrontController
         $this->context->smarty->assign(['buybacks' => $buybacks]);
         $this->setTemplate('module:' . $this->module->name . '/views/templates/front/buyback.tpl');
     }
+
+    /**
+     * @return array
+     */
+    public function getBreadcrumbLinks(): array
+    {
+        $breadcrumb = parent::getBreadcrumbLinks();
+        $breadcrumb['links'][] = $this->addMyAccountToBreadcrumb();
+        $breadcrumb['links'][] = [
+            'title' => $this->trans('Buyback', [], 'Modules.Adbuyback.Front'),
+            'url' => $this->context->link->getModuleLink('ad_buyback', 'buyback')
+        ];
+
+        return $breadcrumb;
+    }
 }

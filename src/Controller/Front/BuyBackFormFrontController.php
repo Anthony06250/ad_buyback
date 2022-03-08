@@ -109,4 +109,18 @@ class BuyBackFormFrontController extends ModuleFrontController
 
         $this->redirectWithNotifications($this->getCurrentURL());
     }
+
+    /**
+     * @return array
+     */
+    public function getBreadcrumbLinks(): array
+    {
+        $breadcrumb = parent::getBreadcrumbLinks();
+        $breadcrumb['links'][] = [
+            'title' => $this->trans('Buyback form', [], 'Modules.Adbuyback.Front'),
+            'url' => $this->context->link->getModuleLink('ad_buyback', 'form')
+        ];
+
+        return $breadcrumb;
+    }
 }

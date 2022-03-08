@@ -23,7 +23,6 @@ declare(strict_types=1);
 namespace AdBuyBack\Tools;
 
 use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
-use Context;
 use Customer;
 use Employee;
 use FilesystemIterator;

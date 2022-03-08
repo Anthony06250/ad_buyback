@@ -18,10 +18,12 @@
  */
 
 $(function () {
+    let customerInfos = new CustomerInfos();
+
     $('#buy_back_message_id_ad_buyback_chat').on('change', function() {
-        if ($(this).val()) {
-            getCustomerInfo($(this).val());
-        }
+        ($(this).val())
+            ? customerInfos.getCustomerInfos(this)
+            : customerInfos.disableUnnecessaryOptions();
     });
 
     $('#buy_back_message_id_customer').on('change', function() {
@@ -37,25 +39,53 @@ $(function () {
     });
 });
 
-function getCustomerInfo(chatId) {
-    let url = $('#buy_back_message_id_customer').attr('data-customer-url');
+class CustomerInfos {
+    constructor() {
+        this.disableUnnecessaryOptions();
+        this.init();
+    }
 
-    $.post(url, {'chatId': chatId}, function(data) {
-        (data.status === true)
-            ? fillCustomerInput(data.message)
-            : $.growl.error({message: data.message});
-    }, 'json');
-}
+    init() {
+        let defaultChat = $('#buy_back_message_id_ad_buyback_chat option:selected');
 
-function fillCustomerInput(data) {
-    $('#buy_back_message_id_customer').find('option').slice(1).remove().end().end()
-        .append($('<option>', {
-            value: (data.id_customer !== '0') ? data.id_customer : '',
-            text: data.fullname,
-            selected: true
-    })).on('change', function() {
-        if ($(this).val()) {
-            $('#buy_back_message_id_employee').prop('selectedIndex', 0);
+        if (defaultChat.val()) {
+            this.getCustomerInfos(defaultChat);
         }
-    }).trigger('change');
+    }
+
+    getCustomerInfos(trigger) {
+        let url = $('#buy_back_message_id_customer').attr('data-customer-url');
+        let self = this;
+
+        $.post(url, {'chatId': $(trigger).val()}, function(data) {
+            (data.status === true)
+                ? self.fillCustomerSelect(data.message)
+                : $.growl.error({message: data.message});
+        }, 'json');
+    }
+
+    fillCustomerSelect(data) {
+        this.enableNecessaryOptions(data.id_customer);
+        this.disableUnnecessaryOptions(data.id_customer);
+        this.removeVisitorOption();
+        if (data.id_customer === '0') {
+            this.addVisitorOption(data.fullname);
+        }
+    }
+
+    enableNecessaryOptions(necessary) {
+        $('#buy_back_message_id_customer').find('option[value=' + necessary + ']').show();
+    }
+
+    disableUnnecessaryOptions(necessary) {
+        $('#buy_back_message_id_customer').prop('selectedIndex', 0).find('option[value!=' + necessary + ']').slice(1).hide();
+    }
+
+    addVisitorOption(visitor) {
+        $('#buy_back_message_id_customer').append(new Option(visitor, ''));
+    }
+
+    removeVisitorOption() {
+        $('#buy_back_message_id_customer').find('option[value!=""]').slice(1).remove();
+    }
 }

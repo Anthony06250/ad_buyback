@@ -17,46 +17,61 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 
+import Modal from '../buyback/admin.modal';
+
 $(function () {
+    let modal = new Modal('buyback-chat-modal');
+    let chatActions = new ChatActions();
+    let messageActions = new MessageActions();
+
     $('html, body').animate({
-        scrollTop: $('.ad-bb-message').last().offset().top
+        scrollTop: $('.ad-bb-admin-message').last().offset().top
             - $('.header-toolbar').height()
             - $('#header_infos').height()
     }, 1000);
 
-    $('.card-header .ps-switch').on('change', function() {
-        toggleActiveChat(this);
+    $('.ad-bb-admin-chat-actions .ps-switch').on('change', function() {
+        chatActions.toggleActiveChat(this);
     });
 
-    $('.ad-bb-message .ps-switch').on('change', function() {
-        toggleActiveMessage(this);
+    $('.ad-bb-admin-msg-actions .ps-switch').on('change', function() {
+        messageActions.toggleActiveMessage(this);
+    });
+
+    $('.ad-bb-admin-chat-actions-delete, .ad-bb-admin-msg-actions-delete').on('click', function () {
+        modal.show(this);
     });
 });
 
-function toggleActiveChat(chat) {
-    let url = $(chat).attr('data-toggle-url');
+class ChatActions {
+    toggleActiveChat(chat) {
+        let url = $(chat).attr('data-toggle-url');
+        let self = this;
 
-    $.post(url, function(data) {
-        if (data.status === true) {
-            $.growl({message: data.message});
-            disableTextarea($(chat).find('input:checked').val());
-        } else {
-            $.growl.error({message: data.message});
-        }
-    }, 'json');
+        $.post(url, function(data) {
+            if (data.status === true) {
+                $.growl({message: data.message});
+                self.disableTextarea($(chat).find('input:checked').val());
+            } else {
+                $.growl.error({message: data.message});
+            }
+        }, 'json');
+    }
+
+    disableTextarea(status) {
+        $('#buy_back_message_message').attr('disabled', (status  === '0'));
+        $('button:submit').attr('disabled', (status  === '0'));
+    }
 }
 
-function disableTextarea(status) {
-    $('#buy_back_message_message').attr('disabled', (status  === '0'));
-    $('button:submit').attr('disabled', (status  === '0'));
-}
+class MessageActions {
+    toggleActiveMessage(message) {
+        let url = $(message).attr('data-toggle-url');
 
-function toggleActiveMessage(message) {
-    let url = $(message).attr('data-toggle-url');
-
-    $.post(url, function(data) {
-        (data.status === true)
-            ? $.growl({message: data.message})
-            : $.growl.error({message: data.message});
-    }, 'json');
+        $.post(url, function(data) {
+            (data.status === true)
+                ? $.growl({message: data.message})
+                : $.growl.error({message: data.message});
+        }, 'json');
+    }
 }

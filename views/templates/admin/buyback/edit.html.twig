@@ -23,6 +23,8 @@
                             {% for key, field in form.children %}
                                 {% if form.vars.value.id_ad_buyback is not defined and 'active' in key %}
                                     {{ form_row(field, {'value': '1'}) }}
+                                {% elseif 'id_customer' in key %}
+                                    {{ form_row(field, {'attr': {'data-customer-url': url('ajax_ad_buyback_customer_for_buyback')}}) }}
                                 {% elseif 'image-' not in key and 'message-' not in key and 'message' not in key and 'image' not in key %}
                                     {{ form_row(field) }}
                                 {% endif %}
@@ -31,7 +33,7 @@
                     </article>
                     <footer class="card-footer">
                         <div class="d-flex justify-content-between">
-                            <a href="javascript: history.back()" class="btn btn-secondary">
+                            <a href="#" class="ad-bb-prev-btn btn btn-secondary">
                                 {{ 'Return' | trans }}
                             </a>
                             <button class="btn btn-{{ form.vars.value.id_ad_buyback is not defined ? 'success' : 'warning' }}">
@@ -57,12 +59,14 @@
                     </header>
                     <article class="card-block row">
                         <div class="card-text row">
-                                {{ form_widget(form.children.image) }}
+                            {{ form_widget(form.children.image) }}
+                            <div class="ad-bb-admin-buyback-img row mt-3 ml-0">
                                 {% for key, field in form.children %}
                                     {% if ('image-' in key) %}
                                         {{ form_widget(field) }}
                                     {% endif %}
                                 {% endfor %}
+                            </div>
                         </div>
                     </article>
                     <footer class="card-footer">
@@ -118,6 +122,13 @@
     </section>
 
     {% include '@Modules/ad_buyback/views/templates/admin/buyback_image/_parts/modal.html.twig' with {'modalId': 'buyback-edit-view-modal'} %}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="{{ asset('/modules/ad_buyback/views/css/admin.buyback.css') }}">
+    <link rel="stylesheet" href="{{ asset('/modules/ad_buyback/views/css/admin.message.css') }}">
 {% endblock %}
 
 {% block javascripts %}

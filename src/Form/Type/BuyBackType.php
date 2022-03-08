@@ -75,7 +75,12 @@ class BuyBackType extends TranslatorAwareType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('id_ad_buyback', HiddenType::class)
-            ->add('id_customer', HiddenType::class)
+            ->add('id_customer', ChoiceType::class, [
+                'label' => $this->trans('Customer', 'Modules.Adbuyback.Form'),
+                'required' => false,
+                'choices' => BuyBackTools::getCustomersList(),
+                'placeholder' => $this->trans('Choose customer', 'Modules.Adbuyback.Form')
+            ])
             ->add('id_gender', ChoiceType::class, [
                 'label' => $this->trans('Civility', 'Modules.Adbuyback.Form'),
                 'required' => true,
