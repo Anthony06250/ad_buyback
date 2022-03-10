@@ -44,6 +44,11 @@ class BuyBackFormFrontController extends ModuleFrontController
     public function setMedia()
     {
         parent::setMedia();
+        $this->registerStylesheet(
+            'module-' . $this->module->name . '-front-form',
+            'modules/' . '/' . $this->module->name . '/views/css/front.form.css',
+            ['media' => 'all', 'priority' => 150]
+        );
         $this->registerJavascript(
             'module-' . $this->module->name . '-front-form',
             'modules/' . $this->module->name . '/views/js/buyback.front.form.bundle.js',
@@ -104,7 +109,7 @@ class BuyBackFormFrontController extends ModuleFrontController
 
             $this->errors[] = $this->trans('Ho !!! Unknown ERROR !!!', [], 'Modules.Adbuyback.Alert');
         } catch (BuyBackException $exception) {
-            $this->errors[] = $this->trans($exception->getMessage(), [], 'Modules.Adbuyback.Alert');
+            $this->errors[] = $exception->getMessage();
         }
 
         $this->redirectWithNotifications($this->getCurrentURL());
@@ -116,6 +121,15 @@ class BuyBackFormFrontController extends ModuleFrontController
     public function getBreadcrumbLinks(): array
     {
         $breadcrumb = parent::getBreadcrumbLinks();
+
+        if ($this->context->customer->id) {
+            $breadcrumb['links'][] = $this->addMyAccountToBreadcrumb();
+            $breadcrumb['links'][] = [
+                'title' => $this->trans('Buyback', [], 'Modules.Adbuyback.Front'),
+                'url' => $this->context->link->getModuleLink('ad_buyback', 'buyback')
+            ];
+        }
+
         $breadcrumb['links'][] = [
             'title' => $this->trans('Buyback form', [], 'Modules.Adbuyback.Front'),
             'url' => $this->context->link->getModuleLink('ad_buyback', 'form')

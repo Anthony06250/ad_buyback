@@ -37,21 +37,21 @@ final class BuyBackExtraImageUploader implements ImageUploaderInterface
     /**
      * @param $id
      * @param UploadedFile $image
+     * @param string|null $imageName
      * @return void
      * @throws ImageOptimizationException
      * @throws ImageUploadException
      * @throws MemoryLimitException
      * @throws UploadedImageConstraintException
      */
-    public function upload($id, UploadedFile $image): void
+    public function upload($id, UploadedFile $image, string $imageName = null): void
     {
         $this->checkImageIsAllowedForUpload($image);
 
         $directory = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $id . '/';
         $temporaryName = $this->createTemporaryImage($image);
-        $imageName = $image->getClientOriginalName();
+        $imageName = $imageName ?? $image->getClientOriginalName();
 
-        BuyBackTools::createDirectory($directory);
         BuyBackTools::createDirectory($directory . '/thumbnail/');
         $this->uploadFromTemp($temporaryName, $directory, $imageName);
     }

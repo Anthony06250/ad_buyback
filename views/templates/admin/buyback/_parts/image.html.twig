@@ -18,11 +18,16 @@
             </button>
         </article>
         <footer class="mt-3">
-            <button class="btn btn-outline-danger btn-sm" type="submit" formmethod="POST"
+            <a class="btn btn-outline-warning btn-sm mr-1" data-toggle="pstooltip" data-placement="top"
+               title="{{ 'Edit' | trans({}, 'Modules.Adbuyback.Form') }}"
+               href="{{ url('admin_ad_buyback_image_edit', {'imageId': id}) }}">
+                <i class="material-icons">edit</i>
+            </a>
+            <button class="btn btn-outline-danger btn-sm" type="submit" formmethod="POST" data-toggle="pstooltip" data-placement="top"
+                    title="{{ 'Delete' | trans({}, 'Modules.Adbuyback.Form') }}"
                     formaction="{{ path('admin_ad_buyback_delete_image', {'imageId': id, 'filename': filename ~ '.' ~ extension}) }}"
             >
-                <i class="material-icons mr-2">delete_forever</i>
-                {{ 'Delete' | trans({}, 'Modules.Adbuyback.Form') }}
+                <i class="material-icons">delete</i>
             </button>
         </footer>
     </section>

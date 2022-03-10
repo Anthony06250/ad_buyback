@@ -26,6 +26,7 @@
                 {include file='modules/ad_buyback/views/templates/front/_parts/form/textarea.tpl'}
             {elseif $field.type === 'file'}
                 {include file='modules/ad_buyback/views/templates/front/_parts/form/file.tpl'}
+                <section id="buyback-form-img-preview" class="row"></section>
             {elseif  $field.type === 'text' or  $field.type === 'email'}
                 {if $field['id']|strpos: 'firstname'}
                     {$field['value'] = $customer.firstname}
@@ -54,8 +55,14 @@
 {/block}
 
 {block name='page_footer'}
-    <a href="{$urls.pages.index}" class="account-link">
-        <i class="material-icons">&#xE88A;</i>
-        <span>{l s='Home' d='Shop.Theme.Global'}</span>
-    </a>
+    {if $customer['id']}
+        {block name='my_account_links'}
+            {include file='customer/_partials/my-account-links.tpl'}
+        {/block}
+    {else}
+        <a href="{$urls.pages.index}" class="account-link">
+            <i class="material-icons">&#xE88A;</i>
+            <span>{l s='Home' d='Shop.Theme.Global'}</span>
+        </a>
+    {/if}
 {/block}

@@ -112,6 +112,13 @@ final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefi
                     'format' => Context::getContext()->language->date_format_full
                 ])
             )
+            ->add((new DateTimeColumn('date_upd'))
+                ->setName($this->trans('Updated', [], 'Modules.Adbuyback.Admin'))
+                ->setOptions([
+                    'field' => 'date_upd',
+                    'format' => Context::getContext()->language->date_format_full
+                ])
+            )
             ->add((new ActionColumn('actions'))
                 ->setName($this->trans('Actions', [], 'Modules.Adbuyback.Admin'))
                 ->setOptions([
@@ -123,6 +130,16 @@ final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefi
                                 'route' => 'admin_ad_buyback_edit',
                                 'route_param_name' => 'buybackId',
                                 'route_param_field' => 'id_ad_buyback',
+                            ])
+                        )
+                        ->add((new LinkRowAction('edit'))
+                            ->setName($this->trans('Edit', [], 'Modules.Adbuyback.Admin'))
+                            ->setIcon('edit')
+                            ->setOptions([
+                                'route' => 'admin_ad_buyback_image_edit',
+                                'route_param_name' => 'imageId',
+                                'route_param_field' => 'id',
+                                'clickable_row' => true
                             ])
                         )
                         ->add((new SubmitRowAction('delete'))
@@ -176,6 +193,12 @@ final class BuyBackImageGridDefinitionFactory extends AbstractFilterableGridDefi
             )
             ->add((new Filter('date_add', DateRangeType::class))
                 ->setAssociatedColumn('date_add')
+                ->setTypeOptions([
+                    'date_format' => str_replace(['Y', 'm', 'd'], ['YYYY', 'MM', 'DD'], Context::getContext()->language->date_format_lite),
+                ])
+            )
+            ->add((new Filter('date_upd', DateRangeType::class))
+                ->setAssociatedColumn('date_upd')
                 ->setTypeOptions([
                     'date_format' => str_replace(['Y', 'm', 'd'], ['YYYY', 'MM', 'DD'], Context::getContext()->language->date_format_lite),
                 ])

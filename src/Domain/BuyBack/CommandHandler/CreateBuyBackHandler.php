@@ -29,6 +29,7 @@ use AdBuyBack\Domain\BuyBack\ValueObject\BuyBackId;
 use AdBuyBack\Domain\BuyBackChat\Command\CreateBuyBackChatCommand;
 use AdBuyBack\Domain\BuyBackMessage\Command\CreateBuyBackMessageCommand;
 use AdBuyBack\Model\BuyBack;
+use AdBuyBack\Tools\BuyBackTools;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShopBundle\Translation\TranslatorInterface;
 use PrestaShopException;
@@ -65,8 +66,8 @@ final class CreateBuyBackHandler extends ImageBuyBackHandler
             $buyback = new BuyBack();
 
             $this->createBuyBack($buyback, $command);
+            $this->createBuyBackImage($buyback, $command);
             $this->createBuyBackChat($buyback, $command);
-            $this->uploadImages((int)$buyback->id, $command);
         } catch (PrestaShopException $exception) {
             throw new CannotCreateBuyBackException($exception->getMessage());
         }
@@ -102,7 +103,8 @@ final class CreateBuyBackHandler extends ImageBuyBackHandler
         if ($command->getMessage()) {
             $chatId = $this->commandBus->handle((new CreateBuyBackChatCommand())->fromArray([
                 'id_ad_buyback' => $buyback->id,
-                'active' => $buyback->active
+                'active' => $buyback->active,
+                'token' => BuyBackTools::getToken()
             ]));
 
             $this->createBuyBackMessage($chatId->getValue(), $command);

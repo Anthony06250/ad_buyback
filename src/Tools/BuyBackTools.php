@@ -25,10 +25,12 @@ namespace AdBuyBack\Tools;
 use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
 use Customer;
 use Employee;
+use Exception;
 use FilesystemIterator;
 use Gender;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Tools;
 
 final class BuyBackTools
 {
@@ -89,6 +91,20 @@ final class BuyBackTools
         }
 
         return $infos['filename'] . '.' . $infos['extension'];
+    }
+
+    /**
+     * @return string
+     */
+    public static function getToken(): string
+    {
+        try {
+            $token = Tools::hash(bin2hex(random_bytes(32)));
+        } catch (Exception $exception) {
+            throw new BuyBackException($exception->getMessage());
+        }
+
+        return $token;
     }
 
     /**

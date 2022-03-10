@@ -22,15 +22,15 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Domain\BuyBackImage\CommandHandler;
 
-use AdBuyBack\Domain\BuyBackImage\Command\DeleteBuyBackImageCommand;
-use AdBuyBack\Domain\BuyBackImage\Exception\CannotDeleteBuyBackImageException;
+use AdBuyBack\Domain\BuyBackImage\Command\EditBuyBackImageCommand;
+use AdBuyBack\Domain\BuyBackImage\Exception\CannotEditBuyBackImageException;
 use AdBuyBack\Model\BuyBackImage;
 use AdBuyBack\Tools\BuyBackTools;
 use FilesystemIterator;
 use PrestaShopBundle\Translation\TranslatorInterface;
 use PrestaShopException;
 
-final class DeleteBuyBackImageHandler
+final class EditBuyBackImageHandler
 {
     /**
      * @var TranslatorInterface
@@ -46,42 +46,49 @@ final class DeleteBuyBackImageHandler
     }
 
     /**
-     * @param DeleteBuyBackImageCommand $command
+     * @param EditBuyBackImageCommand $command
      * @return void
      */
-    public function handle(DeleteBuyBackImageCommand $command): void
+    public function handle(EditBuyBackImageCommand $command): void
     {
         $imageId = $command->getId()->getValue();
 
         try {
             $image = new BuyBackImage($imageId);
 
-            $this->deleteImageFile($image);
-            $this->deleteBuyBackImage($image);
+            $this->editImageFile($image, $command);
+            $this->editBuyBackImage($image, $command);
         } catch (PrestaShopException $exception) {
-            throw new CannotDeleteBuyBackImageException($exception->getMessage());
+            throw new CannotEditBuyBackImageException($exception->getMessage());
         }
     }
 
     /**
      * @param BuyBackImage $image
+     * @param EditBuyBackImageCommand $command
      * @return void
      */
-    public function deleteImageFile(BuyBackImage $image): void
+    public function editImageFile(BuyBackImage $image, EditBuyBackImageCommand $command): void
     {
         $directory = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $image->id_ad_buyback . '/';
+        $destination = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $command->getBuyBackId() . '/';
 
-        if (!file_exists($directory . $image->name) || !unlink($directory . $image->name)) {
-            throw new CannotDeleteBuyBackImageException($this->translator->trans(
-                'Cannot delete image with id %imageId% for buyback with id %buybackId%.',
-                ['%imageId%' => $image->id, '%buybackId%' => $image->id_ad_buyback],
-                'Modules.Adbuyback.Alert'
-            ));
+        if (!file_exists($destination)) {
+            BuyBackTools::createDirectory($destination . 'thumbnail/');
+            if (!copy($directory . 'fileType', $destination . 'fileType')
+                || !copy($directory . 'thumbnail/fileType', $destination . 'thumbnail/fileType')) {
+                throw new CannotEditBuyBackImageException($this->translator->trans(
+                    'Fail to create directory for image with id %imageId% for buyback with id %buybackId%.',
+                    ['%imageId%' => $image->id, '%buybackId%' => $image->id_ad_buyback],
+                    'Modules.Adbuyback.Alert'
+                ));
+            }
         }
 
-        if (!file_exists($directory . '/thumbnail/' . $image->name) || !unlink($directory . '/thumbnail/' . $image->name)) {
-            throw new CannotDeleteBuyBackImageException($this->translator->trans(
-                'Cannot delete thumbnail for image with id %imageId% for buyback with id %buybackId%.',
+        if (!rename($directory . $image->name, $destination . $command->getName())
+            || !rename($directory . 'thumbnail/' . $image->name, $destination . 'thumbnail/' . $command->getName())) {
+            throw new CannotEditBuyBackImageException($this->translator->trans(
+                'Cannot move image with id %imageId% for buyback with id %buybackId%.',
                 ['%imageId%' => $image->id, '%buybackId%' => $image->id_ad_buyback],
                 'Modules.Adbuyback.Alert'
             ));
@@ -94,14 +101,17 @@ final class DeleteBuyBackImageHandler
 
     /**
      * @param BuyBackImage $image
+     * @param EditBuyBackImageCommand $command
      * @return void
      * @throws PrestaShopException
      */
-    public function deleteBuyBackImage(BuyBackImage $image): void
+    private function editBuyBackImage(BuyBackImage $image, EditBuyBackImageCommand $command): void
     {
-        if (!$image->delete()) {
-            throw new CannotDeleteBuyBackImageException($this->translator->trans(
-                'Failed to delete image with id %imageId%.',
+        $image->hydrate($command->toArray());
+
+        if (!$image->update()) {
+            throw new CannotEditBuyBackImageException($this->translator->trans(
+                'Failed to update image with id %imageId%.',
                 ['%imageId%' => $image->id],
                 'Modules.Adbuyback.Alert'
             ));

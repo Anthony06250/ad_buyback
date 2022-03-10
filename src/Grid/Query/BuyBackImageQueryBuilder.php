@@ -70,7 +70,7 @@ final class BuyBackImageQueryBuilder extends AbstractDoctrineQueryBuilder
     {
         $query = $this->getQueryBuilder($searchCriteria->getFilters());
 
-        $query->select('p.`id_ad_buyback_image` AS `id`, p.`id_ad_buyback`, p.`name` AS `filename`, p.`date_add`')
+        $query->select('p.`id_ad_buyback_image` AS `id`, p.`id_ad_buyback`, p.`name` AS `filename`, p.`date_add`, p.`date_upd`')
             ->addSelect('CONCAT(pl.`name`, " ", ps.`firstname`, " ", ps.`lastname`) AS `customer`');
 
         $this->searchCriteriaApplicator
@@ -148,6 +148,24 @@ final class BuyBackImageQueryBuilder extends AbstractDoctrineQueryBuilder
 
                     $query->andWhere('p.`date_add` < :date_add_to');
                     $query->setParameter('date_add_to', $filter['to']->format('Y-m-d') . ' 23:59:59');
+                }
+
+                continue;
+            }
+
+            if ('date_upd' === $filterName) {
+                if (isset($filter['from'])) {
+                    $filter['from'] = DateTime::createFromFormat(Context::getContext()->language->date_format_lite, $filter['from']);
+
+                    $query->andWhere('p.`date_upd` > :date_upd_from');
+                    $query->setParameter('date_upd_from', $filter['from']->format('Y-m-d') . ' 00:00:00');
+                }
+
+                if (isset($filter['to'])) {
+                    $filter['to'] = DateTime::createFromFormat(Context::getContext()->language->date_format_lite, $filter['to']);
+
+                    $query->andWhere('p.`date_upd` < :date_upd_to');
+                    $query->setParameter('date_upd_to', $filter['to']->format('Y-m-d') . ' 23:59:59');
                 }
 
                 continue;

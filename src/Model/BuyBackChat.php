@@ -50,6 +50,11 @@ final class BuyBackChat extends ObjectModel
     public $date_upd;
 
     /**
+     * @var string
+     */
+    public $token;
+
+    /**
      * @see ObjectModel::$definition
      */
     public static $definition = [
@@ -59,7 +64,8 @@ final class BuyBackChat extends ObjectModel
             'id_ad_buyback' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedId'],
             'active' => ['type' => self::TYPE_BOOL, 'validate' => 'isBool'],
             'date_add' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false],
-            'date_upd' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false]
+            'date_upd' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false],
+            'token' => ['type' => self::TYPE_STRING, 'validate' => 'isMd5', 'copy_post' => false]
         ],
     ];
 

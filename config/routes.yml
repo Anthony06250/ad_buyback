@@ -95,6 +95,22 @@ admin_ad_buyback_image_search:
         _legacy_controller: 'AdminBuyBack'
         _legacy_link: 'AdminBuyBack:submitFilterbuybackImage'
 
+admin_ad_buyback_image_create:
+    path: /buyback/image/new
+    methods: [GET, POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackImageController::createAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_image_edit:
+    path: /buyback/image/{imageId}/edit
+    methods: [GET, POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackImageController::editAction'
+        _legacy_controller: 'AdminBuyBack'
+    requirements:
+        imageId: \d+
+
 admin_ad_buyback_image_delete:
     path: /buyback/image/delete
     methods: [POST]
@@ -172,6 +188,13 @@ admin_ad_buyback_chat_delete:
     methods: [POST]
     defaults:
         _controller: 'AdBuyBack\Controller\Admin\BuyBackChatController::deleteAction'
+        _legacy_controller: 'AdminBuyBack'
+
+admin_ad_buyback_chat_delete_message:
+    path: /buyback/chat/delete/message
+    methods: [POST]
+    defaults:
+        _controller: 'AdBuyBack\Controller\Admin\BuyBackChatController::deleteMessageAction'
         _legacy_controller: 'AdminBuyBack'
 
 admin_ad_buyback_chat_active:

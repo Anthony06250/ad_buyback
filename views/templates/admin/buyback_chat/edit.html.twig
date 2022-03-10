@@ -20,7 +20,13 @@
                     </header>
                     <article class="card-block row">
                         <div class="card-text">
-                            {{ form_rest(form) }}
+                            {% for key, field in form.children %}
+                                {% if form.vars.value.id_ad_buyback_chat is not defined and 'active' in key %}
+                                    {{ form_row(field, {'value': '1'}) }}
+                                {% else %}
+                                    {{ form_row(field) }}
+                                {% endif %}
+                            {% endfor %}
                         </div>
                     </article>
                     <footer class="card-footer">

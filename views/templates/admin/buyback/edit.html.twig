@@ -33,7 +33,7 @@
                     </article>
                     <footer class="card-footer">
                         <div class="d-flex justify-content-between">
-                            <a href="#" class="ad-bb-prev-btn btn btn-secondary">
+                            <a href="{{ url('admin_ad_buyback_index') }}" class="ad-bb-prev-btn btn btn-secondary">
                                 {{ 'Return' | trans }}
                             </a>
                             <button class="btn btn-{{ form.vars.value.id_ad_buyback is not defined ? 'success' : 'warning' }}">
@@ -47,7 +47,7 @@
                     </footer>
                 </section>
                 <section id="buyback_edit_image" class="card">
-                    <header class="card-header">
+                    <header class="card-header d-flex justify-content-between">
                         <h3 class="d-inline-block card-header-title">
                             <i class="material-icons">photo</i>
                             {% if form.vars.value.id_ad_buyback is not defined %}
@@ -56,6 +56,16 @@
                                 {{ 'Edit images' | trans }}
                             {% endif %}
                         </h3>
+                        <aside>
+                            {% if form.vars.value.id_ad_buyback is defined %}
+                                <a href="{{ url('admin_ad_buyback_image_index', {'buybackId': form.vars.value.id_ad_buyback}) }}"
+                                   class="btn tooltip-link p-0 mr-2" data-toggle="pstooltip" data-placement="bottom"
+                                   data-original-title="{{ 'View all images' | trans }}"
+                                >
+                                    <i class="material-icons m-0">list</i>
+                                </a>
+                            {% endif %}
+                        </aside>
                     </header>
                     <article class="card-block row">
                         <div class="card-text row">
@@ -71,7 +81,7 @@
                     </article>
                     <footer class="card-footer">
                         <div class="d-flex justify-content-between">
-                            <a href="javascript: history.back()" class="btn btn-secondary">
+                            <a href="{{ url('admin_ad_buyback_index') }}" class="btn btn-secondary">
                                 {{ 'Return' | trans }}
                             </a>
                             <button class="btn btn-primary">
@@ -81,7 +91,7 @@
                     </footer>
                 </section>
                 <section id="buyback_edit_message" class="card">
-                    <header class="card-header">
+                    <header class="card-header d-flex justify-content-between">
                         <h3 class="d-inline-block card-header-title">
                             <i class="material-icons">chat</i>
                             {% if form.vars.value.id_ad_buyback is not defined %}
@@ -90,6 +100,16 @@
                                 {{ 'Last messages' | trans }}
                             {% endif %}
                         </h3>
+                        <aside>
+                            {% if form.vars.value.id_ad_buyback is defined %}
+                                <a href="{{ url('admin_ad_buyback_chat_index', {'buybackId': form.vars.value.id_ad_buyback}) }}"
+                                   class="btn tooltip-link p-0 mr-2" data-toggle="pstooltip" data-placement="bottom"
+                                   data-original-title="{{ 'View all chats' | trans }}"
+                                >
+                                    <i class="material-icons m-0">list</i>
+                                </a>
+                            {% endif %}
+                        </aside>
                     </header>
                     <article class="card-block row">
                         <div class="card-text row">
@@ -106,7 +126,7 @@
                     </article>
                     <footer class="card-footer">
                         <div class="d-flex justify-content-between">
-                            <a href="javascript: history.back()" class="btn btn-secondary">
+                            <a href="{{ url('admin_ad_buyback_index') }}" class="btn btn-secondary">
                                 {{ 'Return' | trans }}
                             </a>
                             {% if form.vars.value.id_ad_buyback is not defined %}

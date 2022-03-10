@@ -25,6 +25,7 @@ namespace AdBuyBack\Install;
 use Ad_BuyBack;
 use AdBuyBack\Domain\BuyBack\Command\CreateBuyBackCommand;
 use AdBuyBack\Domain\BuyBackMessage\Command\CreateBuyBackMessageCommand;
+use AdBuyBack\Tools\BuyBackTools;
 
 final class FixturesInstaller
 {

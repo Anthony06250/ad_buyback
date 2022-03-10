@@ -20,53 +20,26 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\Command;
+namespace AdBuyBack\Domain\BuyBackImage\QueryHandler;
 
-use AdBuyBack\Domain\BuyBack\ValueObject\BuyBackId;
+use AdBuyBack\Domain\BuyBack\QueryHandler\AbstractQueryHandler;
+use AdBuyBack\Domain\BuyBackImage\Query\GetImageForForm;
+use AdBuyBack\Domain\BuyBackImage\QueryResult\ImageForForm;
 
-class AbstractBuyBackCommand
+final class GetImageForFormHandler extends AbstractQueryHandler
 {
     /**
-     * @var BuyBackId
+     * @param GetImageForForm $query
+     * @return ImageForForm
      */
-    private $id;
-
-    /**
-     * @param mixed $id
-     */
-    public function __construct($id = null)
+    public function handle(GetImageForForm $query): ImageForForm
     {
-        $this->id = new BuyBackId($id);
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return array_slice(get_object_vars($this), 0, -1);
-    }
-
-    /**
-     * @param array $data
-     * @return AbstractBuyBackCommand
-     */
-    public function fromArray(array $data): AbstractBuyBackCommand
-    {
-        foreach ($data as $key => $value) {
-            if (property_exists($this, $key)) {
-                $this->{$key} = $value;
-            }
+        if (!$query->getId()) {
+            return new ImageForForm(false);
         }
 
-        return $this;
-    }
-
-    /**
-     * @return BuyBackId
-     */
-    public function getId(): BuyBackId
-    {
-        return $this->id;
+        return new ImageForForm($this->repository->findBy([
+            'id_ad_buyback_image' => $query->getId()->getValue()
+        ]));
     }
 }

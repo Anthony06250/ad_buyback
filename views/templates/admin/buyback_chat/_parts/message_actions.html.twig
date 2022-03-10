@@ -28,7 +28,7 @@
     <a href="#" data-method="POST" class="ad-bb-admin-msg-actions-delete btn tooltip-link p-0 m-0" data-toggle="pstooltip" data-placement="bottom"
        data-original-title="{{ 'Delete message' | trans }}"
        data-confirm-message="{{ 'Are you sure you want to delete this message ?' | trans }}"
-       data-url="{{ url('admin_ad_buyback_message_delete', {'messageId': message['id_ad_buyback_message']}) }}"
+       data-url="{{ url('admin_ad_buyback_chat_delete_message', {'messageId': message['id_ad_buyback_message'], 'chatId': chat['id_ad_buyback_chat']}) }}"
        data-title="{{ 'Delete message' | trans }}"
        data-confirm-button-label="{{ 'Delete' | trans }}"
        data-confirm-button-class="btn-danger"

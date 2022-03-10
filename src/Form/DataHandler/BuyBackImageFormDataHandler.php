@@ -22,14 +22,14 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Form\DataHandler;
 
-use AdBuyBack\Domain\BuyBack\Command\CreateBuyBackCommand;
-use AdBuyBack\Domain\BuyBack\Command\EditBuyBackCommand;
-use AdBuyBack\Tools\BuyBackTools;
+use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
+use AdBuyBack\Domain\BuyBackImage\Command\CreateBuyBackImageCommand;
+use AdBuyBack\Domain\BuyBackImage\Command\EditBuyBackImageCommand;
 use DateTime;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataHandler\FormDataHandlerInterface;
 
-final class BuyBackFormDataHandler implements FormDataHandlerInterface
+final class BuyBackImageFormDataHandler implements FormDataHandlerInterface
 {
     /**
      * @var CommandBusInterface
@@ -47,10 +47,11 @@ final class BuyBackFormDataHandler implements FormDataHandlerInterface
     /**
      * @param array $data
      * @return int
+     * @throws BuyBackException
      */
     public function create(array $data): int
     {
-        $command = (new CreateBuyBackCommand())->fromArray($data);
+        $command = (new CreateBuyBackImageCommand())->fromArray($data);
         $response = $this->commandBus->handle($command);
 
         return $response->getValue();
@@ -60,11 +61,12 @@ final class BuyBackFormDataHandler implements FormDataHandlerInterface
      * @param $id
      * @param array $data
      * @return void
+     * @throws BuyBackException
      */
     public function update($id, array $data): void
     {
         $data['date_upd'] = (new DateTime())->format('Y-m-d H:i:s');
-        $command = (new EditBuyBackCommand((int)$id))->fromArray($data);
+        $command = (new EditBuyBackImageCommand((int)$id))->fromArray($data);
 
         $this->commandBus->handle($command);
     }

@@ -24,11 +24,15 @@
             {/if}
             <footer class="card-footer p-0">
                 <section class="ad-bb-front-chat-footer d-flex justify-content-between">
-                    <a href="{$link->getModuleLink('ad_buyback', 'buyback', ['buybackId' => $chat['id_ad_buyback']])}"
-                       class="btn btn-secondary btn-sm"
-                    >
-                        {l s='Return' d='Modules.Adbuyback.Front'}
-                    </a>
+                    <span>
+                        {if $customer['id']}
+                            <a href="{$link->getModuleLink('ad_buyback', 'buyback', ['buybackId' => $chat['id_ad_buyback']])}"
+                               class="btn btn-secondary btn-sm"
+                            >
+                                {l s='Return' d='Modules.Adbuyback.Front'}
+                            </a>
+                        {/if}
+                    </span>
                     <span>
                         {if $chat['active']}
                             <button name="ad-buyback-front-message-form" class="btn btn-primary btn-sm" type="submit">

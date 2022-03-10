@@ -163,6 +163,37 @@ services:
             - '@doctrine.dbal.default_connection'
             - '%database_prefix%'
 
+    # BuyBack Image form factory
+    adbuyback.form.type.buyback_image:
+        class: 'AdBuyBack\Form\Type\BuyBackImageType'
+        parent: 'form.type.translatable.aware'
+        tags:
+            - name: form.type
+
+    adbuyback.form.data_provider.buyback_image:
+        class: 'AdBuyBack\Form\DataProvider\BuyBackImageFormDataProvider'
+        arguments:
+            - '@prestashop.core.query_bus'
+
+    adbuyback.form.form_builder.buyback_image:
+        class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilder'
+        factory: 'prestashop.core.form.builder.form_builder_factory:create'
+        public: true
+        arguments:
+            - 'AdBuyBack\Form\Type\BuyBackImageType'
+            - '@adbuyback.form.data_provider.buyback_image'
+
+    adbuyback.form.data_handler.buyback_image:
+        class: 'AdBuyBack\Form\DataHandler\BuyBackImageFormDataHandler'
+        arguments:
+            - '@prestashop.core.command_bus'
+
+    adbuyback.form.form_handler.buyback_image:
+        class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler\FormHandler'
+        factory: 'prestashop.core.form.identifiable_object.handler.form_handler_factory:create'
+        arguments:
+            - '@adbuyback.form.data_handler.buyback_image'
+
     # BuyBack Image grid factory
     adbuyback.grid.factory.definition.buyback_image:
         class: 'AdBuyBack\Grid\Factory\BuyBackImageGridDefinitionFactory'
@@ -194,6 +225,14 @@ services:
             - '@prestashop.core.hook.dispatcher'
 
     # BuyBack Image domain query handler
+    adbuyback.domain.buyback_image.query_handler.get_for_form:
+        class: 'AdBuyBack\Domain\BuyBackImage\QueryHandler\GetImageForFormHandler'
+        arguments:
+            - '@adbuyback.repository.buyback_image'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackImage\Query\GetImageForForm'
+
     adbuyback.domain.buyback_image.query_handler.get_for_buyback:
         class: 'AdBuyBack\Domain\BuyBackImage\QueryHandler\GetImageForBuyBackHandler'
         arguments:
@@ -208,6 +247,14 @@ services:
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBackImage\Command\CreateBuyBackImageCommand'
+
+    adbuyback.domain.buyback_image.command_handler.edit:
+        class: 'AdBuyBack\Domain\BuyBackImage\CommandHandler\EditBuyBackImageHandler'
+        arguments:
+            - '@translator'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackImage\Command\EditBuyBackImageCommand'
 
     adbuyback.domain.buyback_image.command_handler.delete:
         class: 'AdBuyBack\Domain\BuyBackImage\CommandHandler\DeleteBuyBackImageHandler'
@@ -319,6 +366,14 @@ services:
         tags:
             -   name: tactician.handler
                 command: 'AdBuyBack\Domain\BuyBackChat\Query\GetChatForForm'
+
+    adbuyback.domain.buyback_chat.query_handler.get_chat_for_front:
+        class: 'AdBuyBack\Domain\BuyBackChat\QueryHandler\GetChatForFrontHandler'
+        arguments:
+            - '@adbuyback.repository.buyback_chat'
+        tags:
+            -   name: tactician.handler
+                command: 'AdBuyBack\Domain\BuyBackChat\Query\GetChatForFront'
 
     adbuyback.domain.buyback_chat.query_handler.get_for_buyback:
         class: 'AdBuyBack\Domain\BuyBackChat\QueryHandler\GetChatForBuyBackHandler'

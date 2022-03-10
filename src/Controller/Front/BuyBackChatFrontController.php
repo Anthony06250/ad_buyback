@@ -64,21 +64,33 @@ class BuyBackChatFrontController extends ModuleFrontController
      */
     public function initContent(): void
     {
+        if (!$token = Tools::getValue('token')) {
+            $this->errors[] = $this->trans('Token is needed.', [], 'Modules.Adbuyback.Alert');
+            $this->redirectWithNotifications('/');
+        }
+
         parent::initContent();
-        $this->indexAction((int)Tools::getValue('chatId'));
+        $this->indexAction((int)Tools::getValue('chatId'), $token);
     }
 
     /**
      * @param int $chatId
+     * @param string $token
      * @return void
      * @throws PrestaShopException
      */
-    private function indexAction(int $chatId): void
+    private function indexAction(int $chatId, string $token): void
     {
         // Use custom kernel for front office
         if ($chat = Ad_BuyBack::handle(new GetChatForForm($chatId))->getData()) {
-            $chat['messages'] = Ad_BuyBack::handle(new GetMessageForChat($chatId))->getData();
-            $this->context->smarty->assign(['chat' => $chat]);
+            if ($token === $chat['token']) {
+                $chat['messages'] = Ad_BuyBack::handle(new GetMessageForChat($chatId))->getData();
+                $this->context->smarty->assign(['chat' => $chat]);
+            }
+            else {
+                $this->errors[] = $this->trans('Token is invalid.', [], 'Modules.Adbuyback.Alert');
+                $this->redirectWithNotifications('/');
+            }
         }
 
         $form = Ad_BuyBack::getService('adbuyback.form.form_builder.buyback_message')->getForm();
@@ -116,7 +128,7 @@ class BuyBackChatFrontController extends ModuleFrontController
                 $this->errors[] = $this->trans('Ho !!! Unknown ERROR !!!', [], 'Modules.Adbuyback.Alert');
             }
         } catch (BuyBackException $exception) {
-            $this->errors[] = $this->trans($exception->getMessage(), [], 'Modules.Adbuyback.Alert');
+            $this->errors[] = $exception->getMessage();
         }
 
         $this->redirectWithNotifications($this->getCurrentURL());
@@ -128,11 +140,15 @@ class BuyBackChatFrontController extends ModuleFrontController
     public function getBreadcrumbLinks(): array
     {
         $breadcrumb = parent::getBreadcrumbLinks();
-        $breadcrumb['links'][] = $this->addMyAccountToBreadcrumb();
-        $breadcrumb['links'][] = [
-            'title' => $this->trans('Buyback', [], 'Modules.Adbuyback.Front'),
-            'url' => $this->context->link->getModuleLink('ad_buyback', 'buyback')
-        ];
+
+        if ($this->context->customer->id) {
+            $breadcrumb['links'][] = $this->addMyAccountToBreadcrumb();
+            $breadcrumb['links'][] = [
+                'title' => $this->trans('Buyback', [], 'Modules.Adbuyback.Front'),
+                'url' => $this->context->link->getModuleLink('ad_buyback', 'buyback')
+            ];
+        }
+
         $breadcrumb['links'][] = [
             'title' => $this->trans('Chat', [], 'Modules.Adbuyback.Front'),
             'url' => $this->context->link->getModuleLink('ad_buyback', 'chat')

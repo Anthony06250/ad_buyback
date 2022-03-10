@@ -141,6 +141,7 @@ final class BuyBackMessageGridDefinitionFactory extends AbstractFilterableGridDe
                                 'route' => 'admin_ad_buyback_message_edit',
                                 'route_param_name' => 'messageId',
                                 'route_param_field' => 'id',
+                                'clickable_row' => true
                             ])
                         )
                         ->add((new SubmitRowAction('delete'))

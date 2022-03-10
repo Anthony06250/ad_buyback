@@ -25,6 +25,7 @@ namespace AdBuyBack\Form\DataHandler;
 use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
 use AdBuyBack\Domain\BuyBackChat\Command\CreateBuyBackChatCommand;
 use AdBuyBack\Domain\BuyBackChat\Command\EditBuyBackChatCommand;
+use AdBuyBack\Tools\BuyBackTools;
 use DateTime;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataHandler\FormDataHandlerInterface;
@@ -51,6 +52,7 @@ final class BuyBackChatFormDataHandler implements FormDataHandlerInterface
      */
     public function create(array $data): int
     {
+        $data['token'] = BuyBackTools::getToken();
         $command = (new CreateBuyBackChatCommand())->fromArray($data);
         $response = $this->commandBus->handle($command);
 

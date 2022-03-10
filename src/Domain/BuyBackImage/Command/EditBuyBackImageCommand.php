@@ -20,32 +20,15 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\CommandHandler;
+namespace AdBuyBack\Domain\BuyBackImage\Command;
 
-use Ad_BuyBack;
-use AdBuyBack\Domain\BuyBack\Command\CreateBuyBackCommand;
-use AdBuyBack\Domain\BuyBackImage\Command\CreateBuyBackImageCommand;
-use AdBuyBack\Model\BuyBack;
-
-class ImageBuyBackHandler
+final class EditBuyBackImageCommand extends CreateBuyBackImageCommand
 {
     /**
-     * @param BuyBack $buyback
-     * @param CreateBuyBackCommand $command
-     * @return void
+     * @return string
      */
-    protected function createBuyBackImage(BuyBack $buyback, CreateBuyBackCommand $command): void
+    public function getName(): string
     {
-        if ($images = $command->getImage()) {
-            // Use custom kernel for front office
-            $commandBus = Ad_BuyBack::getService('prestashop.core.command_bus');
-
-            foreach ($images as $image) {
-                $commandBus->handle((new CreateBuyBackImageCommand())->fromArray([
-                    'id_ad_buyback' => $buyback->id,
-                    'image' => $image
-                ]));
-            }
-        }
+        return $this->name;
     }
 }

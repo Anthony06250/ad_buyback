@@ -13,6 +13,12 @@
     >
         <i class="material-icons m-0">edit</i>
     </a>
+    <a href="{{ url('admin_ad_buyback_message_index', {'chatId': chat['id_ad_buyback_chat']}) }}"
+       class="btn tooltip-link p-0 mr-2" data-toggle="pstooltip" data-placement="bottom"
+       data-original-title="{{ 'View all messages' | trans }}"
+    >
+        <i class="material-icons m-0">list</i>
+    </a>
     <span class="d-inline-block mr-2" data-toggle="pstooltip" data-placement="bottom"
           data-original-title="{{ 'Active chat' | trans }}"
           style="width: 60px; overflow: hidden;"

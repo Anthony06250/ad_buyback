@@ -4,17 +4,15 @@
     </label>
     <article class="col-md-6">
         <div class="form-select">
-            <select id="field-{$field.name}" name="{$field.name}" class="form-control custom-select"
-                    {if isset($field.readonly) and $field.readonly}readonly{/if}
+            <select id="field-{$field.name}" name="{$field.name}"
+                    class="form-control custom-select {if isset($field.readonly) and $field.readonly}readonly{/if}"
             >
-                <option {if $customer.gender.id}disabled{/if}>
+                <option>
                     {$field.placeholder}
                 </option>
                 {foreach from=$field.choices item=choice}
                     <option value="{$choice->value}"
-                            {if $field['value']}
-                                {($choice->value == $field['value']) ? 'selected' : 'disabled'}
-                            {/if}
+                        {if $choice->value == $field['value']}selected{/if}
                     >
                         {$choice->label}
                     </option>

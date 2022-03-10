@@ -20,41 +20,10 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBackChat\Command;
+namespace AdBuyBack\Domain\BuyBackImage\QueryResult;
 
-class CreateBuyBackChatCommand extends AbstractBuyBackChatCommand
+use AdBuyBack\Domain\BuyBack\QueryResult\AbstractQueryResult;
+
+final class ImageForForm extends AbstractQueryResult
 {
-    /**
-     * @var int
-     */
-    protected $id_ad_buyback;
-
-    /**
-     * @var bool
-     */
-    protected $active;
-
-    /**
-     * @var string
-     */
-    protected $token;
-
-    /**
-     * @return int
-     */
-    public function getBuyBackId(): int
-    {
-        return (int)$this->id_ad_buyback;
-    }
-
-    /**
-     * @param bool $active
-     * @return CreateBuyBackChatCommand
-     */
-    public function setActive(bool $active): CreateBuyBackChatCommand
-    {
-        $this->active = $active;
-
-        return $this;
-    }
 }

@@ -24,7 +24,7 @@ namespace AdBuyBack\Controller\Front;
 
 use Ad_BuyBack;
 use AdBuyBack\Domain\BuyBack\Query\GetBuyBackForFront;
-use AdBuyBack\Domain\BuyBackChat\Query\GetChatForBuyBack;
+use AdBuyBack\Domain\BuyBackChat\Query\GetChatForFront;
 use AdBuyBack\Domain\BuyBackMessage\Query\GetMessageForBuyBack;
 use ModuleFrontController;
 use PrestaShopException;
@@ -35,6 +35,16 @@ class BuyBackFrontController extends ModuleFrontController
      * @var bool
      */
     public $ssl = true;
+
+    /**
+     * @var bool
+     */
+    public $auth = true;
+
+    /**
+     * @var bool
+     */
+    public $guestAllowed = false;
 
     /**
      * @return void
@@ -74,11 +84,13 @@ class BuyBackFrontController extends ModuleFrontController
         $buybacks = Ad_BuyBack::handle(new GetBuyBackForFront($this->context->customer->id))->getData();
 
         foreach ($buybacks as $key => $buyback) {
-            $chats = Ad_BuyBack::handle(new GetChatForBuyBack($buyback['id_ad_buyback']))->getData();
-
-            foreach ($chats as $chat) {
-                $chat['messages'][] = Ad_BuyBack::handle(new GetMessageForBuyBack($chat['id_ad_buyback_chat']))->getData();
-                $buybacks[$key]['chats'][] = $chat;
+            if ($chats = Ad_BuyBack::handle(new GetChatForFront($buyback['id_ad_buyback']))->getData()) {
+                foreach ($chats as $chat) {
+                    if ($message = Ad_BuyBack::handle(new GetMessageForBuyBack($chat['id_ad_buyback_chat']))->getData()) {
+                        $chat['messages'][] = $message;
+                    }
+                    $buybacks[$key]['chats'][] = $chat;
+                }
             }
         }
 

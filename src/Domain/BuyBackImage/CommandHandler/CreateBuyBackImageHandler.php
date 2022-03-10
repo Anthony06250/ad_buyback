@@ -23,12 +23,17 @@ declare(strict_types=1);
 namespace AdBuyBack\Domain\BuyBackImage\CommandHandler;
 
 use Ad_BuyBack;
+use AdBuyBack\Domain\BuyBack\Exception\BuyBackException;
 use AdBuyBack\Domain\BuyBackImage\Command\CreateBuyBackImageCommand;
 use AdBuyBack\Domain\BuyBackImage\Exception\CannotCreateBuyBackImageException;
 use AdBuyBack\Domain\BuyBackImage\ValueObject\BuyBackImageId;
 use AdBuyBack\Model\BuyBackImage;
+use AdBuyBack\Tools\BuyBackTools;
+use AdBuyBack\Uploader\BuyBackExtraImageUploader;
+use PrestaShop\PrestaShop\Core\Image\Exception\ImageException;
 use PrestaShopBundle\Translation\TranslatorInterface;
 use PrestaShopException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 final class CreateBuyBackImageHandler
 {
@@ -55,12 +60,46 @@ final class CreateBuyBackImageHandler
         try {
             $image = new BuyBackImage();
 
+            $this->createImageFile($command);
             $this->createBuyBackImage($image, $command);
         } catch (PrestaShopException $exception) {
             throw new CannotCreateBuyBackImageException($exception->getMessage());
         }
 
         return $command->getId()->setValue((int)$image->id);
+    }
+
+    /**
+     * @param CreateBuyBackImageCommand $command
+     * @return void
+     */
+    private function createImageFile(CreateBuyBackImageCommand &$command): void
+    {
+        $imageFile = $command->getImage();
+
+        if (!$imageFile instanceof UploadedFile) {
+            throw new CannotCreateBuyBackImageException($this->translator->trans(
+                'This file is not a valid image.',
+                [],
+                'Modules.Adbuyback.Alert'
+            ));
+        }
+
+        try {
+            $uploader = new BuyBackExtraImageUploader();
+            $buybackId = $command->getBuyBackId();
+            $directory = _PS_MODULE_DIR_ . 'ad_buyback/views/img/buyback/' . $buybackId . '/';
+            $imageName = $imageFile->getClientOriginalName();
+
+            if (file_exists($directory . $imageName)) {
+                $imageName = BuyBackTools::changeFilenameForCopy($directory . $imageName);
+            }
+
+            $command->setName($imageName);
+            $uploader->upload($buybackId, $imageFile, $imageName);
+        } catch (ImageException $exception) {
+            throw new BuyBackException($exception->getMessage());
+        }
     }
 
     /**

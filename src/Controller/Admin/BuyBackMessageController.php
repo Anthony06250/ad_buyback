@@ -78,7 +78,7 @@ final class BuyBackMessageController extends FrameworkBundleAdminController
                 return $this->redirectToRoute('admin_ad_buyback_message_index');
             }
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->render('@Modules/ad_buyback/views/templates/admin/buyback_message/edit.html.twig', [
@@ -107,7 +107,7 @@ final class BuyBackMessageController extends FrameworkBundleAdminController
                 return $this->redirectToRoute('admin_ad_buyback_message_index');
             }
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->render('@Modules/ad_buyback/views/templates/admin/buyback_message/edit.html.twig', [
@@ -129,7 +129,7 @@ final class BuyBackMessageController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new DeleteBuyBackMessageCommand($messageId));
             $this->addFlash('success', $this->trans('Message has been successfully deleted.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_message_index');
@@ -152,7 +152,7 @@ final class BuyBackMessageController extends FrameworkBundleAdminController
         } catch (BuyBackException $exception) {
             $response = [
                 'status' => false,
-                'message' => $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'),
+                'message' => $exception->getMessage(),
             ];
         }
 
@@ -172,7 +172,7 @@ final class BuyBackMessageController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new DuplicateBulkBuyBackMessageCommand($messageIds));
             $this->addFlash('success', $this->trans('The selection has been successfully duplicated.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_message_index');
@@ -192,7 +192,7 @@ final class BuyBackMessageController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new ActiveBulkBuyBackMessageCommand($messageIds, $status));
             $this->addFlash('success', $this->trans('The selection has been successfully ' . ($status ? 'enabled.' : 'disabled'), 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_message_index');
@@ -211,7 +211,7 @@ final class BuyBackMessageController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new DeleteBulkBuyBackMessageCommand($messageIds));
             $this->addFlash('success', $this->trans('The selection has been successfully deleted.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_message_index');

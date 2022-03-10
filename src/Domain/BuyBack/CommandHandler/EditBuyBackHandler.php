@@ -26,7 +26,6 @@ use AdBuyBack\Domain\BuyBack\Command\EditBuyBackCommand;
 use AdBuyBack\Domain\BuyBack\Exception\CannotEditBuyBackException;
 use AdBuyBack\Domain\BuyBackChat\Command\ActiveBulkBuyBackChatCommand;
 use AdBuyBack\Domain\BuyBackChat\Query\GetChatForBuyBack;
-use AdBuyBack\Domain\BuyBackMessage\Command\EditBuyBackMessageCommand;
 use AdBuyBack\Model\BuyBack;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShopBundle\Translation\TranslatorInterface;
@@ -66,8 +65,8 @@ final class EditBuyBackHandler extends ImageBuyBackHandler
             $buyback = new BuyBack($buybackId);
 
             $this->editBuyBack($buyback, $command);
+            $this->createBuyBackImage($buyback, $command);
             $this->editBuyBackChat($buyback);
-            $this->uploadImages((int)$buyback->id, $command);
         } catch (PrestaShopException $exception) {
             throw new CannotEditBuyBackException($exception->getMessage());
         }

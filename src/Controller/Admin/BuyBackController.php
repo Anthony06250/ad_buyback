@@ -74,7 +74,7 @@ final class BuyBackController extends FrameworkBundleAdminController
                 return $this->redirectToRoute('admin_ad_buyback_index');
             }
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->render('@Modules/ad_buyback/views/templates/admin/buyback/edit.html.twig', [
@@ -103,7 +103,7 @@ final class BuyBackController extends FrameworkBundleAdminController
                 return $this->redirectToRoute('admin_ad_buyback_edit', ['buybackId' => $buybackId]);
             }
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->render('@Modules/ad_buyback/views/templates/admin/buyback/edit.html.twig', [
@@ -125,7 +125,7 @@ final class BuyBackController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new DeleteBuyBackCommand($buybackId));
             $this->addFlash('success', $this->trans('The buyback has been successfully deleted.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_index');
@@ -145,7 +145,7 @@ final class BuyBackController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new DeleteBuyBackImageCommand($imageId));
             $this->addFlash('success', $this->trans('The image has been successfully deleted.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_edit', ['buybackId' => $buybackId]);
@@ -188,7 +188,7 @@ final class BuyBackController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new DuplicateBulkBuyBackCommand($buybackIds));
             $this->addFlash('success', $this->trans('The selection has been successfully duplicated.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_index');
@@ -208,7 +208,7 @@ final class BuyBackController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new ActiveBulkBuyBackCommand($buybackIds, $status));
             $this->addFlash('success', $this->trans('The selection has been successfully ' . ($status ? 'enabled.' : 'disabled'), 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_index');
@@ -227,7 +227,7 @@ final class BuyBackController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new DeleteBulkBuyBackCommand($buybackIds));
             $this->addFlash('success', $this->trans('The selection has been successfully deleted.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_index');

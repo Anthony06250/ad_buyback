@@ -20,53 +20,36 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\Command;
+namespace AdBuyBack\Domain\BuyBackChat\QueryHandler;
 
-use AdBuyBack\Domain\BuyBack\ValueObject\BuyBackId;
+use AdBuyBack\Domain\BuyBack\QueryHandler\AbstractQueryHandler;
+use AdBuyBack\Domain\BuyBackChat\Query\GetChatForFront;
+use AdBuyBack\Domain\BuyBackChat\QueryResult\ChatForFront;
 
-class AbstractBuyBackCommand
+final class GetChatForFrontHandler extends AbstractQueryHandler
 {
     /**
-     * @var BuyBackId
+     * @param GetChatForFront $query
+     * @return ChatForFront
      */
-    private $id;
-
-    /**
-     * @param mixed $id
-     */
-    public function __construct($id = null)
+    public function handle(GetChatForFront $query): ChatForFront
     {
-        $this->id = new BuyBackId($id);
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return array_slice(get_object_vars($this), 0, -1);
-    }
-
-    /**
-     * @param array $data
-     * @return AbstractBuyBackCommand
-     */
-    public function fromArray(array $data): AbstractBuyBackCommand
-    {
-        foreach ($data as $key => $value) {
-            if (property_exists($this, $key)) {
-                $this->{$key} = $value;
-            }
+        if (!$query->getId()) {
+            return new ChatForFront(false);
         }
 
-        return $this;
-    }
-
-    /**
-     * @return BuyBackId
-     */
-    public function getId(): BuyBackId
-    {
-        return $this->id;
+        return new ChatForFront($this->repository->findAllBy([
+            'id_ad_buyback' => $query->getId()->getValue(),
+            'active' => true
+        ], [
+            'date_add' => 'DESC',
+            'date_upd' => 'DESC',
+            'id_ad_buyback_chat' => 'DESC'
+        ],[
+            'id_ad_buyback_chat',
+            'active',
+            'date_upd',
+            'token'
+        ]));
     }
 }

@@ -29,6 +29,7 @@ use AdBuyBack\Domain\BuyBackChat\Command\DeleteBulkBuyBackChatCommand;
 use AdBuyBack\Domain\BuyBackChat\Command\DeleteBuyBackChatCommand;
 use AdBuyBack\Domain\BuyBackChat\Command\DuplicateBulkBuyBackChatCommand;
 use AdBuyBack\Domain\BuyBackChat\Query\GetChatForForm;
+use AdBuyBack\Domain\BuyBackMessage\Command\DeleteBuyBackMessageCommand;
 use AdBuyBack\Domain\BuyBackMessage\Query\GetMessageForChat;
 use AdBuyBack\Grid\Filters\BuyBackChatFilters;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
@@ -80,7 +81,7 @@ class BuyBackChatController extends FrameworkBundleAdminController
                 return $this->redirectToRoute('admin_ad_buyback_chat_index');
             }
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->render('@Modules/ad_buyback/views/templates/admin/buyback_chat/edit.html.twig', [
@@ -107,7 +108,7 @@ class BuyBackChatController extends FrameworkBundleAdminController
                 $this->addFlash('success', $this->trans('The message has been successfully created.', 'Modules.Adbuyback.Alert'));
             }
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_chat_view', ['chatId' => $chatId]);
@@ -133,7 +134,7 @@ class BuyBackChatController extends FrameworkBundleAdminController
                 return $this->redirectToRoute('admin_ad_buyback_chat_index');
             }
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->render('@Modules/ad_buyback/views/templates/admin/buyback_chat/edit.html.twig', [
@@ -156,7 +157,7 @@ class BuyBackChatController extends FrameworkBundleAdminController
             $chat = $this->getQueryBus()->handle(new GetChatForForm($chatId))->getData();
             $messages = $this->getQueryBus()->handle(new GetMessageForChat($chatId))->getData();
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
 
             return $this->redirectToRoute('admin_ad_buyback_chat_index');
         }
@@ -182,10 +183,30 @@ class BuyBackChatController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new DeleteBuyBackChatCommand($chatId));
             $this->addFlash('success', $this->trans('Chat has been successfully deleted.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_chat_index');
+    }
+
+    /**
+     * @AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message="Access denied.")
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function deleteMessageAction(Request $request): RedirectResponse
+    {
+        $messageId = (int)$request->get('messageId');
+        $chatId = (int)$request->get('chatId');
+
+        try {
+            $this->getCommandBus()->handle(new DeleteBuyBackMessageCommand($messageId));
+            $this->addFlash('success', $this->trans('The message has been successfully deleted.', 'Modules.Adbuyback.Alert'));
+        } catch (BuyBackException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('admin_ad_buyback_chat_view', ['chatId' => $chatId]);
     }
 
     /**
@@ -225,7 +246,7 @@ class BuyBackChatController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new DuplicateBulkBuyBackChatCommand($chatIds));
             $this->addFlash('success', $this->trans('The selection has been successfully duplicated.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_chat_index');
@@ -248,7 +269,7 @@ class BuyBackChatController extends FrameworkBundleAdminController
                 : $this->trans('The selection has been successfully disabled.', 'Modules.Adbuyback.Alert')
             );
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_chat_index');
@@ -267,7 +288,7 @@ class BuyBackChatController extends FrameworkBundleAdminController
             $this->getCommandBus()->handle(new DeleteBulkBuyBackChatCommand($chatIds));
             $this->addFlash('success', $this->trans('The selection has been successfully deleted.', 'Modules.Adbuyback.Alert'));
         } catch (BuyBackException $exception) {
-            $this->addFlash('error', $this->trans($exception->getMessage(), 'Modules.Adbuyback.Alert'));
+            $this->addFlash('error', $exception->getMessage());
         }
 
         return $this->redirectToRoute('admin_ad_buyback_chat_index');

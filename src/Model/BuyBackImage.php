@@ -45,6 +45,11 @@ final class BuyBackImage extends ObjectModel
     public $date_add;
 
     /**
+     * @var string
+     */
+    public $date_upd;
+
+    /**
      * @see ObjectModel::$definition
      */
     public static $definition = [
@@ -53,7 +58,8 @@ final class BuyBackImage extends ObjectModel
         'fields' => [
             'id_ad_buyback' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedId'],
             'name' => ['type' => self::TYPE_STRING, 'size' => 128],
-            'date_add' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false]
+            'date_add' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false],
+            'date_upd' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false]
         ],
     ];
 

@@ -20,52 +20,29 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\Command;
+namespace AdBuyBack\Domain\BuyBackImage\Query;
 
-use AdBuyBack\Domain\BuyBack\ValueObject\BuyBackId;
+use AdBuyBack\Domain\BuyBackImage\ValueObject\BuyBackImageId;
 
-class AbstractBuyBackCommand
+final class GetImageForForm
 {
     /**
-     * @var BuyBackId
+     * @var BuyBackImageId|null
      */
     private $id;
 
     /**
-     * @param mixed $id
+     * @param $id
      */
-    public function __construct($id = null)
+    public function __construct($id)
     {
-        $this->id = new BuyBackId($id);
+        $this->id = null !== $id ? new BuyBackImageId($id) : null;
     }
 
     /**
-     * @return array
+     * @return BuyBackImageId|null
      */
-    public function toArray(): array
-    {
-        return array_slice(get_object_vars($this), 0, -1);
-    }
-
-    /**
-     * @param array $data
-     * @return AbstractBuyBackCommand
-     */
-    public function fromArray(array $data): AbstractBuyBackCommand
-    {
-        foreach ($data as $key => $value) {
-            if (property_exists($this, $key)) {
-                $this->{$key} = $value;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return BuyBackId
-     */
-    public function getId(): BuyBackId
+    public function getId(): ?BuyBackImageId
     {
         return $this->id;
     }

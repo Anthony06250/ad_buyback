@@ -20,53 +20,43 @@
 
 declare(strict_types=1);
 
-namespace AdBuyBack\Domain\BuyBack\Command;
+namespace AdBuyBack\Form\DataProvider;
 
-use AdBuyBack\Domain\BuyBack\ValueObject\BuyBackId;
+use AdBuyBack\Domain\BuyBackImage\Query\GetImageForForm;
+use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
+use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\FormDataProviderInterface;
 
-class AbstractBuyBackCommand
+final class BuyBackImageFormDataProvider implements FormDataProviderInterface
 {
     /**
-     * @var BuyBackId
+     * @var CommandBusInterface
      */
-    private $id;
+    private $queryBus;
 
     /**
-     * @param mixed $id
+     * @param CommandBusInterface $queryBus
      */
-    public function __construct($id = null)
+    public function __construct(CommandBusInterface $queryBus)
     {
-        $this->id = new BuyBackId($id);
+        $this->queryBus = $queryBus;
+    }
+
+    /**
+     * @param $id
+     * @return array
+     */
+    public function getData($id): array
+    {
+        $response = $this->queryBus->handle(new GetImageForForm($id));
+
+        return $response->getData();
     }
 
     /**
      * @return array
      */
-    public function toArray(): array
+    public function getDefaultData(): array
     {
-        return array_slice(get_object_vars($this), 0, -1);
-    }
-
-    /**
-     * @param array $data
-     * @return AbstractBuyBackCommand
-     */
-    public function fromArray(array $data): AbstractBuyBackCommand
-    {
-        foreach ($data as $key => $value) {
-            if (property_exists($this, $key)) {
-                $this->{$key} = $value;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return BuyBackId
-     */
-    public function getId(): BuyBackId
-    {
-        return $this->id;
+        return [];
     }
 }

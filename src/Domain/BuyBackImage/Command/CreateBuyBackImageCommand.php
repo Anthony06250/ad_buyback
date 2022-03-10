@@ -22,7 +22,9 @@ declare(strict_types=1);
 
 namespace AdBuyBack\Domain\BuyBackImage\Command;
 
-final class CreateBuyBackImageCommand extends AbstractBuyBackImageCommand
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+
+class CreateBuyBackImageCommand extends AbstractBuyBackImageCommand
 {
     /**
      * @var int
@@ -33,4 +35,36 @@ final class CreateBuyBackImageCommand extends AbstractBuyBackImageCommand
      * @var string
      */
     protected $name;
+
+    /**
+     * @var UploadedFile
+     */
+    protected $image;
+
+    /**
+     * @return int
+     */
+    public function getBuyBackId(): int
+    {
+        return (int)$this->id_ad_buyback;
+    }
+
+    /**
+     * @return UploadedFile|null
+     */
+    public function getImage(): ?UploadedFile
+    {
+        return $this->image;
+    }
+
+    /**
+     * @param string $name
+     * @return CreateBuyBackImageCommand
+     */
+    public function setName(string $name): CreateBuyBackImageCommand
+    {
+        $this->name = $name;
+
+        return $this;
+    }
 }

@@ -149,7 +149,8 @@ final class BuyBackChatGridDefinitionFactory extends AbstractFilterableGridDefin
                             ->setOptions([
                                 'route' => 'admin_ad_buyback_chat_edit',
                                 'route_param_name' => 'chatId',
-                                'route_param_field' => 'id'
+                                'route_param_field' => 'id',
+                                'clickable_row' => true
                             ])
                         )
                         ->add((new SubmitRowAction('delete'))
