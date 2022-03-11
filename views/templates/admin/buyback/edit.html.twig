@@ -20,7 +20,11 @@
                     </header>
                     <article class="card-block row">
                         <div class="card-text">
+                            {% set flag_image = null %}
                             {% for key, field in form.children %}
+                                {% if 'image-' in key  %}
+                                    {% set flag_image = true %}
+                                {% endif %}
                                 {% if form.vars.value.id_ad_buyback is not defined and 'active' in key %}
                                     {{ form_row(field, {'value': '1'}) }}
                                 {% elseif 'id_customer' in key %}
@@ -68,16 +72,31 @@
                         </aside>
                     </header>
                     <article class="card-block row">
-                        <div class="card-text row">
-                            {{ form_widget(form.children.image) }}
-                            <div class="ad-bb-admin-buyback-img row mt-3 ml-0">
-                                {% for key, field in form.children %}
-                                    {% if ('image-' in key) %}
-                                        {{ form_widget(field) }}
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        </div>
+                        <section class="card-text row">
+                            <article class="container p-0 mb-2">
+                                {{ form_widget(form.children.image) }}
+                            </article>
+                            {% include '@Modules/ad_buyback/views/templates/admin/buyback_image/_parts/grid_preview.html.twig' %}
+                            {% if flag_image %}
+                                <section class="card container p-0 mt-2">
+                                    <header class="card-header">
+                                        <h3 class="d-inline-block card-header-title">
+                                            <i class="material-icons">image</i>
+                                            {{ 'Uploaded images' | trans }}
+                                        </h3>
+                                    </header>
+                                    <article class="container pr-4 pb-3 pl-4">
+                                        <section class="ad-bb-admin-buyback-img row mt-3 ml-0">
+                                            {% for key, field in form.children %}
+                                                {% if ('image-' in key) %}
+                                                    {{ form_widget(field) }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </section>
+                                    </article>
+                                </section>
+                            {% endif %}
+                        </section>
                     </article>
                     <footer class="card-footer">
                         <div class="d-flex justify-content-between">
@@ -141,7 +160,7 @@
         </section>
     </section>
 
-    {% include '@Modules/ad_buyback/views/templates/admin/buyback_image/_parts/modal.html.twig' with {'modalId': 'buyback-edit-view-modal'} %}
+    {% include '@Modules/ad_buyback/views/templates/admin/buyback_image/_parts/modal.html.twig' with {'modalId': 'buyback-form-view-modal'} %}
 {% endblock %}
 
 {% block stylesheets %}

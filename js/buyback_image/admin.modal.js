@@ -25,16 +25,18 @@ export default class ImageModal {
     loadImageModal(trigger) {
         this.fillImageInModal($(trigger));
         this.fillTitleInModal($(trigger));
+        this.modal.modal('show');
     }
 
     fillImageInModal(trigger) {
         let source = trigger.find('img').attr('src');
         let link = source.split('/').filter(function(element) {return element !== 'thumbnail';}).join('/');
-        console.log(source);
-        console.log(link);
+        let button = $('.ad-bb-modal-view');
 
         $('.ad-bb-modal-figure img').attr('src', source);
-        $('.ad-bb-modal-view').attr('href', link);
+        (source.split(':')[0] !== 'data')
+            ? button.attr('href', link).removeClass('hidden')
+            : button.attr('href', '').addClass('hidden');
     }
 
     fillTitleInModal(trigger) {

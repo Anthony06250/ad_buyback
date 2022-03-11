@@ -103,6 +103,7 @@ class BuyBackFormFrontController extends ModuleFrontController
         try {
             if ($formHandler->handle($form)->getIdentifiableObjectId()) {
                 $this->success[] = $this->trans('The buyback form has been successfully send.', [], 'Modules.Adbuyback.Alert');
+                // => TODO: Send mail here for buyback creation success
 
                 $this->redirectWithNotifications('/');
             }

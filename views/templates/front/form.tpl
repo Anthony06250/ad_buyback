@@ -26,7 +26,7 @@
                 {include file='modules/ad_buyback/views/templates/front/_parts/form/textarea.tpl'}
             {elseif $field.type === 'file'}
                 {include file='modules/ad_buyback/views/templates/front/_parts/form/file.tpl'}
-                <section id="buyback-form-img-preview" class="row"></section>
+                {include file='modules/ad_buyback/views/templates/front/_parts/image/preview.tpl'}
             {elseif  $field.type === 'text' or  $field.type === 'email'}
                 {if $field['id']|strpos: 'firstname'}
                     {$field['value'] = $customer.firstname}
@@ -52,6 +52,8 @@
             </button>
         </footer>
     </form>
+
+    {include file='modules/ad_buyback/views/templates/front/_parts/image/modal.tpl' modalId='buyback-form-view-modal'}
 {/block}
 
 {block name='page_footer'}

@@ -1,17 +1,17 @@
-<div class="ad-bb-admin-img-content col-sm-2 mt-4 pl-0">
+<div class="ad-bb-admin-img-content col-sm-2 mt-3">
     <section class="form-group text-center">
         <article>
-            <button class="ad-bb-admin-img-btn p-0 border-0 rounded w-100" type="button"
+            <button class="ad-bb-img-preview-btn p-0 border-0 rounded w-100" type="button"
                     data-toggle="modal" data-target="#buyback-edit-view-modal"
             >
                 <figure class="m-0">
-                    <img class="img-thumbnail p-3" data-toggle="pstooltip" data-placement="top"
+                    <img class="img-thumbnail p-3 border-bottom-0" data-toggle="pstooltip" data-placement="top"
                          title="{{ 'Click for preview' | trans({}, 'Modules.Adbuyback.Admin') }}"
                          src="{{ path }}" alt="{{ filename }}.{{ extension }}"
                     >
-                    <figcaption>
+                    <figcaption class="border rounded-bottom">
                         <h5 class="m-1">
-                            {{ (filename | length < 23) ? filename : filename|slice(0, 20) ~ '...' }}
+                            {{ (filename | length < 23) ? filename : filename|slice(0, 15) ~ '...' }}
                         </h5>
                     </figcaption>
                 </figure>

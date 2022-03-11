@@ -1,3 +1,4 @@
+
 /*
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
@@ -17,26 +18,12 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 
-/* Enhance Bootstrap */
-.hidden {
-    display: none;
-}
-.border-b-0 {
-    border-bottom: none;
-}
+import ImagePreview from '../buyback_image/image.preview';
 
-/* Custom buyback */
-.readonly {
-    pointer-events: none;
-    touch-action: none;
-    background: #eee;
-}
-.img-thumbnail {
-    border-radius: 0.25rem 0.25rem 0 0;
-}
+$(function () {
+    let imagePreview = new ImagePreview('buyback-form-img-preview');
 
-/* Custom image modal */
-.ad-bb-modal-figure img {
-    max-width: 360px;
-    max-height: 360px;
-}
+    $('#buy_back_image_image').on('change', function() {
+        imagePreview.init(this);
+    });
+});

@@ -24,6 +24,7 @@ module.exports = {
         'buyback.admin.index': './buyback/admin.index.js',
         'buyback.admin.edit': './buyback/admin.edit.js',
         'buyback_image.admin.index': './buyback_image/admin.index.js',
+        'buyback_image.admin.edit': './buyback_image/admin.edit.js',
         'buyback_chat.admin.index': './buyback_chat/admin.index.js',
         'buyback_chat.admin.view': './buyback_chat/admin.view.js',
         'buyback_message.admin.index': './buyback_message/admin.index.js',

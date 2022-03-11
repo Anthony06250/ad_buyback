@@ -21,22 +21,9 @@
 .hidden {
     display: none;
 }
-.border-b-0 {
-    border-bottom: none;
-}
 
-/* Custom buyback */
-.readonly {
+/* Custom image preview */
+.ad-bb-img-preview-btn {
     pointer-events: none;
-    touch-action: none;
-    background: #eee;
-}
-.img-thumbnail {
-    border-radius: 0.25rem 0.25rem 0 0;
-}
-
-/* Custom image modal */
-.ad-bb-modal-figure img {
-    max-width: 360px;
-    max-height: 360px;
+    cursor: default!important;
 }

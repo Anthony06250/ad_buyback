@@ -17,18 +17,26 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 
+import ImagePreview from '../buyback_image/image.preview';
 import ImageModal from '../buyback_image/admin.modal';
 
 $(function () {
-    let modal = new ImageModal('buyback-edit-view-modal');
     let customerInfos = new CustomerInfos();
+    let imagePreview = new ImagePreview('buyback-form-img-preview');
+    let modal = new ImageModal('buyback-form-view-modal');
 
     $('#buy_back_id_customer').on('change', function() {
         customerInfos.getCustomerInfos(this);
     });
 
-    $('.ad-bb-admin-img-btn').on('click', function () {
+    $('#buy_back_image').on('change', function() {
+        imagePreview.init(this);
+    });
+
+    $('body').on('click', '.ad-bb-img-preview-btn', function() {
         modal.loadImageModal(this);
+    }).on('mouseover', '.ad-bb-img-preview-btn img', function() {
+        $(this).pstooltip('show');
     });
 });
 
@@ -71,7 +79,9 @@ class CustomerInfos {
     readOnlyInputs(readonly) {
         let inputIdGender = $('#buy_back_id_gender');
 
-        readonly ? inputIdGender.addClass('readonly') : inputIdGender.removeClass('readonly')
+        readonly
+            ? inputIdGender.addClass('readonly')
+            : inputIdGender.removeClass('readonly')
         $('#buy_back_firstname').attr('readonly', readonly);
         $('#buy_back_lastname').attr('readonly', readonly);
         $('#buy_back_email').attr('readonly', readonly);

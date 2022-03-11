@@ -17,6 +17,41 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 
+/* Enhance Bootstrap */
+.d-flex {
+    display: flex;
+}
+.justify-content-between {
+    justify-content: space-between;
+}
+.hidden {
+    display: none;
+}
+.w-100 {
+    width: 100%;
+}
+.text-center {
+    text-align: center;
+}
+.border {
+    border: 1px solid #dddddd;
+}
+.border-0 {
+    border: none;
+}
+.border-bottom-0 {
+    border-bottom: none;
+}
+.card-header:after {
+    display: none;
+}
+.card-footer {
+    padding: 4px;
+}
+.btn.btn-secondary {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
 /* Fix size bug on form file button */
 .ad-bb-front-form-btn-file {
     border: 2px solid #24b9d7!important;
@@ -35,10 +70,13 @@
 #buyback-form-img-preview figure {
     background-color: #f6f6f6;
 }
-#buyback-form-img-preview figcaption {
-    padding: 3px;
-    text-align: center;
-}
-#buyback-form-img-preview figcaption small {
+.ad-bb-img-preview-btn small {
+    word-wrap: anywhere;
     font-weight: 700;
+}
+
+/* Custom image modal */
+.ad-bb-modal-figure img {
+    max-width: 360px;
+    max-height: 360px;
 }

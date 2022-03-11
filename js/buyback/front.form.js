@@ -17,66 +17,22 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 
+import ImagePreview from '../buyback_image/image.preview';
+import ImageModal from '../buyback_image/admin.modal';
+
 $(function () {
     let imagePreview = new ImagePreview('buyback-form-img-preview');
+    let modal = new ImageModal('buyback-form-view-modal');
 
     $('#input-image').on('click', function() {
         $('#field-image').trigger('click');
     });
 
-
     $('#field-image').on('change', function() {
-        getImageFieldName(this);
         imagePreview.init(this);
     });
+
+    $('body').on('click', '.ad-bb-img-preview-btn', function() {
+        modal.loadImageModal(this);
+    });
 });
-
-function getImageFieldName(field) {
-    let count = $(field.files).length;
-    let label = $(field).attr('data-multiple-files-text').replace('%count%', count);
-
-    $('#input-image').val(count > 1 ? label : field.files[0].name);
-}
-
-class ImagePreview {
-    constructor(preview) {
-        this.preview = $('#' + preview);
-    }
-
-    init(trigger) {
-        let self = this;
-
-        if (trigger.files && trigger.files[0]) {
-            this.preview.find('article').remove();
-            $.each(trigger.files, function(key, file) {
-                self.previewImage(file);
-            });
-        }
-    }
-
-    previewImage(file) {
-        let reader = new FileReader();
-        let self = this;
-
-        reader.onload = function (event) {
-            self.preview.append($('<article class="col-md-2 mb-2">')
-                .append($('<figure class="m-0">')
-                    .append($('<img class="img-thumbnail" src="' + event.target.result + '" alt="' + file.name + '">'))
-                    .append($('<figcaption>')
-                        .append($('<small>').html(self.formatFilename(file.name))))));
-        };
-
-        reader.readAsDataURL(file);
-    }
-
-    formatFilename(filename) {
-        let name = filename.split('.').slice(0, -1).join('.');
-
-        if (name.length > 23) {
-            return name.slice(0, 15) + '...';
-        }
-
-        return name;
-    }
-}
-
